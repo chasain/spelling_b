@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Progress · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Practice</a><a href="/test">Test</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="metrics-shell">
+    <div class="metrics-title">
+      <div><p class="eyebrow">Learning progress</p><h1>Session stars</h1></div>
+      <span class="metrics-mascot" aria-hidden="true">📈⭐</span>
+    </div>
+    <p class="hint">Times are capped at 60 seconds per word so breaks do not skew the averages.</p>
+
+    <section id="metrics-summary" class="metrics-summary" aria-label="Overall summary">
+      <div><strong id="total-sessions">0</strong><span>sessions</span></div>
+      <div><strong id="overall-accuracy">—</strong><span>word accuracy</span></div>
+      <div><strong id="overall-time">—</strong><span>avg. word time</span></div>
+      <div><strong id="overall-speed">—</strong><span>typing speed</span></div>
+    </section>
+
+    <section class="history-section" aria-labelledby="history-heading">
+      <h2 id="history-heading">Recent sessions</h2>
+      <div id="empty-metrics" class="empty-metrics" hidden><span aria-hidden="true">🌟</span><p>Complete some practice and your progress will appear here.</p><a class="primary button-link" href="/">Start practicing</a></div>
+      <div id="session-history" class="session-history"></div>
+    </section>
+  </main>
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/metrics.js" defer></script>
+</body>
+</html>

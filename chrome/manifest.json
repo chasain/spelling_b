@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Spelling B",
+  "version": "1.0.0",
+  "description": "Kid-friendly, offline spelling practice with configurable word lists and lessons.",
+  "permissions": [
+    "storage",
+    "tts"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Spelling B",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "settings.html"
+}

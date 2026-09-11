@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B</a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Practice</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="test-shell">
+    <section id="test-intro" class="practice-card test-intro">
+      <p class="eyebrow">Spelling test</p>
+      <h1>Ready to test?</h1>
+      <p id="test-summary" class="progress"></p>
+      <p class="test-note">Each word is asked once. Your results stay hidden until the test is finished.</p>
+      <button id="start-test" class="primary start-test" type="button">Begin test</button>
+    </section>
+
+    <section id="test-question" class="practice-card" hidden aria-labelledby="test-heading">
+      <p class="eyebrow">Spelling test</p>
+      <h1 id="test-heading">Listen carefully</h1>
+      <p id="question-progress" class="progress"></p>
+      <div class="test-progress-track" role="progressbar" aria-label="Test progress" aria-valuemin="0" aria-valuemax="100"><div id="test-progress-fill"></div></div>
+      <button id="test-speak" class="speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
+      <form id="test-form" autocomplete="off">
+        <label class="sr-only" for="test-answer">Enter the spelling</label>
+        <input id="test-answer" type="text" spellcheck="false" autocapitalize="none" placeholder="Type what you hear" required>
+        <button class="primary" type="submit">Next word</button>
+      </form>
+    </section>
+
+    <section id="test-results" class="results-panel" hidden aria-labelledby="results-heading">
+      <p class="eyebrow">Test complete</p>
+      <h1 id="results-heading">Your results</h1>
+      <p id="overall-score" class="overall-score"></p>
+      <div id="list-results" class="list-results"></div>
+      <div class="results-actions"><button id="take-again" class="secondary" type="button">Take another test</button><a class="primary button-link" href="/">Back to practice</a></div>
+    </section>
+  </main>
+
+  <script>window.SPELLING_CONFIG = {{.Config | json}};</script>
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/test.js" defer></script>
+</body>
+</html>

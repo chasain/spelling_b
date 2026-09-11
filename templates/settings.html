@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B</a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Practice</a><a href="/test">Test</a><a href="/progress">Progress</a></nav>
+  </header>
+
+  <main class="settings-shell">
+    <div class="settings-heading">
+      <div><p class="eyebrow">Settings</p><h1>Your word lists</h1></div>
+      <button id="add-list" class="secondary" type="button">+ Add list</button>
+    </div>
+    <p class="hint">Give each list a title and enter one word per line.</p>
+    <form id="settings-form">
+      <section class="lesson-settings">
+        <div class="lesson-settings-heading">
+          <div><h2>Lesson plan</h2><p>Set a lesson to 0 repetitions to turn it off for that mode.</p></div>
+          <label for="beginner-days">Beginner-mode days
+            <input id="beginner-days" type="number" min="0" max="365" value="2" required>
+          </label>
+        </div>
+        <div class="mode-settings-grid">
+          <fieldset class="mode-settings">
+            <legend>🌱 Beginner mode</legend>
+            <p>Used for the first configured number of days.</p>
+            <div class="repetition-grid">
+              <label for="beginner-copy">Copy<input id="beginner-copy" type="number" min="0" max="100" required></label>
+              <label for="beginner-letters">Letter Builder<input id="beginner-letters" type="number" min="0" max="100" required></label>
+              <label for="beginner-guided">Guided<input id="beginner-guided" type="number" min="0" max="100" required></label>
+              <label for="beginner-spell">Spell<input id="beginner-spell" type="number" min="0" max="100" required></label>
+            </div>
+          </fieldset>
+          <fieldset class="mode-settings">
+            <legend>🚀 Advanced mode</legend>
+            <p>Used after the beginner days are complete.</p>
+            <div class="repetition-grid">
+              <label for="advanced-copy">Copy<input id="advanced-copy" type="number" min="0" max="100" required></label>
+              <label for="advanced-letters">Letter Builder<input id="advanced-letters" type="number" min="0" max="100" required></label>
+              <label for="advanced-guided">Guided<input id="advanced-guided" type="number" min="0" max="100" required></label>
+              <label for="advanced-spell">Spell<input id="advanced-spell" type="number" min="0" max="100" required></label>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+      <section class="test-setting-card">
+        <div>
+          <h2>Test length</h2>
+          <p>Maximum number of words selected from each list.</p>
+        </div>
+        <label for="test-limit">Words per list
+          <input id="test-limit" type="number" min="1" max="100" value="5" required>
+        </label>
+      </section>
+      <div id="lists" class="lists"></div>
+      <div class="save-row">
+        <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
+        <button class="primary" type="submit">Save settings</button>
+      </div>
+    </form>
+  </main>
+  <template id="list-template">
+    <section class="word-list-card">
+      <div class="list-card-heading">
+        <label>List title<input class="title-input" type="text" maxlength="80" required placeholder="e.g. Week 1"></label>
+        <button class="remove-list" type="button" aria-label="Remove this list">Remove</button>
+      </div>
+      <label>Words<textarea class="words-input" rows="7" required placeholder="apple&#10;friend&#10;school"></textarea></label>
+      <span class="word-count">0 words</span>
+    </section>
+  </template>
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/settings.js" defer></script>
+</body>
+</html>
