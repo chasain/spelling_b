@@ -1,6 +1,6 @@
 # Spelling B
 
-A small, dependency-free Go spelling practice app. Word lists and lesson settings are stored in a local JSON file, speech uses the browser's Web Speech API, and feedback sounds use the Web Audio API.
+A dependency-free Go and Manifest V3 learning app with configurable word-list practice, 100 high-frequency word levels, 120 phonics lessons, and a seven-level daily typing trail. The Chrome extension works fully offline; speech uses an installed browser or ChromeOS voice and feedback sounds use the Web Audio API.
 
 ## Run
 
@@ -32,9 +32,19 @@ Settings controls:
 
 A mode that will run must keep at least one lesson enabled. Defaults preserve the original plan: two Beginner days with Copy, Letter Builder, and Guided at three repetitions, followed by Advanced days with Guided and Spell at three repetitions.
 
-Letter Builder adds three choices per repetition, up to 24 choices, always in rows of three. Choices are unique and the upcoming correct letter is excluded from the current decoys to prevent clicks during the transition from becoming accidental errors.
+Letter Builder adds three choices per repetition, up to 24 choices, always in rows of three. Choices are unique and the upcoming correct letter is excluded from the current decoys to prevent clicks during the transition from becoming accidental errors. Mouse/touch choices retain a short success animation, while correct keyboard input advances immediately so fast typing is not dropped.
+
+After an incorrect Spell answer, the correct word remains visible in the same style as Copy. The learner must correct the typed answer before the explicit retry button becomes available.
 
 After completing a practice day, **Start a new day** advances the saved day counter and loads that day's configured mode. Each word list keeps separate progress in the browser. Changing the lesson configuration safely restarts the current day's stage progress.
+
+## Classroom setup exchange
+
+The Settings page can export the current word lists, lesson plan, and test length as a versioned `.spellingb` classroom setup. The file contains no student progress, scores, metrics, or day counters. Students can import it with the file picker or drag-and-drop, preview its contents, and either replace their lists or merge lists with matching titles. Every import saves the previously stored configuration as a one-click recoverable backup.
+
+Teachers can also import existing `.csv`, `.tsv`, and `.xlsx` workbooks. The on-device preview supports six layouts: titled columns, titled rows, two-column list/word records, one flat list, untitled rows, and untitled columns. CSV imports detect comma, tab, semicolon, and pipe delimiters, while still allowing the teacher to choose the delimiter. Multi-sheet XLSX files include a worksheet picker. Spreadsheet imports change word lists only; lesson settings remain unchanged.
+
+The workflow is completely local and needs no hosted service. Use **Import classroom setup** or drag a file onto the Settings drop zone. Every import displays a layout or content preview and never silently changes settings. The extension intentionally does not register an operating-system file handler, keeping the same warning-free manifest on ChromeOS, Linux, Windows, and macOS.
 
 ## Learning metrics
 
@@ -44,12 +54,30 @@ Practice and spelling-test sessions are stored locally in the browser. The Progr
 - average word time;
 - spelling accuracy;
 - correct-position character accuracy;
-- typing speed in characters per minute (CPM);
+- copy speed in characters per minute (CPM), calculated only from Copy attempts and excluding the slowest 25% of samples;
 - Backspace corrections;
 - Letter Builder choice accuracy;
 - per-stage timing and accuracy.
 
 The most recent 100 sessions are retained. Metrics never leave the device.
+
+## High Frequency Words
+
+The **High Frequency** page divides 1,000 unique common English words into 100 levels of 10 words. Every level uses Copy, Guided, and Spell stages, including the required correction-and-confirmation step after a missed Spell answer. Level completion and overall progress stay in local browser storage.
+
+The word data is a classroom-friendly, de-duplicated adaptation of the public-domain Moby Words II general-text and Internet frequency lists from Project Gutenberg. Source data, the reproducible generator, and attribution are bundled in the repository; the finished extension needs no network access.
+
+## Phonics
+
+The **Phonics** page contains all 120 sequential Open Source Phonics lessons. Student practice is the default view and provides 160 focused practice sets derived from labeled Examples sections (with labeled reading-word sections as a fallback). Sets are numbered like 1.1 and 1.2, contain at most 10 entries, and run through Copy, Guided, and Spell activities. The separate tutor guide, completion tracking, and unchanged printable PDF remain available. The curriculum is by Dr. Katie Spurlock / Open Source Phonics and is adapted under CC BY-NC-SA 4.0. See LICENSE-PHONICS.md. The lessons and PDF are bundled locally and require no network access.
+
+## Typing
+
+The **Typing** page is a seven-level daily trail with tactile F/J markers and page-wide focus recovery for accidental trackpad clicks. It begins with Home Row and adds groups of two to four keys from the middle of the keyboard outward until the full letter keyboard is available. Each daily mission has three short training rounds followed by a sentence test; reaching 60 CPM unlocks the next level. Tests retain the learner's best CPM score and award Growing Typist, Keyboard Explorer, Gold Star Typist, or Lightning Bee rankings. Daily participation and streaks stay on the device.
+
+## Text-to-speech voices
+
+The Settings page explains how to choose or install voices on ChromeOS, Windows, and Linux and includes a voice-preview button. On ChromeOS, an English voice labeled **(Natural)** is recommended. Some system-provided Natural voices may process speech online; this is controlled by ChromeOS rather than Spelling B.
 
 ## Spelling test
 
@@ -94,7 +122,7 @@ make GO=/usr/local/go/bin/go extension
 This creates:
 
 - `dist/chrome-extension/` — an unpacked build for local testing with **Load unpacked**;
-- `dist/spelling-b-chrome-extension.zip` — the upload artifact for the Chrome Web Store;
+- `dist/spelling-b-chrome-extension-1.3.0.zip` — the final Chrome Web Store upload artifact;
 - `dist/spelling-b-chrome-extension.sha256` — a copy-verification checksum.
 
 For local testing, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome-extension`. Click the Spelling B toolbar icon to open the full-page app.

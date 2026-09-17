@@ -1,0 +1,13 @@
+# Open Source Phonics curriculum license
+
+The phonics curriculum bundled with Spelling B is adapted from **Open Source Phonics**, written by Dr. Katie Spurlock and published by Open Source Phonics, Inc.
+
+Source: https://www.opensourcephonics.org/
+
+The curriculum materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license:
+
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Spelling B changes the presentation and navigation for offline use and derives short interactive practice sets from labeled examples and reading-word sections. The lesson wording comes from the supplied February 2024 “All Lessons 1–120” PDF. The original printable PDF is included unchanged.
+
+These license terms apply to the phonics curriculum and its adaptations. They do not automatically apply to unrelated application code.

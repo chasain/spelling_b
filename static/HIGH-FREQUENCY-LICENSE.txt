@@ -1,0 +1,12 @@
+HIGH-FREQUENCY WORD DATA
+
+Source: Moby Words II by Grady Ward
+Project Gutenberg: https://www.gutenberg.org/ebooks/3201
+Source files:
+  https://www.gutenberg.org/files/3201/files/freq.txt
+  https://www.gutenberg.org/files/3201/files/freq-int.txt
+
+The Moby Words II documentation states:
+"This documentation, the software and/or database are: Public Domain material by grant from the author, January, 2001."
+
+Spelling B uses a classroom-friendly, de-duplicated selection of 1,000 entries from the general-text and Internet frequency lists. Words are normalized to lowercase, non-word network artifacts and malformed contractions are omitted, and unsuitable elementary-school terms are excluded. Remaining words preserve their order in the source lists.

@@ -88,7 +88,7 @@ func TestPagesRender(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, path := range []string{"/", "/settings", "/test", "/progress"} {
+	for _, path := range []string{"/", "/settings", "/test", "/progress", "/high-frequency", "/phonics", "/typing"} {
 		rec := httptest.NewRecorder()
 		app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
 		if rec.Code != http.StatusOK {
@@ -151,7 +151,15 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/static/app.css", contentType: "text/css", contains: ".practice-card"},
 		{path: "/static/practice.js", contentType: "text/javascript", contains: "planForDay"},
 		{path: "/progress", contentType: "text/html", contains: "Session stars"},
-		{path: "/static/metrics.js", contentType: "text/javascript", contains: "wordSeconds"},
+		{path: "/settings", contentType: "text/html", contains: "Export classroom setup"},
+		{path: "/static/settings.js", contentType: "text/javascript", contains: "spelling-b-classroom"},
+		{path: "/static/import-data.js", contentType: "text/javascript", contains: "readXlsx"},
+		{path: "/static/metrics.js", contentType: "text/javascript", contains: "copySpeed"},
+		{path: "/high-frequency", contentType: "text/html", contains: "High Frequency Words"},
+		{path: "/phonics", contentType: "text/html", contains: "Phonics lessons"},
+		{path: "/typing", contentType: "text/html", contains: "Typing trail"},
+		{path: "/static/high-frequency-words.json", contentType: "application/json", contains: "\"levels\":"},
+		{path: "/static/phonics-lessons.json", contentType: "application/json", contains: "\"lessons\":"},
 	} {
 		recorder := httptest.NewRecorder()
 		app.Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, test.path, nil))
@@ -211,5 +219,138 @@ func TestCustomLessonPlanPersists(t *testing.T) {
 	}
 	if got := reloaded.Get().LessonPlan; got != plan {
 		t.Fatalf("lesson plan = %#v, want %#v", got, plan)
+	}
+}
+
+func TestPhonicsDataHasAllLessons(t *testing.T) {
+	data, err := os.ReadFile("static/phonics-lessons.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var course struct {
+		License string `json:"license"`
+		Lessons []struct {
+			Number         int      `json:"number"`
+			Title          string   `json:"title"`
+			Guide          string   `json:"guide"`
+			Student        string   `json:"student"`
+			Words          []string `json:"words"`
+			PracticeGroups []struct {
+				ID     string   `json:"id"`
+				Title  string   `json:"title"`
+				Source string   `json:"source"`
+				Words  []string `json:"words"`
+			} `json:"practiceGroups"`
+		} `json:"lessons"`
+	}
+	if err := json.Unmarshal(data, &course); err != nil {
+		t.Fatal(err)
+	}
+	if course.License != "CC BY-NC-SA 4.0" {
+		t.Fatalf("license = %q", course.License)
+	}
+	if len(course.Lessons) != 120 {
+		t.Fatalf("lesson count = %d", len(course.Lessons))
+	}
+	groupCount := 0
+	for index, lesson := range course.Lessons {
+		if lesson.Number != index+1 || lesson.Title == "" || lesson.Guide == "" || len(lesson.PracticeGroups) == 0 {
+			t.Fatalf("lesson %d is incomplete: %#v", index+1, lesson)
+		}
+		for _, group := range lesson.PracticeGroups {
+			groupCount++
+			if group.ID == "" || group.Title == "" || group.Source == "" || len(group.Words) == 0 || len(group.Words) > 10 {
+				t.Fatalf("lesson %d has invalid practice group: %#v", lesson.Number, group)
+			}
+		}
+	}
+	if groupCount != 160 {
+		t.Fatalf("practice group count = %d, want 160", groupCount)
+	}
+}
+
+func TestPhonicsTutorRegularExpressionsStayEscaped(t *testing.T) {
+	script, err := os.ReadFile("static/phonics.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(script)
+	for _, expression := range []string{
+		`block.replace(/([A-Za-z])-\n([a-z])/g`,
+		`replace(/\n+/g`,
+		`block.split(/\n(?=\s*•)/)`,
+		`replace(/^\s*•\s*/, '')`,
+		`text.split(/\n\s*\n/)`,
+	} {
+		if !strings.Contains(source, expression) {
+			t.Errorf("phonics.js is missing escaped expression %q", expression)
+		}
+	}
+}
+
+func TestHighFrequencyDataHasOneHundredLevels(t *testing.T) {
+	data, err := os.ReadFile("static/high-frequency-words.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var course struct {
+		License string `json:"license"`
+		Levels  []struct {
+			Number    int      `json:"number"`
+			StartRank int      `json:"startRank"`
+			EndRank   int      `json:"endRank"`
+			Words     []string `json:"words"`
+		} `json:"levels"`
+	}
+	if err := json.Unmarshal(data, &course); err != nil {
+		t.Fatal(err)
+	}
+	if course.License != "Public Domain" {
+		t.Fatalf("license = %q", course.License)
+	}
+	if len(course.Levels) != 100 {
+		t.Fatalf("level count = %d, want 100", len(course.Levels))
+	}
+	seen := make(map[string]bool)
+	for index, level := range course.Levels {
+		if level.Number != index+1 || level.StartRank != index*10+1 || level.EndRank != index*10+10 {
+			t.Fatalf("level %d has invalid numbering: %#v", index+1, level)
+		}
+		if len(level.Words) != 10 {
+			t.Fatalf("level %d has %d words", level.Number, len(level.Words))
+		}
+		for _, word := range level.Words {
+			if word == "" || seen[word] {
+				t.Fatalf("invalid or duplicate word %q in level %d", word, level.Number)
+			}
+			seen[word] = true
+		}
+	}
+	if len(seen) != 1000 {
+		t.Fatalf("unique word count = %d, want 1000", len(seen))
+	}
+}
+
+func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
+	data, err := os.ReadFile("chrome/manifest.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest struct {
+		VersionName string          `json:"version_name"`
+		Permissions []string        `json:"permissions"`
+		Extra       json.RawMessage `json:"file_handlers"`
+	}
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		t.Fatal(err)
+	}
+	if manifest.VersionName != "1.3.0" {
+		t.Fatalf("version_name = %q", manifest.VersionName)
+	}
+	if len(manifest.Extra) != 0 {
+		t.Fatal("file_handlers is ChromeOS-only and must not be included in the cross-platform extension")
+	}
+	if strings.Join(manifest.Permissions, ",") != "storage,tts" {
+		t.Fatalf("permissions = %#v", manifest.Permissions)
 	}
 }

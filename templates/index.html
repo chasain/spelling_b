@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
-    <nav class="topnav" aria-label="Main navigation"><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
   <main class="practice-shell">
@@ -29,6 +29,7 @@
       <div id="level-progress" class="level-progress" aria-label="Stage progress"></div>
 
       <div id="shown-word" class="shown-word" aria-live="polite"></div>
+      <button id="review-word" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
       <button id="speak" class="speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
 
       <section id="letter-builder" class="letter-builder" tabindex="0" hidden aria-label="Build the word with letters">
@@ -52,7 +53,7 @@
         <div class="metric-grid">
           <div><strong id="session-accuracy">—</strong><span>word accuracy</span></div>
           <div><strong id="session-time">—</strong><span>avg. word time</span></div>
-          <div><strong id="session-speed">—</strong><span>typing speed</span></div>
+          <div><strong id="session-speed">—</strong><span>copy speed (CPM)</span></div>
           <div><strong id="session-characters">—</strong><span>letter accuracy</span></div>
         </div>
       </section>

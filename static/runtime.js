@@ -28,12 +28,25 @@
     }
   }
 
+  async function persist(key, value) {
+    await ready;
+    const copied = clone(value);
+    if (isExtension) {
+      await chrome.storage.local.set({ [key]: copied });
+      cache[key] = copied;
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(copied));
+  }
+
   function write(key, value) {
     if (isExtension) {
       cache[key] = clone(value);
       return chrome.storage.local.set({ [key]: value }).catch(() => {});
     }
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (_) {}
   }
 
   async function loadConfig() {
@@ -42,8 +55,7 @@
   }
 
   async function saveConfig(config) {
-    await ready;
-    await write('spelling-b:config:v1', config);
+    await persist('spelling-b:config:v1', config);
   }
 
   function speak(word) {
@@ -72,6 +84,7 @@
     ready,
     read,
     write,
+    persist,
     loadConfig,
     saveConfig,
     speak,

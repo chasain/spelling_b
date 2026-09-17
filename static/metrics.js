@@ -21,7 +21,14 @@ void (async () => {
 
   const percent = (part, total) => total ? `${Math.round(part / total * 100)}%` : '—';
   const average = (total, count) => count ? `${(total / count).toFixed(1)}s` : '—';
-  const speed = (characters, seconds) => seconds > 0 ? `${Math.round(characters / seconds * 60)} CPM` : '—';
+  function copySpeed(timings) {
+    const samples = timings
+      .filter((sample) => sample.stage === 'copy' && sample.seconds > 0 && sample.word)
+      .map((sample) => Array.from(sample.word).length / sample.seconds)
+      .sort((left, right) => right - left);
+    const kept = samples.slice(0, Math.max(1, Math.ceil(samples.length * 0.75)));
+    return kept.length ? `${Math.round(kept.reduce((sum, value) => sum + value, 0) / kept.length * 60)} CPM` : '—';
+  }
 
   function metric(label, value) {
     const item = document.createElement('div');
@@ -96,7 +103,7 @@ void (async () => {
       metric('avg. word time', average(seconds, wordSamples)),
       metric('spelling accuracy', percent(session.correctTypedAttempts || 0, session.typedAttempts || 0)),
       metric('letter accuracy', percent(session.correctPositionCharacters || 0, session.comparedCharacters || 0)),
-      metric('typing speed', speed(session.typedCharacters || 0, session.typingSeconds || 0)),
+      metric('copy speed', copySpeed(timings)),
       metric('builder choices', percent(session.correctLetterChoices || 0, session.letterChoices || 0)),
       metric('corrections', String(session.corrections || 0)),
     );
@@ -115,13 +122,12 @@ void (async () => {
       result.wordSamples += session.wordSamples ?? timings.length;
       result.correctTyped += session.correctTypedAttempts || 0;
       result.typedAttempts += session.typedAttempts || 0;
-      result.typedCharacters += session.typedCharacters || 0;
-      result.typingSeconds += session.typingSeconds || 0;
+      result.timings.push(...timings);
       return result;
-    }, { wordSeconds: 0, wordSamples: 0, correctTyped: 0, typedAttempts: 0, typedCharacters: 0, typingSeconds: 0 });
+    }, { wordSeconds: 0, wordSamples: 0, correctTyped: 0, typedAttempts: 0, timings: [] });
     overallAccuracy.textContent = percent(totals.correctTyped, totals.typedAttempts);
     overallTime.textContent = average(totals.wordSeconds, totals.wordSamples);
-    overallSpeed.textContent = speed(totals.typedCharacters, totals.typingSeconds);
+    overallSpeed.textContent = copySpeed(totals.timings);
     empty.hidden = sessions.length > 0;
     historyContainer.replaceChildren(...sessions.slice(0, 50).map(renderSession));
   }

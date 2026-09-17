@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typing · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a aria-current="page" href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="typing-shell">
+    <section class="typing-heading">
+      <div><p class="eyebrow">Daily keyboard practice</p><h1>Typing trail</h1><p>Complete three warm-up rounds, then reach 60 CPM to unlock the next keys.</p></div>
+      <div class="typing-day-card"><strong>Day <span id="typing-day">1</span></strong><span>🔥 <span id="typing-streak">0</span> day streak</span></div>
+    </section>
+
+    <nav id="typing-levels" class="typing-levels" aria-label="Typing levels"></nav>
+
+    <section class="typing-card">
+      <div class="typing-card-heading">
+        <div><p id="typing-level-label" class="eyebrow"></p><h2 id="typing-title"></h2><p id="typing-instructions"></p></div>
+        <div id="typing-best" class="typing-best"></div>
+      </div>
+      <div id="typing-unlock-note" class="typing-unlock-note"></div>
+      <div id="towel-note" class="towel-note" hidden><span aria-hidden="true">🙈</span><strong>Challenge:</strong> Try covering your hands and keyboard with a light towel.</div>
+
+      <div class="daily-mission">
+        <div><strong id="typing-round">Round 1 of 3</strong><span id="typing-round-detail"></span></div>
+        <div class="mission-stars" id="typing-mission-stars" aria-label="Daily training rounds"></div>
+      </div>
+
+      <div id="typing-prompt" class="typing-prompt" aria-live="polite"></div>
+      <div id="typing-guidance" class="typing-guidance">
+        <div id="keyboard" class="keyboard" aria-label="Keyboard and hand-position guide"></div>
+        <div class="hand-guide" aria-label="Hand positions">
+          <div><span class="hand-icon" aria-hidden="true">✋</span><strong>Left hand</strong><small>A S D F</small></div>
+          <div><strong>Home keys</strong><small>Keep fingers curved. Thumbs rest on space.</small></div>
+          <div><span class="hand-icon right" aria-hidden="true">✋</span><strong>Right hand</strong><small>J K L ;</small></div>
+        </div>
+      </div>
+
+      <input id="typing-capture" class="typing-capture" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Type the highlighted character">
+      <p id="typing-feedback" class="typing-feedback" role="status" aria-live="polite">Click the practice area, then start typing.</p>
+      <div class="typing-progress" role="progressbar" aria-label="Today's typing progress" aria-valuemin="0" aria-valuemax="45" aria-valuenow="0"><div id="typing-progress-fill"></div></div>
+      <div class="typing-actions">
+        <button id="typing-practice" class="secondary" type="button">Restart today’s training</button>
+        <button id="typing-test" class="primary" type="button" disabled>Take level test</button>
+      </div>
+    </section>
+
+    <section id="typing-result" class="typing-result" hidden>
+      <span id="typing-rank-icon" aria-hidden="true">⭐</span>
+      <div><p class="eyebrow">Test complete</p><h2 id="typing-rank"></h2><p id="typing-score"></p><p id="typing-unlock-result"></p></div>
+      <div class="typing-result-actions">
+        <button id="typing-retest" class="secondary" type="button">Retake test</button>
+        <button id="typing-continue" class="primary" type="button" hidden>Next level →</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/typing.js" defer></script>
+</body>
+</html>

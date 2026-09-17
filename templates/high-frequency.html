@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>High Frequency Words · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a aria-current="page" href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="phonics-shell frequency-shell">
+    <section class="phonics-hero frequency-hero">
+      <div><p class="eyebrow">100 levels · 1,000 words</p><h1>High Frequency Words</h1><p>Build confidence with ten useful words at a time.</p></div>
+      <div class="phonics-overall">
+        <strong><span aria-hidden="true">⭐</span> <b id="frequency-completed">0 of 100</b></strong>
+        <span>levels mastered</span>
+        <div class="phonics-progress-track" role="progressbar" aria-label="High-frequency word progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="frequency-progress-fill"></div></div>
+      </div>
+    </section>
+
+    <section class="phonics-toolbar" aria-label="Level navigation">
+      <button id="frequency-previous" class="secondary" type="button">← Previous</button>
+      <label for="frequency-select">Level
+        <select id="frequency-select" aria-label="Choose a high-frequency word level"></select>
+      </label>
+      <button id="frequency-next" class="secondary" type="button">Next →</button>
+    </section>
+
+    <article class="phonics-card" aria-labelledby="frequency-title">
+      <div class="phonics-card-heading">
+        <div><p id="frequency-number" class="eyebrow">Level 1 of 100</p><h2 id="frequency-title">Loading words…</h2></div>
+        <div id="frequency-level-status" class="complete-lesson" aria-live="polite">☆ Ready to learn</div>
+      </div>
+
+      <section class="phonics-practice" aria-live="polite">
+        <div class="phonics-word-list-heading">
+          <div><p class="eyebrow">Your ten words</p><h3 id="frequency-word-count">Practice all three stages to master this level.</h3></div>
+          <button id="frequency-start" class="primary" type="button">Start level</button>
+        </div>
+        <div id="frequency-word-bank" class="phonics-word-bank"></div>
+
+        <section id="frequency-activity" class="phonics-activity" hidden>
+          <div class="phonics-stage-line">
+            <strong id="frequency-stage"></strong>
+            <span id="frequency-question-progress"></span>
+          </div>
+          <div class="typing-progress"><div id="frequency-activity-fill"></div></div>
+          <p id="frequency-instruction" class="hint"></p>
+          <div id="frequency-shown-word" class="shown-word"></div>
+          <button id="frequency-speak" class="speaker phonics-speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
+          <div id="frequency-typed" class="typed-display" aria-live="polite"></div>
+          <form id="frequency-answer-form" class="answer-form">
+            <input id="frequency-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Type the word">
+            <button id="frequency-submit" class="primary" type="submit">Check</button>
+          </form>
+          <button id="frequency-review" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
+          <p id="frequency-feedback" class="feedback" role="status"></p>
+        </section>
+      </section>
+    </article>
+
+    <aside class="phonics-credit">
+      <p><strong>Word source:</strong> Moby Words II general-text and Internet frequency lists. The 1,000 words are de-duplicated, normalized, and filtered for elementary-school practice.</p>
+      <a href="/static/HIGH-FREQUENCY-LICENSE.txt" target="_blank" rel="noopener">Public-domain source and adaptation notes</a>
+    </aside>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/high-frequency.js" defer></script>
+</body>
+</html>

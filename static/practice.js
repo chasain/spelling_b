@@ -9,6 +9,7 @@ void (async () => {
   const instructions = document.querySelector('#instructions');
   const progressContainer = document.querySelector('#level-progress');
   const shownWord = document.querySelector('#shown-word');
+  const reviewButton = document.querySelector('#review-word');
   const speakButton = document.querySelector('#speak');
   const letterBuilder = document.querySelector('#letter-builder');
   const letterRound = document.querySelector('#letter-round');
@@ -48,6 +49,7 @@ void (async () => {
   let letterLocked = false;
   let attemptStartedAt = 0;
   let session = null;
+  let reviewMode = false;
 
   function modeForDay(day) {
     return config.lessonPlan.beginnerDays > 0 && day <= config.lessonPlan.beginnerDays ? 'beginner' : 'advanced';
@@ -76,7 +78,11 @@ void (async () => {
         saved.day = Math.max(1, Number(saved.day) || 1);
         if (saved.stageIndex >= 0 && saved.stageIndex < planForDay(saved.day).length) return saved;
       }
-      if (saved) return freshState(Math.max(1, Number(saved.day) || 1));
+      if (saved) {
+        const savedDay = Math.max(1, Number(saved.day) || 1);
+        // A changed lesson plan starts the next day if the saved day was already finished.
+        return freshState(saved.completed ? savedDay + 1 : savedDay);
+      }
     } catch (_) {
       // Storage being unavailable should never prevent practice.
     }
@@ -209,11 +215,16 @@ void (async () => {
     }
     const accuracy = session.typedAttempts ? Math.round(session.correctTypedAttempts / session.typedAttempts * 100) : null;
     const averageTime = session.wordSamples ? session.wordSeconds / session.wordSamples : null;
-    const charactersPerMinute = session.typingSeconds > 0 ? Math.round(session.typedCharacters / session.typingSeconds * 60) : null;
+    const copySamples = session.wordTimings
+      .filter((sample) => sample.stage === 'copy' && sample.seconds > 0)
+      .map((sample) => Array.from(sample.word).length / sample.seconds)
+      .sort((left, right) => right - left);
+    const keptCopySamples = copySamples.slice(0, Math.max(1, Math.ceil(copySamples.length * 0.75)));
+    const copySpeed = keptCopySamples.length ? keptCopySamples.reduce((sum, value) => sum + value, 0) / keptCopySamples.length : null;
     const characterAccuracy = session.comparedCharacters ? Math.round(session.correctPositionCharacters / session.comparedCharacters * 100) : null;
     metricAccuracy.textContent = accuracy === null ? '—' : `${accuracy}%`;
     metricTime.textContent = averageTime === null ? '—' : `${averageTime.toFixed(1)}s`;
-    metricSpeed.textContent = charactersPerMinute === null ? '—' : `${charactersPerMinute} CPM`;
+    metricSpeed.textContent = copySpeed === null ? '—' : `${Math.round(copySpeed * 60)} CPM`;
     metricCharacters.textContent = characterAccuracy === null ? '—' : `${characterAccuracy}%`;
   }
 
@@ -291,6 +302,8 @@ void (async () => {
     levelLabel.textContent = `Stage ${state.stageIndex + 1} · ${detail.name}`;
     instructions.textContent = `${detail.instruction} ${currentStagePlan().repetitions} ${currentStagePlan().repetitions === 1 ? 'round' : 'rounds'} per word.`;
     newDayButton.hidden = true;
+    reviewMode = false;
+    reviewButton.hidden = true;
     feedback.textContent = '';
     feedback.className = 'feedback';
     shownWord.hidden = stage !== 'copy';
@@ -417,14 +430,16 @@ void (async () => {
     const completedSlot = builtWord.querySelectorAll('.built-letter')[builderIndex];
     completedSlot.textContent = expected;
     completedSlot.classList.add('done');
-    nextTimer = setTimeout(() => {
+    const advance = () => {
       builderIndex++;
       if (builderIndex === characters.length) completeLetterWord();
       else {
         letterLocked = false;
         renderLetterChoices();
       }
-    }, 280);
+    };
+    if (button.dataset.keyboard === 'true') advance();
+    else nextTimer = setTimeout(advance, 220);
   }
 
   function rejectKeyboardLetter() {
@@ -526,7 +541,12 @@ void (async () => {
     chooseWord();
   }
 
-  answer.addEventListener('input', renderTyped);
+  answer.addEventListener('input', () => {
+    renderTyped();
+    if (reviewMode) {
+      reviewButton.disabled = answer.value.trim().localeCompare(currentWord, undefined, { sensitivity: 'accent' }) !== 0;
+    }
+  });
   answer.addEventListener('keydown', (event) => {
     if (event.key === 'Backspace' && answer.value && session) session.corrections++;
   });
@@ -540,6 +560,10 @@ void (async () => {
     newSession();
     chooseWord();
   });
+  reviewButton.addEventListener('click', () => {
+    if (!reviewMode || reviewButton.disabled) return;
+    prepareEntry();
+  });
 
   document.addEventListener('keydown', (event) => {
     if (!state || state.completed || currentStage() !== 'letters' || letterLocked) return;
@@ -547,8 +571,10 @@ void (async () => {
     event.preventDefault();
     const pressed = event.key.toLocaleLowerCase();
     const button = Array.from(letterChoices.querySelectorAll('.letter-choice')).find((choice) => choice.dataset.letter === pressed);
-    if (button) chooseLetter(pressed, button);
-    else rejectKeyboardLetter();
+    if (button) {
+      button.dataset.keyboard = 'true';
+      chooseLetter(pressed, button);
+    } else rejectKeyboardLetter();
   });
 
   form.addEventListener('submit', (event) => {
@@ -562,15 +588,24 @@ void (async () => {
       saveState();
       feedback.textContent = ['Nice work! ⭐', 'Super spelling! 🌟', 'You got it! 🎉'][Math.floor(Math.random() * 3)];
       feedback.className = 'feedback correct';
+    } else if (currentStage() === 'spell') {
+      reviewMode = true;
+      shownWord.hidden = false;
+      shownWord.textContent = currentWord;
+      feedback.textContent = 'Read the word, fix your spelling below, then press the button.';
+      feedback.className = 'feedback incorrect review-prompt';
     } else {
       feedback.textContent = currentStage() === 'copy' ? 'Almost! Give that word another try.' : `Good try! The word was “${currentWord}”.`;
       feedback.className = 'feedback incorrect';
     }
     playTone(isCorrect);
-    answer.disabled = true;
+    answer.disabled = !reviewMode;
     submit.disabled = true;
+    reviewButton.hidden = !reviewMode;
+    reviewButton.disabled = true;
     updateProgress();
-    nextTimer = setTimeout(isCorrect ? chooseWord : prepareEntry, isCorrect ? 800 : 1500);
+    if (!reviewMode) nextTimer = setTimeout(isCorrect ? chooseWord : prepareEntry, isCorrect ? 800 : 1500);
+    else answer.focus();
   });
 
   document.addEventListener('visibilitychange', () => {

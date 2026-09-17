@@ -8,20 +8,54 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/"><span>Spelling</span> B</a>
-    <nav class="topnav" aria-label="Main navigation"><a href="/">Practice</a><a href="/test">Test</a><a href="/progress">Progress</a></nav>
+    <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a></nav>
   </header>
 
   <main class="settings-shell">
-    <div class="settings-heading">
-      <div><p class="eyebrow">Settings</p><h1>Your word lists</h1></div>
-      <button id="add-list" class="secondary" type="button">+ Add list</button>
-    </div>
-    <p class="hint">Give each list a title and enter one word per line.</p>
+    <header class="settings-page-heading">
+      <p class="eyebrow">Parent &amp; teacher controls</p>
+      <h1>Settings</h1>
+      <p>Manage practice words, lesson pacing, classroom sharing, and speech.</p>
+    </header>
+
     <form id="settings-form">
-      <section class="lesson-settings">
+      <section class="settings-section word-lists-section" aria-labelledby="word-lists-title">
+        <div class="settings-section-heading">
+          <div>
+            <p class="eyebrow">Word lists</p>
+            <h2 id="word-lists-title">Your word lists</h2>
+            <p>Give each list a title and enter one word per line.</p>
+          </div>
+          <button id="add-list" class="secondary" type="button">+ Add list</button>
+        </div>
+        <div id="lists" class="lists"></div>
+      </section>
+
+      <section class="classroom-card" aria-labelledby="classroom-title">
+        <div class="classroom-heading">
+          <div><p class="eyebrow">Classroom sharing</p><h2 id="classroom-title">Share a classroom setup</h2><p>Export these word lists and lesson settings once, then import the same offline file on every student's device.</p></div>
+          <span class="classroom-file-badge">.spellingb · CSV · XLSX</span>
+        </div>
+        <label class="classroom-name" for="classroom-name">Package name
+          <input id="classroom-name" type="text" maxlength="120" value="Spelling B classroom setup" placeholder="e.g. Mrs. Smith — Week 4">
+        </label>
+        <div class="classroom-actions">
+          <button id="export-classroom" class="primary" type="button" disabled>Export classroom setup</button>
+          <button id="import-classroom" class="secondary" type="button" disabled>Import classroom setup</button>
+          <button id="restore-classroom-backup" class="secondary classroom-restore" type="button" hidden>Restore pre-import backup</button>
+        </div>
+        <button id="classroom-drop-zone" class="classroom-drop-zone" type="button" disabled>
+          <strong>Drop a .spellingb, CSV, TSV, or XLSX file here</strong>
+          <span>or choose Import classroom setup or spreadsheet</span>
+        </button>
+        <input id="classroom-file" class="sr-only" type="file" accept=".spellingb,.csv,.tsv,.xlsx,application/json,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <p id="classroom-status" class="classroom-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="lesson-settings" aria-labelledby="practice-plan-title">
         <div class="lesson-settings-heading">
-          <div><h2>Lesson plan</h2><p>Set a lesson to 0 repetitions to turn it off for that mode.</p></div>
+          <div><p class="eyebrow">Practice plan</p><h2 id="practice-plan-title">Lesson stages</h2><p>Set a lesson to 0 repetitions to turn it off for that mode.</p></div>
           <label for="beginner-days">Beginner-mode days
             <input id="beginner-days" type="number" min="0" max="365" value="2" required>
           </label>
@@ -48,23 +82,109 @@
             </div>
           </fieldset>
         </div>
-      </section>
-      <section class="test-setting-card">
-        <div>
-          <h2>Test length</h2>
-          <p>Maximum number of words selected from each list.</p>
+        <div class="test-setting-card">
+          <div>
+            <h3>Spelling test</h3>
+            <p>Maximum number of words selected from each list.</p>
+          </div>
+          <label for="test-limit">Words per list
+            <input id="test-limit" type="number" min="1" max="100" value="5" required>
+          </label>
         </div>
-        <label for="test-limit">Words per list
-          <input id="test-limit" type="number" min="1" max="100" value="5" required>
-        </label>
       </section>
-      <div id="lists" class="lists"></div>
+
+      <section class="voice-settings-card" aria-labelledby="voice-settings-title">
+        <div class="voice-settings-heading">
+          <div><p class="eyebrow">Speech</p><h2 id="voice-settings-title">🔊 Voice quality</h2><p>Spelling B uses the text-to-speech voice selected by Chrome or your operating system.</p></div>
+          <button id="test-settings-voice" class="secondary" type="button">Test voice</button>
+        </div>
+        <details open>
+          <summary>ChromeOS — recommended</summary>
+          <p>Open <strong>Settings → Accessibility → Text-to-speech → Text-to-speech voice settings</strong>. Under the ChromeOS built-in speech engine, install and select an English voice labeled <strong>(Natural)</strong>, then restart Chrome.</p>
+          <p class="voice-privacy-note">ChromeOS may process a Natural voice online. Spelling B does not send speech to the developer; any online voice processing is controlled by the system.</p>
+        </details>
+        <details>
+          <summary>Windows</summary>
+          <p>Open <strong>Settings → Time &amp; language → Speech</strong>. Choose an English voice, or install Text-to-speech under the English language options, then restart Chrome.</p>
+        </details>
+        <details>
+          <summary>Linux</summary>
+          <p>Chrome uses voices provided by the installed system speech service. Install or select an English text-to-speech voice through your distribution, then restart Chrome. Names and menus vary by distribution.</p>
+        </details>
+        <p class="voice-help-links"><a href="https://support.google.com/chromebook/answer/11221616" target="_blank" rel="noopener">ChromeOS voice help</a> · <a href="https://support.microsoft.com/en-us/accessibility/windows/narrator/appendix-a-supported-languages-and-voices" target="_blank" rel="noopener">Windows voice help</a></p>
+      </section>
+
       <div class="save-row">
         <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <button class="primary" type="submit">Save settings</button>
       </div>
     </form>
   </main>
+
+  <dialog id="classroom-import-dialog" class="classroom-dialog" aria-labelledby="classroom-preview-title">
+    <div class="classroom-dialog-heading">
+      <div><p class="eyebrow">Import preview</p><h2 id="classroom-preview-title">Classroom setup</h2></div>
+      <button id="cancel-classroom-import-x" class="dialog-close" type="button" aria-label="Close import preview">×</button>
+    </div>
+    <p id="classroom-preview-file" class="classroom-preview-file"></p>
+    <dl class="classroom-preview-grid">
+      <div><dt>Word lists</dt><dd id="classroom-preview-lists">0</dd></div>
+      <div><dt>Total words</dt><dd id="classroom-preview-words">0</dd></div>
+      <div><dt>Beginner days</dt><dd id="classroom-preview-days">0</dd></div>
+      <div><dt>Test limit</dt><dd id="classroom-preview-test">0</dd></div>
+    </dl>
+    <div id="classroom-preview-list-names" class="classroom-preview-list-names"></div>
+    <fieldset class="classroom-import-options">
+      <legend>How should the word lists be imported?</legend>
+      <label><input type="radio" name="classroom-import-mode" value="replace" checked> <span><strong>Replace my word lists</strong><small>Recommended for matching the teacher's setup.</small></span></label>
+      <label><input type="radio" name="classroom-import-mode" value="merge"> <span><strong>Merge with my word lists</strong><small>Lists with the same title are combined without duplicate words.</small></span></label>
+    </fieldset>
+    <label id="classroom-apply-settings-row" class="classroom-settings-option"><input id="classroom-apply-settings" type="checkbox" checked> Apply the imported lesson plan and test length</label>
+    <p class="classroom-backup-note">Your currently saved setup will be kept as a recoverable pre-import backup. Student progress and results are not changed.</p>
+    <p id="classroom-dialog-status" class="classroom-status" role="status" aria-live="polite"></p>
+    <div class="classroom-dialog-actions">
+      <button id="cancel-classroom-import" class="secondary" type="button">Cancel</button>
+      <button id="confirm-classroom-import" class="primary" type="button">Import setup</button>
+    </div>
+  </dialog>
+  <dialog id="table-import-dialog" class="classroom-dialog table-import-dialog" aria-labelledby="table-import-title">
+    <div class="classroom-dialog-heading">
+      <div><p class="eyebrow">Spreadsheet import</p><h2 id="table-import-title">Choose the layout</h2></div>
+      <button id="cancel-table-import-x" class="dialog-close" type="button" aria-label="Close spreadsheet import">×</button>
+    </div>
+    <p id="table-import-file" class="classroom-preview-file"></p>
+    <div class="table-import-controls">
+      <label id="table-sheet-row" hidden>Worksheet
+        <select id="table-sheet"></select>
+      </label>
+      <label id="table-delimiter-row" hidden>Delimiter
+        <select id="table-delimiter">
+          <option value=",">Comma</option>
+          <option value="tab">Tab</option>
+          <option value=";">Semicolon</option>
+          <option value="|">Pipe</option>
+        </select>
+      </label>
+      <label>How is the data arranged?
+        <select id="table-layout">
+          <option value="columns-header">Titles in the first row; one list per column</option>
+          <option value="rows-title">One list per row; title in the first cell</option>
+          <option value="records">Two columns: list title, then one word</option>
+          <option value="single">One list; all non-empty cells are words</option>
+          <option value="rows-plain">No titles; one list per row</option>
+          <option value="columns-plain">No titles; one list per column</option>
+        </select>
+      </label>
+    </div>
+    <p class="table-preview-help">Preview of the first rows. Empty rows and duplicate words are ignored.</p>
+    <div class="table-preview-wrap"><table id="table-preview" class="table-preview"></table></div>
+    <p id="table-import-summary" class="table-import-summary" aria-live="polite"></p>
+    <p id="table-dialog-status" class="classroom-status" role="status" aria-live="polite"></p>
+    <div class="classroom-dialog-actions">
+      <button id="cancel-table-import" class="secondary" type="button">Cancel</button>
+      <button id="continue-table-import" class="primary" type="button">Preview word lists</button>
+    </div>
+  </dialog>
   <template id="list-template">
     <section class="word-list-card">
       <div class="list-card-heading">
@@ -76,6 +196,7 @@
     </section>
   </template>
   <script src="/static/runtime.js" defer></script>
+  <script src="/static/import-data.js" defer></script>
   <script src="/static/settings.js" defer></script>
 </body>
 </html>

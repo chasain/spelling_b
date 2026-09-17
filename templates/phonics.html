@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phonics · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a aria-current="page" href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="phonics-shell">
+    <section class="phonics-hero">
+      <div><p class="eyebrow">120-lesson course</p><h1>Phonics lessons</h1><p>Practice focused example sets for each sound, blend, and spelling pattern.</p></div>
+      <div class="phonics-overall">
+        <strong id="phonics-completed">0 completed</strong>
+        <span>practice sets completed</span>
+        <div class="phonics-progress-track" role="progressbar" aria-label="Phonics practice-set progress" aria-valuemin="0" aria-valuemax="160" aria-valuenow="0"><div id="phonics-progress-fill"></div></div>
+      </div>
+    </section>
+
+    <section class="phonics-toolbar" aria-label="Lesson navigation">
+      <button id="phonics-previous" class="secondary" type="button">← Previous</button>
+      <label for="phonics-select">Lesson
+        <select id="phonics-select" aria-label="Choose a phonics lesson"></select>
+      </label>
+      <button id="phonics-next" class="secondary" type="button">Next →</button>
+    </section>
+
+    <article class="phonics-card" aria-labelledby="phonics-title">
+      <div class="phonics-card-heading">
+        <div><p id="phonics-number" class="eyebrow">Lesson 1</p><h2 id="phonics-title">Loading lessons…</h2></div>
+        <button id="phonics-complete" class="complete-lesson" type="button" aria-pressed="false">☆ Mark complete</button>
+      </div>
+      <div class="lesson-view-tabs" role="tablist" aria-label="Lesson view">
+        <button id="student-tab" class="lesson-tab active" type="button" role="tab" aria-selected="true">Student practice</button>
+        <button id="tutor-tab" class="lesson-tab" type="button" role="tab" aria-selected="false">Tutor guide</button>
+      </div>
+
+      <section id="phonics-practice" class="phonics-practice" aria-live="polite">
+        <div class="phonics-word-list-heading">
+          <div><p class="eyebrow">Examples from this lesson</p><h3 id="phonics-word-count"></h3></div>
+          <div class="phonics-set-actions">
+            <label for="phonics-group-select">Practice set
+              <select id="phonics-group-select" aria-label="Choose a practice set"></select>
+            </label>
+            <button id="phonics-start" class="primary" type="button">Start practice</button>
+          </div>
+        </div>
+        <div id="phonics-word-bank" class="phonics-word-bank"></div>
+
+        <section id="phonics-activity" class="phonics-activity" hidden>
+          <div class="phonics-stage-line">
+            <strong id="phonics-stage"></strong>
+            <span id="phonics-question-progress"></span>
+          </div>
+          <div class="typing-progress"><div id="phonics-activity-fill"></div></div>
+          <p id="phonics-instruction" class="hint"></p>
+          <div id="phonics-shown-word" class="shown-word"></div>
+          <button id="phonics-speak" class="speaker phonics-speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
+          <div id="phonics-typed" class="typed-display" aria-live="polite"></div>
+          <form id="phonics-answer-form" class="answer-form">
+            <input id="phonics-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Type the word">
+            <button id="phonics-submit" class="primary" type="submit">Check</button>
+          </form>
+          <button id="phonics-review" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
+          <p id="phonics-feedback" class="feedback" role="status"></p>
+        </section>
+      </section>
+
+      <section id="phonics-content" class="phonics-content" aria-live="polite" hidden></section>
+    </article>
+
+    <aside class="phonics-credit">
+      <p><strong>Open Source Phonics</strong> lessons by Dr. Katie Spurlock. Adapted for offline navigation and interactive practice in Spelling B under CC BY-NC-SA 4.0.</p>
+      <a href="/static/open-source-phonics-120-lessons.pdf" target="_blank" rel="noopener">Open the original printable PDF</a> · <a href="/static/PHONICS-LICENSE.txt" target="_blank" rel="noopener">License and attribution</a>
+    </aside>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/phonics.js" defer></script>
+</body>
+</html>

@@ -228,6 +228,9 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /settings", a.settings)
 	mux.HandleFunc("GET /test", a.test)
 	mux.HandleFunc("GET /progress", a.progress)
+	mux.HandleFunc("GET /high-frequency", a.highFrequency)
+	mux.HandleFunc("GET /phonics", a.phonics)
+	mux.HandleFunc("GET /typing", a.typing)
 	mux.HandleFunc("GET /api/config", a.getConfig)
 	mux.HandleFunc("POST /api/config", a.saveConfig)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(a.staticFS))))
@@ -248,6 +251,18 @@ func (a *App) test(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) progress(w http.ResponseWriter, r *http.Request) {
 	a.render(w, "progress.html", nil)
+}
+
+func (a *App) highFrequency(w http.ResponseWriter, r *http.Request) {
+	a.render(w, "high-frequency.html", nil)
+}
+
+func (a *App) phonics(w http.ResponseWriter, r *http.Request) {
+	a.render(w, "phonics.html", nil)
+}
+
+func (a *App) typing(w http.ResponseWriter, r *http.Request) {
+	a.render(w, "typing.html", nil)
 }
 
 func (a *App) getConfig(w http.ResponseWriter, _ *http.Request) {
