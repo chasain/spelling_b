@@ -56,8 +56,8 @@ var defaultConfig = Config{
 	TestWordsPerList: 5,
 	LessonPlan: LessonPlan{
 		BeginnerDays: 2,
-		Beginner:     LessonRepetitions{Copy: 3, LetterBuilder: 3, Guided: 3},
-		Advanced:     LessonRepetitions{Guided: 3, Spell: 3},
+		Beginner:     LessonRepetitions{Copy: 2, LetterBuilder: 3, Guided: 1},
+		Advanced:     LessonRepetitions{Copy: 1, Guided: 2, Spell: 2},
 	},
 }
 

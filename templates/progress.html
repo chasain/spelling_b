@@ -17,13 +17,34 @@
       <div><p class="eyebrow">Learning progress</p><h1>Session stars</h1></div>
       <span class="metrics-mascot" aria-hidden="true">📈⭐</span>
     </div>
-    <p class="hint">Times are capped at 60 seconds per word. Copy speed uses the fastest 75% of Copy samples so thinking breaks do not skew it.</p>
+    <p class="hint">Times are capped at 60 seconds per word. Copy speed uses the fastest 75% of Copy samples so thinking breaks do not skew it. All data stays on this device.</p>
 
     <section id="metrics-summary" class="metrics-summary" aria-label="Overall summary">
       <div><strong id="total-sessions">0</strong><span>sessions</span></div>
       <div><strong id="overall-accuracy">—</strong><span>word accuracy</span></div>
       <div><strong id="overall-time">—</strong><span>avg. word time</span></div>
       <div><strong id="overall-speed">—</strong><span>copy speed (CPM)</span></div>
+      <div><strong id="active-time">—</strong><span>active practice</span></div>
+    </section>
+
+    <section id="metrics-charts" class="metrics-charts" aria-label="Progress graphs" hidden>
+      <article class="chart-card">
+        <div class="chart-heading"><div><p class="eyebrow">All activities</p><h2>Accuracy by activity</h2></div><span aria-hidden="true">🎯</span></div>
+        <div id="activity-chart" class="activity-chart"></div>
+      </article>
+      <article class="chart-card">
+        <div class="chart-heading"><div><p class="eyebrow">Last 14 days</p><h2>Active practice time</h2></div><span aria-hidden="true">📅</span></div>
+        <div id="practice-chart" class="practice-chart"></div>
+      </article>
+      <article id="typing-chart-card" class="chart-card chart-card-wide" hidden>
+        <div class="chart-heading"><div><p class="eyebrow">Recent tests</p><h2>Typing speed trend</h2></div><strong id="typing-chart-latest"></strong></div>
+        <div id="typing-chart" class="typing-chart"></div>
+      </article>
+    </section>
+
+    <section id="needs-practice-section" class="needs-practice-section" aria-labelledby="needs-practice-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Focus next</p><h2 id="needs-practice-heading">Words needing practice</h2></div><p>Based on incorrect answers and slower response times.</p></div>
+      <div id="needs-practice" class="needs-practice"></div>
     </section>
 
     <section class="history-section" aria-labelledby="history-heading">

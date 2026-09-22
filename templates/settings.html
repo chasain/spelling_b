@@ -93,6 +93,35 @@
         </div>
       </section>
 
+      <section class="settings-section typing-display-settings" aria-labelledby="typing-display-title">
+        <div class="settings-section-heading">
+          <div>
+            <p class="eyebrow">Typing</p>
+            <h2 id="typing-display-title">Keyboard appearance</h2>
+            <p>Choose how much visual guidance appears during typing practice.</p>
+          </div>
+        </div>
+        <div class="typing-display-options">
+          <label class="typing-display-toggle">
+            <input id="typing-show-colors" type="checkbox" checked>
+            <span><strong>Color-coded finger zones</strong><small>Match each key to its finger color.</small></span>
+          </label>
+          <label class="typing-display-toggle">
+            <input id="typing-show-hands" type="checkbox" checked>
+            <span><strong>Highlighted hand guides</strong><small>Show which hand and finger should press the key.</small></span>
+          </label>
+          <label class="typing-display-toggle">
+            <input id="typing-split-keyboard" type="checkbox" checked>
+            <span><strong>Split keyboard</strong><small>Separate the left-hand and right-hand key groups.</small></span>
+          </label>
+        </div>
+        <label class="typing-gap-setting" for="typing-keyboard-gap">
+          <span><strong>Keyboard gap</strong><small>Distance between the left and right sections.</small></span>
+          <input id="typing-keyboard-gap" type="range" min="0" max="25" step="1" value="25">
+          <output id="typing-keyboard-gap-value" for="typing-keyboard-gap">25 mm</output>
+        </label>
+      </section>
+
       <section class="voice-settings-card" aria-labelledby="voice-settings-title">
         <div class="voice-settings-heading">
           <div><p class="eyebrow">Speech</p><h2 id="voice-settings-title">🔊 Voice quality</h2><p>Spelling B uses the text-to-speech voice selected by Chrome or your operating system.</p></div>

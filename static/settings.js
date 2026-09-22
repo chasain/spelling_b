@@ -9,6 +9,11 @@
   const lessons = ['copy', 'letters', 'guided', 'spell'];
   const status = document.querySelector('#save-status');
   const testVoice = document.querySelector('#test-settings-voice');
+  const typingShowColors = document.querySelector('#typing-show-colors');
+  const typingShowHands = document.querySelector('#typing-show-hands');
+  const typingSplitKeyboard = document.querySelector('#typing-split-keyboard');
+  const typingKeyboardGap = document.querySelector('#typing-keyboard-gap');
+  const typingKeyboardGapValue = document.querySelector('#typing-keyboard-gap-value');
   const classroomName = document.querySelector('#classroom-name');
   const exportClassroom = document.querySelector('#export-classroom');
   const importClassroom = document.querySelector('#import-classroom');
@@ -45,10 +50,12 @@
   const cancelImport = document.querySelector('#cancel-classroom-import');
   const cancelImportX = document.querySelector('#cancel-classroom-import-x');
   const runtime = window.SpellingRuntime;
+  const typingDisplayKey = 'spelling-b:typing-display:v1';
+  const typingDisplayDefaults = { showColors: true, showHands: true, splitKeyboard: true, gapMM: 25 };
 
   const packageFormat = 'spelling-b-classroom';
   const packageVersion = 1;
-  const appVersion = '1.3.0';
+  const appVersion = '1.4.0';
   const backupKey = 'spelling-b:classroom-import-backup:v1';
   const maxPackageBytes = 1024 * 1024;
   const maxSpreadsheetBytes = 5 * 1024 * 1024;
@@ -177,6 +184,29 @@
     }
     lists.replaceChildren();
     config.lists.forEach(addList);
+  }
+
+  function typingDisplaySettings() {
+    const saved = runtime.read(typingDisplayKey, {});
+    return { ...typingDisplayDefaults, ...(saved && typeof saved === 'object' ? saved : {}) };
+  }
+
+  function renderTypingDisplay(settings = typingDisplaySettings()) {
+    typingShowColors.checked = settings.showColors !== false;
+    typingShowHands.checked = settings.showHands !== false;
+    typingSplitKeyboard.checked = settings.splitKeyboard !== false;
+    typingKeyboardGap.value = String(Math.min(25, Math.max(0, Number(settings.gapMM) || 0)));
+    typingKeyboardGap.disabled = !typingSplitKeyboard.checked;
+    typingKeyboardGapValue.textContent = `${typingKeyboardGap.value} mm`;
+  }
+
+  function collectTypingDisplay() {
+    return {
+      showColors: typingShowColors.checked,
+      showHands: typingShowHands.checked,
+      splitKeyboard: typingSplitKeyboard.checked,
+      gapMM: integerBetween(typingKeyboardGap.value, 0, 25, 'Keyboard gap'),
+    };
   }
 
   function collectConfig() {
@@ -499,6 +529,7 @@
       await runtime.ready;
       const config = cleanAndValidate(await loadConfig());
       renderConfig(config);
+      renderTypingDisplay();
       exportClassroom.disabled = false;
       importClassroom.disabled = false;
       dropZone.disabled = false;
@@ -512,6 +543,12 @@
   addButton.addEventListener('click', () => addList());
   testVoice.addEventListener('click', () => {
     runtime.speak('Welcome to Spelling B. This is your current English voice.');
+  });
+  typingKeyboardGap.addEventListener('input', () => {
+    typingKeyboardGapValue.textContent = `${typingKeyboardGap.value} mm`;
+  });
+  typingSplitKeyboard.addEventListener('change', () => {
+    typingKeyboardGap.disabled = !typingSplitKeyboard.checked;
   });
   exportClassroom.addEventListener('click', exportPackage);
   importClassroom.addEventListener('click', () => classroomFile.click());
@@ -554,7 +591,10 @@
     status.textContent = 'Saving…';
     status.className = 'save-status';
     try {
-      await saveConfig(collectConfig());
+      await Promise.all([
+        saveConfig(collectConfig()),
+        runtime.persist(typingDisplayKey, collectTypingDisplay()),
+      ]);
       status.textContent = 'Saved!';
       status.className = 'save-status success';
       setTimeout(() => { window.location.href = runtime.homeURL; }, 550);

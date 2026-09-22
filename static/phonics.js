@@ -24,7 +24,6 @@ void (async () => {
   const tutorContent = document.querySelector('#phonics-content');
   const practicePanel = document.querySelector('#phonics-practice');
   const wordCount = document.querySelector('#phonics-word-count');
-  const wordBank = document.querySelector('#phonics-word-bank');
   const startButton = document.querySelector('#phonics-start');
   const activity = document.querySelector('#phonics-activity');
   const stageLabel = document.querySelector('#phonics-stage');
@@ -45,6 +44,7 @@ void (async () => {
     { id: 'guided', name: 'Guided', icon: '🌈', instruction: 'Listen and spell. The colors will help.' },
     { id: 'spell', name: 'Spell', icon: '🎯', instruction: 'Listen and spell without hints.' },
   ];
+  const masteryRounds = 3;
   const allGroups = course.lessons.flatMap((lesson, lessonIndex) => {
     return lesson.practiceGroups.map((group, groupIndex) => ({ lessonIndex, groupIndex, id: group.id }));
   });
@@ -68,6 +68,9 @@ void (async () => {
   if (state.group >= course.lessons[state.current].practiceGroups.length) state.group = 0;
   let reviewMode = false;
   let transitionTimer = 0;
+  let metricSession = null;
+  let attemptStartedAt = 0;
+  let corrections = 0;
 
   function save() {
     runtime.write(storageKey, {
@@ -98,6 +101,7 @@ void (async () => {
   function moveToFlatIndex(index) {
     const target = allGroups[index];
     if (!target) return;
+    closeMetricSession(false);
     state.current = target.lessonIndex;
     state.group = target.groupIndex;
     state.view = 'student';
@@ -109,8 +113,9 @@ void (async () => {
     const signature = JSON.stringify(group.words);
     const existing = state.practice[group.id];
     if (!existing || existing.signature !== signature) {
-      state.practice[group.id] = { signature, started: false, complete: false, stage: 0, word: 0 };
+      state.practice[group.id] = { signature, started: false, complete: false, stage: 0, round: 0, word: 0 };
     }
+    if (!Number.isInteger(state.practice[group.id].round)) state.practice[group.id].round = 0;
     return state.practice[group.id];
   }
 
@@ -124,6 +129,41 @@ void (async () => {
 
   function normalized(value) {
     return value.trim().toLocaleLowerCase();
+  }
+
+  function ensureMetricSession() {
+    if (!metricSession) {
+      metricSession = runtime.createWordMetricSession({
+        activity: 'phonics',
+        listTitle: `Phonics · Lesson ${currentGroup().id}`,
+        contextLabel: currentGroup().title,
+        stages: stages.map((stage) => stage.id),
+      });
+    }
+    return metricSession;
+  }
+
+  function recordMetricAttempt(entered, correct) {
+    const session = ensureMetricSession();
+    const seconds = attemptStartedAt ? (performance.now() - attemptStartedAt) / 1000 : 0;
+    runtime.recordWordMetricAttempt(session, {
+      word: currentWord(),
+      stage: currentStage().id,
+      entered,
+      correct,
+      seconds,
+      corrections,
+    });
+    attemptStartedAt = performance.now();
+    corrections = 0;
+  }
+
+  function closeMetricSession(completed = false) {
+    if (!metricSession || metricSession.endedAt) return;
+    metricSession.completed = completed;
+    metricSession.endedAt = new Date().toISOString();
+    runtime.saveMetricSession(metricSession);
+    metricSession = null;
   }
 
   function appendBlock(block) {
@@ -195,17 +235,10 @@ void (async () => {
     groupSelect.closest('label').hidden = lesson.practiceGroups.length < 2;
   }
 
-  function renderWordBank() {
+  function renderStartButton() {
     const words = currentWords();
     const session = practiceState();
     wordCount.textContent = `${currentGroup().title} · ${words.length} practice ${words.length === 1 ? 'word' : 'words'}`;
-    wordBank.replaceChildren(...words.map((word, index) => {
-      const chip = document.createElement('span');
-      chip.textContent = word;
-      if (session.complete || session.stage > 0 || (session.started && index < session.word)) chip.classList.add('done');
-      if (session.started && !session.complete && index === session.word) chip.classList.add('current');
-      return chip;
-    }));
     startButton.textContent = session.started && !session.complete ? 'Restart this practice set' : session.complete ? 'Practice again' : 'Start practice';
   }
 
@@ -231,40 +264,45 @@ void (async () => {
 
     const words = currentWords();
     const stage = currentStage();
-    const overall = session.stage * words.length + session.word;
-    const total = stages.length * words.length;
+    const overall = (session.stage * masteryRounds + session.round) * words.length + session.word;
+    const total = stages.length * masteryRounds * words.length;
     stageLabel.textContent = `${stage.icon} ${stage.name} · Stage ${session.stage + 1} of ${stages.length}`;
-    questionProgress.textContent = `Word ${session.word + 1} of ${words.length}`;
+    questionProgress.textContent = `Round ${session.round + 1} of ${masteryRounds} · Word ${session.word + 1} of ${words.length}`;
     activityFill.style.width = `${Math.round(overall / total * 100)}%`;
     instruction.textContent = stage.instruction;
     shownWord.hidden = stage.id !== 'copy';
     shownWord.textContent = stage.id === 'copy' ? currentWord() : '';
-    speakButton.hidden = stage.id === 'copy';
+    speakButton.hidden = false;
+    speakButton.classList.toggle('copy-speaker', stage.id === 'copy');
     form.hidden = false;
     typed.hidden = false;
     answer.disabled = false;
-    submit.disabled = false;
+    submit.disabled = true;
     review.hidden = true;
     reviewMode = false;
     answer.value = '';
+    corrections = 0;
+    attemptStartedAt = performance.now();
     feedback.textContent = '';
     feedback.className = 'feedback';
     renderTyped();
-    renderWordBank();
-    if (stage.id !== 'copy') runtime.speak(currentWord());
+    renderStartButton();
+    if (stage.id !== 'copy') runtime.speak(currentWord(), { button: speakButton });
     answer.focus();
   }
 
   function beginPractice() {
     clearTimeout(transitionTimer);
+    closeMetricSession(false);
     const session = practiceState();
     session.started = true;
     session.complete = false;
     session.stage = 0;
+    session.round = 0;
     session.word = 0;
     state.completed.delete(currentGroup().id);
     save();
-    renderWordBank();
+    renderStartButton();
     renderActivity();
     updateCourseProgress();
   }
@@ -275,15 +313,20 @@ void (async () => {
     session.word++;
     if (session.word >= words.length) {
       session.word = 0;
+      session.round++;
+    }
+    if (session.round >= masteryRounds) {
+      session.round = 0;
       session.stage++;
     }
     if (session.stage >= stages.length) {
       session.complete = true;
       state.completed.add(currentGroup().id);
+      closeMetricSession(true);
     }
     save();
     renderActivity();
-    renderWordBank();
+    renderStartButton();
     updateCourseProgress();
     const isComplete = state.completed.has(currentGroup().id);
     complete.textContent = isComplete ? '★ Completed' : '☆ Mark complete';
@@ -327,7 +370,7 @@ void (async () => {
     tutorTab.setAttribute('aria-selected', String(state.view === 'tutor'));
     practicePanel.hidden = state.view !== 'student';
     tutorContent.hidden = state.view !== 'tutor';
-    renderWordBank();
+    renderStartButton();
     renderActivity();
     if (state.view === 'tutor') renderTutor(lesson.guide);
     updateCourseProgress();
@@ -343,12 +386,14 @@ void (async () => {
   });
 
   select.addEventListener('change', () => {
+    closeMetricSession(false);
     state.current = Number(select.value);
     state.group = 0;
     state.view = 'student';
     render();
   });
   groupSelect.addEventListener('change', () => {
+    closeMetricSession(false);
     state.group = Number(groupSelect.value);
     state.view = 'student';
     render();
@@ -358,7 +403,10 @@ void (async () => {
   complete.addEventListener('click', () => {
     const groupID = currentGroup().id;
     if (state.completed.has(groupID)) state.completed.delete(groupID);
-    else state.completed.add(groupID);
+    else {
+      state.completed.add(groupID);
+      closeMetricSession(true);
+    }
     render();
   });
   tutorTab.addEventListener('click', () => {
@@ -370,10 +418,14 @@ void (async () => {
     render();
   });
   startButton.addEventListener('click', beginPractice);
-  speakButton.addEventListener('click', () => runtime.speak(currentWord()));
+  speakButton.addEventListener('click', () => runtime.speak(currentWord(), { button: speakButton }));
   answer.addEventListener('input', () => {
     renderTyped();
+    submit.disabled = reviewMode || normalized(answer.value) === '';
     if (reviewMode) review.disabled = normalized(answer.value) !== normalized(currentWord());
+  });
+  answer.addEventListener('keydown', (event) => {
+    if (event.key === 'Backspace' && answer.value) corrections++;
   });
   review.addEventListener('click', () => {
     if (review.disabled) return;
@@ -382,8 +434,9 @@ void (async () => {
   });
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (reviewMode) return;
+    if (reviewMode || normalized(answer.value) === '') return;
     const correct = normalized(answer.value) === normalized(currentWord());
+    recordMetricAttempt(answer.value.trim(), correct);
     playTone(correct);
     if (correct) {
       answer.disabled = true;
@@ -413,5 +466,9 @@ void (async () => {
     if (event.key === 'ArrowLeft') previous.click();
     if (event.key === 'ArrowRight') next.click();
   });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && metricSession) runtime.saveMetricSession(metricSession);
+  });
+  window.addEventListener('pagehide', () => closeMetricSession(false));
   render();
 })();

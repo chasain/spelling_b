@@ -17,7 +17,7 @@ Spelling B helps children practice spelling at their own pace.
 - Take a no-feedback spelling test across all lists.
 - Master 1,000 high-frequency words in 100 focused levels of 10 words.
 - Work through 120 Open Source Phonics lessons using 160 focused, interactive example-word practice sets and tutor guides.
-- Build touch-typing skills through gated daily missions, seven incremental key levels, and repeatable ranked tests.
+- Build touch-typing skills through gated daily missions, balanced key practice, seven incremental key levels, configurable keyboard guidance, and repeatable ranked tests.
 - Review local session metrics including accuracy, response time, CPM copy speed, and difficult words.
 - Work offline after installation when using a locally installed text-to-speech voice.
 
@@ -33,14 +33,15 @@ All settings and learning data stay in the local Chrome profile. Spelling B has 
 
 Provide configurable, offline word-list, high-frequency word, phonics, typing, and spelling-test practice for children.
 
-## Version 1.3.0 release notes
+## Version 1.4.0 release notes
 
-- Added 120 Open Source Phonics lessons with 160 interactive practice sets.
-- Added 100 high-frequency-word levels covering 1,000 words.
-- Added daily touch-typing missions, progressive key unlocks, keyboard guidance, and ranked tests.
-- Added configurable beginner and advanced lesson plans, per-session metrics, CPM reporting, and difficult-word tracking.
-- Added offline classroom setup export/import plus CSV, TSV, and XLSX word-list imports.
-- Improved spelling corrections, fast keyboard input, navigation focus handling, settings organization, and kid-friendly visuals.
+- Expanded phonics and high-frequency practice into multi-day mastery activities and removed visible answer cues.
+- Added speech-loading feedback, optional pronunciation during Copy, and protection against blank submissions.
+- Expanded Progress with current activity coverage, corrected Copy-only CPM calculations, and visual graphs.
+- Expanded typing with balanced key cycles, three-sentence tests, consistent color-coded hand guides, tactile F/J markers, and stronger staged guidance.
+- Added Settings controls for typing colors, hand illustrations, split layout, and a 0–25 mm keyboard gap.
+- Improved cursor placement, keyboard focus recovery, spelling correction confirmation, and several user-testing issues.
+- Updated the default lesson plan to Beginner 2/3/1/0 and Advanced 1/0/2/2 for Copy/Letter Builder/Guided/Spell.
 
 ## Store fields
 
@@ -51,6 +52,6 @@ Provide configurable, offline word-list, high-frequency word, phonics, typing, a
 
 ## Submission notes
 
-Version 1.3.0 is ready for publication. Upload `dist/spelling-b-chrome-extension-1.3.0.zip`; `manifest.json` is at the ZIP root. The extension is fully offline and contains no remote code, analytics, advertising, accounts, host permissions, or network requests. Classroom and spreadsheet imports use the Settings file picker or drag-and-drop, require no additional permission, and are processed locally. The manifest intentionally omits ChromeOS-only `file_handlers` so it loads without cross-platform warnings.
+Version 1.4.0 is ready for publication. Upload `dist/spelling-b-chrome-extension-1.4.0.zip`; `manifest.json` is at the ZIP root. The extension is fully offline and contains no remote code, analytics, advertising, accounts, host permissions, or network requests. Classroom and spreadsheet imports use the Settings file picker or drag-and-drop, require no additional permission, and are processed locally. The manifest intentionally omits ChromeOS-only `file_handlers` so it loads without cross-platform warnings.
 
 The `storage` permission saves settings and learning progress locally. The `tts` permission speaks practice words using a voice provided by Chrome or the operating system. The bundled phonics material is attributed under CC BY-NC-SA 4.0, and the bundled high-frequency source data is public domain; license files are included in the package.

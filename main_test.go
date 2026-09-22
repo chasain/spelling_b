@@ -344,7 +344,7 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.VersionName != "1.3.0" {
+	if manifest.VersionName != "1.4.0" {
 		t.Fatalf("version_name = %q", manifest.VersionName)
 	}
 	if len(manifest.Extra) != 0 {

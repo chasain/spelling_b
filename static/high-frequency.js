@@ -17,7 +17,6 @@ void (async () => {
   const completedLabel = document.querySelector('#frequency-completed');
   const progressTrack = document.querySelector('.frequency-hero .phonics-progress-track');
   const progressFill = document.querySelector('#frequency-progress-fill');
-  const wordBank = document.querySelector('#frequency-word-bank');
   const startButton = document.querySelector('#frequency-start');
   const activity = document.querySelector('#frequency-activity');
   const stageLabel = document.querySelector('#frequency-stage');
@@ -38,6 +37,7 @@ void (async () => {
     { id: 'guided', name: 'Guided', icon: '🌈', instruction: 'Listen and spell. The colors will help.' },
     { id: 'spell', name: 'Spell', icon: '🎯', instruction: 'Listen and spell without hints.' },
   ];
+  const masteryRounds = 3;
   const state = {
     current: Math.min(course.levels.length - 1, Math.max(0, Number(saved.current) || 0)),
     completed: new Set(Array.isArray(saved.completed) ? saved.completed.map(Number) : []),
@@ -45,6 +45,9 @@ void (async () => {
   };
   let reviewMode = false;
   let transitionTimer = 0;
+  let metricSession = null;
+  let attemptStartedAt = 0;
+  let corrections = 0;
 
   function currentLevel() {
     return course.levels[state.current];
@@ -60,8 +63,9 @@ void (async () => {
     const signature = JSON.stringify(level.words);
     const existing = state.practice[key];
     if (!existing || existing.signature !== signature) {
-      state.practice[key] = { signature, started: false, complete: false, stage: 0, word: 0 };
+      state.practice[key] = { signature, started: false, complete: false, stage: 0, round: 0, word: 0 };
     }
+    if (!Number.isInteger(state.practice[key].round)) state.practice[key].round = 0;
     return state.practice[key];
   }
 
@@ -75,6 +79,42 @@ void (async () => {
 
   function normalized(value) {
     return value.trim().toLocaleLowerCase();
+  }
+
+  function ensureMetricSession() {
+    if (!metricSession) {
+      const level = currentLevel();
+      metricSession = runtime.createWordMetricSession({
+        activity: 'high-frequency',
+        listTitle: `High Frequency · Level ${level.number}`,
+        contextLabel: `Words ${level.startRank}–${level.endRank}`,
+        stages: stages.map((stage) => stage.id),
+      });
+    }
+    return metricSession;
+  }
+
+  function recordMetricAttempt(entered, correct) {
+    const session = ensureMetricSession();
+    const seconds = attemptStartedAt ? (performance.now() - attemptStartedAt) / 1000 : 0;
+    runtime.recordWordMetricAttempt(session, {
+      word: currentWord(),
+      stage: currentStage().id,
+      entered,
+      correct,
+      seconds,
+      corrections,
+    });
+    attemptStartedAt = performance.now();
+    corrections = 0;
+  }
+
+  function closeMetricSession(completed = false) {
+    if (!metricSession || metricSession.endedAt) return;
+    metricSession.completed = completed;
+    metricSession.endedAt = new Date().toISOString();
+    runtime.saveMetricSession(metricSession);
+    metricSession = null;
   }
 
   function save() {
@@ -126,15 +166,8 @@ void (async () => {
     });
   }
 
-  function renderWordBank() {
+  function renderStartButton() {
     const session = practiceState();
-    wordBank.replaceChildren(...currentWords().map((word, index) => {
-      const chip = document.createElement('span');
-      chip.textContent = word;
-      if (session.complete || session.stage > 0 || (session.started && index < session.word)) chip.classList.add('done');
-      if (session.started && !session.complete && index === session.word) chip.classList.add('current');
-      return chip;
-    }));
     startButton.textContent = session.started && !session.complete
       ? 'Restart this level'
       : session.complete ? 'Practice again' : 'Start level';
@@ -164,36 +197,41 @@ void (async () => {
 
     const words = currentWords();
     const stage = currentStage();
-    const overall = session.stage * words.length + session.word;
-    const total = stages.length * words.length;
+    const overall = (session.stage * masteryRounds + session.round) * words.length + session.word;
+    const total = stages.length * masteryRounds * words.length;
     stageLabel.textContent = `${stage.icon} ${stage.name} · Stage ${session.stage + 1} of ${stages.length}`;
-    questionProgress.textContent = `Word ${session.word + 1} of ${words.length}`;
+    questionProgress.textContent = `Round ${session.round + 1} of ${masteryRounds} · Word ${session.word + 1} of ${words.length}`;
     activityFill.style.width = `${Math.round(overall / total * 100)}%`;
     instruction.textContent = stage.instruction;
     shownWord.hidden = stage.id !== 'copy';
     shownWord.textContent = stage.id === 'copy' ? currentWord() : '';
-    speakButton.hidden = stage.id === 'copy';
+    speakButton.hidden = false;
+    speakButton.classList.toggle('copy-speaker', stage.id === 'copy');
     form.hidden = false;
     typed.hidden = false;
     answer.disabled = false;
-    submit.disabled = false;
+    submit.disabled = true;
     review.hidden = true;
     reviewMode = false;
     answer.value = '';
+    corrections = 0;
+    attemptStartedAt = performance.now();
     feedback.textContent = '';
     feedback.className = 'feedback';
     renderTyped();
-    renderWordBank();
-    if (stage.id !== 'copy') runtime.speak(currentWord());
+    renderStartButton();
+    if (stage.id !== 'copy') runtime.speak(currentWord(), { button: speakButton });
     answer.focus({ preventScroll: true });
   }
 
   function beginPractice() {
     clearTimeout(transitionTimer);
+    closeMetricSession(false);
     const session = practiceState();
     session.started = true;
     session.complete = false;
     session.stage = 0;
+    session.round = 0;
     session.word = 0;
     state.completed.delete(currentLevel().number);
     save();
@@ -205,11 +243,16 @@ void (async () => {
     session.word++;
     if (session.word >= currentWords().length) {
       session.word = 0;
+      session.round++;
+    }
+    if (session.round >= masteryRounds) {
+      session.round = 0;
       session.stage++;
     }
     if (session.stage >= stages.length) {
       session.complete = true;
       state.completed.add(currentLevel().number);
+      closeMetricSession(true);
     }
     save();
     render();
@@ -241,7 +284,7 @@ void (async () => {
     levelStatus.classList.toggle('done', isComplete);
     previous.disabled = state.current === 0;
     next.disabled = state.current === course.levels.length - 1;
-    renderWordBank();
+    renderStartButton();
     renderActivity();
     updateCourseProgress();
     save();
@@ -249,22 +292,29 @@ void (async () => {
   }
 
   select.addEventListener('change', () => {
+    closeMetricSession(false);
     state.current = Number(select.value);
     render();
   });
   previous.addEventListener('click', () => {
+    closeMetricSession(false);
     if (state.current > 0) state.current--;
     render();
   });
   next.addEventListener('click', () => {
+    closeMetricSession(false);
     if (state.current < course.levels.length - 1) state.current++;
     render();
   });
   startButton.addEventListener('click', beginPractice);
-  speakButton.addEventListener('click', () => runtime.speak(currentWord()));
+  speakButton.addEventListener('click', () => runtime.speak(currentWord(), { button: speakButton }));
   answer.addEventListener('input', () => {
     renderTyped();
+    submit.disabled = reviewMode || normalized(answer.value) === '';
     if (reviewMode) review.disabled = normalized(answer.value) !== normalized(currentWord());
+  });
+  answer.addEventListener('keydown', (event) => {
+    if (event.key === 'Backspace' && answer.value) corrections++;
   });
   review.addEventListener('click', () => {
     if (review.disabled) return;
@@ -273,8 +323,9 @@ void (async () => {
   });
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (reviewMode) return;
+    if (reviewMode || normalized(answer.value) === '') return;
     const correct = normalized(answer.value) === normalized(currentWord());
+    recordMetricAttempt(answer.value.trim(), correct);
     playTone(correct);
     if (correct) {
       answer.disabled = true;
@@ -308,6 +359,10 @@ void (async () => {
     if (activity.hidden || event.target.closest('a, button, input, textarea, select, summary')) return;
     requestAnimationFrame(() => answer.focus({ preventScroll: true }));
   });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && metricSession) runtime.saveMetricSession(metricSession);
+  });
+  window.addEventListener('pagehide', () => closeMetricSession(false));
   render();
 })().catch((error) => {
   console.error(error);

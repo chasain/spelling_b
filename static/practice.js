@@ -11,6 +11,7 @@ void (async () => {
   const shownWord = document.querySelector('#shown-word');
   const reviewButton = document.querySelector('#review-word');
   const speakButton = document.querySelector('#speak');
+  const copySpeakButton = document.querySelector('#copy-speak');
   const letterBuilder = document.querySelector('#letter-builder');
   const letterRound = document.querySelector('#letter-round');
   const builtWord = document.querySelector('#built-word');
@@ -101,6 +102,7 @@ void (async () => {
       lastActiveAt: new Date().toISOString(),
       endedAt: null,
       completed: false,
+      activity: 'word-list',
       listTitle: list.title,
       day: state.day,
       mode,
@@ -125,6 +127,7 @@ void (async () => {
   }
 
   function metricsHistory() {
+    if (runtime.metricSessions) return runtime.metricSessions();
     try {
       const history = runtime.read(metricsStorageKey);
       return Array.isArray(history) ? history : [];
@@ -136,12 +139,16 @@ void (async () => {
   function persistSession() {
     if (!session) return;
     session.lastActiveAt = new Date().toISOString();
+    if (runtime.saveMetricSession) {
+      runtime.saveMetricSession(session);
+      return;
+    }
     try {
       const history = metricsHistory();
       const existing = history.findIndex((item) => item.id === session.id);
       if (existing >= 0) history[existing] = session;
       else history.unshift(session);
-      runtime.write(metricsStorageKey, history.slice(0, 100));
+      runtime.write(metricsStorageKey, history.slice(0, 250));
     } catch (_) {}
   }
 
@@ -308,6 +315,7 @@ void (async () => {
     feedback.className = 'feedback';
     shownWord.hidden = stage !== 'copy';
     shownWord.textContent = stage === 'copy' ? currentWord : '';
+    copySpeakButton.hidden = stage !== 'copy';
     speakButton.hidden = stage === 'copy';
     letterBuilder.hidden = stage !== 'letters';
     form.hidden = stage === 'letters';
@@ -316,29 +324,36 @@ void (async () => {
 
     if (stage === 'letters') {
       startLetterWord();
-      speak();
+      speak(speakButton);
       return;
     }
     answer.value = '';
     answer.disabled = false;
-    submit.disabled = false;
+    submit.disabled = true;
     answerField.classList.toggle('guided', stage === 'guided');
     renderTyped();
-    if (stage !== 'copy') speak();
+    if (stage !== 'copy') speak(speakButton);
     answer.focus();
   }
 
   function renderTyped() {
     typedDisplay.replaceChildren();
     const typed = answer.value;
+    const caretOffset = typeof answer.selectionStart === 'number' ? answer.selectionStart : typed.length;
+    const caretIndex = Array.from(typed.slice(0, caretOffset)).length;
+    const caret = document.createElement('span');
+    caret.className = 'typed-caret';
+    caret.setAttribute('aria-hidden', 'true');
     if (!typed) {
       const placeholder = document.createElement('span');
       placeholder.className = 'typed-placeholder';
       placeholder.textContent = currentStage() === 'copy' ? 'Copy the word here' : 'Type what you hear';
-      typedDisplay.append(placeholder);
+      typedDisplay.append(caret, placeholder);
       return;
     }
-    Array.from(typed).forEach((character, index) => {
+    const characters = Array.from(typed);
+    characters.forEach((character, index) => {
+      if (index === caretIndex) typedDisplay.append(caret);
       const span = document.createElement('span');
       span.textContent = character;
       if (currentStage() === 'guided') {
@@ -347,6 +362,7 @@ void (async () => {
       }
       typedDisplay.append(span);
     });
+    if (caretIndex >= characters.length) typedDisplay.append(caret);
   }
 
   function startLetterWord() {
@@ -459,9 +475,9 @@ void (async () => {
     nextTimer = setTimeout(chooseWord, 900);
   }
 
-  function speak() {
-    if (!currentWord || currentStage() === 'copy' || state.completed) return;
-    if (!runtime.speak(currentWord)) {
+  function speak(button = speakButton) {
+    if (!currentWord || state.completed) return;
+    if (!runtime.speak(currentWord, { button })) {
       feedback.textContent = 'Speech is not supported by this browser.';
       feedback.className = 'feedback incorrect';
     }
@@ -499,6 +515,7 @@ void (async () => {
       levelLabel.textContent = `${finished} complete!`;
       instructions.textContent = `Amazing job! ${stageDetails[currentStage()].name} is next.`;
       shownWord.hidden = true;
+      copySpeakButton.hidden = true;
       speakButton.hidden = true;
       letterBuilder.hidden = true;
       form.hidden = true;
@@ -518,6 +535,7 @@ void (async () => {
     levelLabel.textContent = `Day ${state.day} complete!`;
     instructions.textContent = 'You finished every word. You are a spelling superstar!';
     shownWord.hidden = true;
+    copySpeakButton.hidden = true;
     speakButton.hidden = true;
     letterBuilder.hidden = true;
     form.hidden = true;
@@ -543,6 +561,7 @@ void (async () => {
 
   answer.addEventListener('input', () => {
     renderTyped();
+    submit.disabled = reviewMode || answer.value.trim() === '';
     if (reviewMode) {
       reviewButton.disabled = answer.value.trim().localeCompare(currentWord, undefined, { sensitivity: 'accent' }) !== 0;
     }
@@ -550,8 +569,14 @@ void (async () => {
   answer.addEventListener('keydown', (event) => {
     if (event.key === 'Backspace' && answer.value && session) session.corrections++;
   });
+  answer.addEventListener('pointerup', () => requestAnimationFrame(renderTyped));
+  answer.addEventListener('select', renderTyped);
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === answer) renderTyped();
+  });
   answerField.addEventListener('click', () => answer.focus());
-  speakButton.addEventListener('click', speak);
+  speakButton.addEventListener('click', () => speak(speakButton));
+  copySpeakButton.addEventListener('click', () => speak(copySpeakButton));
   select.addEventListener('change', loadList);
   newDayButton.addEventListener('click', () => {
     state = freshState(state.day + 1);

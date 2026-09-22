@@ -12,6 +12,7 @@ void (async () => {
   const speakButton = document.querySelector('#test-speak');
   const form = document.querySelector('#test-form');
   const answer = document.querySelector('#test-answer');
+  const submit = form.querySelector('button[type="submit"]');
   const resultsPanel = document.querySelector('#test-results');
   const overallScore = document.querySelector('#overall-score');
   const listResults = document.querySelector('#list-results');
@@ -45,10 +46,11 @@ void (async () => {
   }
 
   function speak() {
-    if (questions[currentIndex]) runtime.speak(questions[currentIndex].word);
+    if (questions[currentIndex]) runtime.speak(questions[currentIndex].word, { button: speakButton });
   }
 
   function metricsHistory() {
+    if (runtime.metricSessions) return runtime.metricSessions();
     try {
       const stored = runtime.read(metricsStorageKey);
       return Array.isArray(stored) ? stored : [];
@@ -60,12 +62,16 @@ void (async () => {
   function persistSession() {
     if (!session) return;
     session.lastActiveAt = new Date().toISOString();
+    if (runtime.saveMetricSession) {
+      runtime.saveMetricSession(session);
+      return;
+    }
     try {
       const history = metricsHistory();
       const existing = history.findIndex((item) => item.id === session.id);
       if (existing >= 0) history[existing] = session;
       else history.unshift(session);
-      runtime.write(metricsStorageKey, history.slice(0, 100));
+      runtime.write(metricsStorageKey, history.slice(0, 250));
     } catch (_) {}
   }
 
@@ -86,6 +92,7 @@ void (async () => {
       lastActiveAt: new Date().toISOString(),
       endedAt: null,
       completed: false,
+      activity: 'spelling-test',
       listTitle: 'All lists test',
       day: null,
       mode: 'test',
@@ -138,6 +145,7 @@ void (async () => {
     progressFill.style.width = `${percentage}%`;
     progressTrack.setAttribute('aria-valuenow', percentage);
     answer.value = '';
+    submit.disabled = true;
     corrections = 0;
     questionStartedAt = performance.now();
     answer.focus();
@@ -212,6 +220,9 @@ void (async () => {
   speakButton.addEventListener('click', speak);
   answer.addEventListener('keydown', (event) => {
     if (event.key === 'Backspace' && answer.value) corrections++;
+  });
+  answer.addEventListener('input', () => {
+    submit.disabled = answer.value.trim() === '';
   });
   form.addEventListener('submit', (event) => {
     event.preventDefault();

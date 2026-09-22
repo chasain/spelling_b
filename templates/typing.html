@@ -36,10 +36,23 @@
       <div id="typing-prompt" class="typing-prompt" aria-live="polite"></div>
       <div id="typing-guidance" class="typing-guidance">
         <div id="keyboard" class="keyboard" aria-label="Keyboard and hand-position guide"></div>
-        <div class="hand-guide" aria-label="Hand positions">
-          <div><span class="hand-icon" aria-hidden="true">✋</span><strong>Left hand</strong><small>A S D F</small></div>
-          <div><strong>Home keys</strong><small>Keep fingers curved. Thumbs rest on space.</small></div>
-          <div><span class="hand-icon right" aria-hidden="true">✋</span><strong>Right hand</strong><small>J K L ;</small></div>
+        <div class="hand-guide" aria-label="Finger and keyboard color guide">
+          <div id="active-finger-guide" class="active-finger-guide">
+            <img id="typing-hand-image" alt="" hidden>
+            <div id="typing-thumb-icon" class="typing-thumb-icon" hidden aria-hidden="true">SPACE</div>
+            <div>
+              <strong id="typing-finger-label">Finger zones</strong>
+              <small id="typing-finger-keys">Each key matches the finger that presses it.</small>
+            </div>
+          </div>
+          <div class="finger-zone-legend" aria-label="Finger zone colors">
+            <span class="pinky"><i></i>Pinky</span>
+            <span class="ring"><i></i>Ring</span>
+            <span class="middle"><i></i>Middle</span>
+            <span class="index left-index-zone"><i></i>Left index</span>
+            <span class="index right-index-zone"><i></i>Right index</span>
+            <span class="thumb"><i></i>Thumbs</span>
+          </div>
         </div>
       </div>
 

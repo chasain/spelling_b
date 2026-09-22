@@ -28,7 +28,10 @@
 
       <div id="level-progress" class="level-progress" aria-label="Stage progress"></div>
 
-      <div id="shown-word" class="shown-word" aria-live="polite"></div>
+      <div class="copy-word-row">
+        <div id="shown-word" class="shown-word" aria-live="polite"></div>
+        <button id="copy-speak" class="speaker copy-speaker" type="button" aria-label="Hear this word" hidden><span aria-hidden="true">🔊</span></button>
+      </div>
       <button id="review-word" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
       <button id="speak" class="speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
 

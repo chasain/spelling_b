@@ -30,7 +30,7 @@ Settings controls:
 - separate repetition counts for the same lessons in Advanced mode;
 - `0` repetitions disables an individual lesson.
 
-A mode that will run must keep at least one lesson enabled. Defaults preserve the original plan: two Beginner days with Copy, Letter Builder, and Guided at three repetitions, followed by Advanced days with Guided and Spell at three repetitions.
+A mode that will run must keep at least one lesson enabled. The default Beginner plan is Copy 2, Letter Builder 3, Guided 1, and Spell 0. The default Advanced plan is Copy 1, Letter Builder 0, Guided 2, and Spell 2.
 
 Letter Builder adds three choices per repetition, up to 24 choices, always in rows of three. Choices are unique and the upcoming correct letter is excluded from the current decoys to prevent clicks during the transition from becoming accidental errors. Mouse/touch choices retain a short success animation, while correct keyboard input advances immediately so fast typing is not dropped.
 
@@ -63,7 +63,7 @@ The most recent 100 sessions are retained. Metrics never leave the device.
 
 ## High Frequency Words
 
-The **High Frequency** page divides 1,000 unique common English words into 100 levels of 10 words. Every level uses Copy, Guided, and Spell stages, including the required correction-and-confirmation step after a missed Spell answer. Level completion and overall progress stay in local browser storage.
+The **High Frequency** page divides 1,000 unique common English words into 100 levels of 10 words. Its multi-day Copy, Guided, and Spell practice emphasizes mastery rather than one-pass completion, including the required correction-and-confirmation step after a missed Spell answer. Level completion and overall progress stay in local browser storage.
 
 The word data is a classroom-friendly, de-duplicated adaptation of the public-domain Moby Words II general-text and Internet frequency lists from Project Gutenberg. Source data, the reproducible generator, and attribution are bundled in the repository; the finished extension needs no network access.
 
@@ -73,7 +73,7 @@ The **Phonics** page contains all 120 sequential Open Source Phonics lessons. St
 
 ## Typing
 
-The **Typing** page is a seven-level daily trail with tactile F/J markers and page-wide focus recovery for accidental trackpad clicks. It begins with Home Row and adds groups of two to four keys from the middle of the keyboard outward until the full letter keyboard is available. Each daily mission has three short training rounds followed by a sentence test; reaching 60 CPM unlocks the next level. Tests retain the learner's best CPM score and award Growing Typist, Keyboard Explorer, Gold Star Typist, or Lightning Bee rankings. Daily participation and streaks stay on the device.
+The **Typing** page is a seven-level daily trail with tactile F/J markers and page-wide focus recovery for accidental trackpad clicks. It begins with Home Row and adds groups of two to four keys from the middle of the keyboard outward until the full letter keyboard is available. Balanced shuffled cycles ensure every new key appears during the first round. Color-coded finger zones, consistent illustrated hand guides, a split keyboard, and a 0–25 mm split-gap control can each be configured in Settings; the original unified, uncolored keyboard remains available. Each daily mission has three short training rounds followed by a three-sentence test; reaching 60 CPM unlocks the next level. Tests retain the learner's best CPM score and award Growing Typist, Keyboard Explorer, Gold Star Typist, or Lightning Bee rankings. Daily participation and streaks stay on the device.
 
 ## Text-to-speech voices
 
@@ -122,7 +122,7 @@ make GO=/usr/local/go/bin/go extension
 This creates:
 
 - `dist/chrome-extension/` — an unpacked build for local testing with **Load unpacked**;
-- `dist/spelling-b-chrome-extension-1.3.0.zip` — the final Chrome Web Store upload artifact;
+- `dist/spelling-b-chrome-extension-1.4.0.zip` — the final Chrome Web Store upload artifact;
 - `dist/spelling-b-chrome-extension.sha256` — a copy-verification checksum.
 
 For local testing, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome-extension`. Click the Spelling B toolbar icon to open the full-page app.

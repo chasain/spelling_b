@@ -4,10 +4,10 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "$0")/.." && pwd)"
 dist_dir="$project_dir/dist"
 extension_dir="$dist_dir/chrome-extension"
-zip_file="$dist_dir/spelling-b-chrome-extension-1.3.0.zip"
+zip_file="$dist_dir/spelling-b-chrome-extension-1.4.0.zip"
 
 rm -rf "$extension_dir"
-mkdir -p "$extension_dir/icons"
+mkdir -p "$extension_dir/icons" "$extension_dir/hand-guides"
 
 cp "$project_dir/chrome/manifest.json" "$extension_dir/manifest.json"
 cp "$project_dir/chrome/background.js" "$extension_dir/background.js"
@@ -19,6 +19,8 @@ for asset in \
   typing.js; do
   cp "$project_dir/static/$asset" "$extension_dir/$asset"
 done
+
+cp "$project_dir/static/hand-guides/"*.png "$extension_dir/hand-guides/"
 
 for page in index settings test progress high-frequency phonics typing; do
   sed \
