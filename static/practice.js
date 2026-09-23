@@ -12,6 +12,8 @@ void (async () => {
   const reviewButton = document.querySelector('#review-word');
   const speakButton = document.querySelector('#speak');
   const copySpeakButton = document.querySelector('#copy-speak');
+  const sentenceSpeakButton = document.querySelector('#sentence-speak');
+  const copySentenceSpeakButton = document.querySelector('#copy-sentence-speak');
   const letterBuilder = document.querySelector('#letter-builder');
   const letterRound = document.querySelector('#letter-round');
   const builtWord = document.querySelector('#built-word');
@@ -317,6 +319,9 @@ void (async () => {
     shownWord.textContent = stage === 'copy' ? currentWord : '';
     copySpeakButton.hidden = stage !== 'copy';
     speakButton.hidden = stage === 'copy';
+    const hasSentence = Boolean(sentenceForCurrentWord());
+    copySentenceSpeakButton.hidden = stage !== 'copy' || !hasSentence;
+    sentenceSpeakButton.hidden = stage === 'copy' || !hasSentence;
     letterBuilder.hidden = stage !== 'letters';
     form.hidden = stage === 'letters';
     updateProgress();
@@ -483,6 +488,22 @@ void (async () => {
     }
   }
 
+  function sentenceForCurrentWord() {
+    const sentences = list?.sentences;
+    if (!sentences || typeof sentences !== 'object') return '';
+    const matchingKey = Object.keys(sentences).find((word) => word.toLocaleLowerCase() === currentWord.toLocaleLowerCase());
+    return matchingKey ? String(sentences[matchingKey] || '').trim() : '';
+  }
+
+  function speakSentence(button) {
+    const sentence = sentenceForCurrentWord();
+    if (!sentence || state.completed) return;
+    if (!runtime.speak(sentence, { button, emphasize: currentWord })) {
+      feedback.textContent = 'Speech is not supported by this browser.';
+      feedback.className = 'feedback incorrect';
+    }
+  }
+
   function playTone(isCorrect) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -517,6 +538,8 @@ void (async () => {
       shownWord.hidden = true;
       copySpeakButton.hidden = true;
       speakButton.hidden = true;
+      copySentenceSpeakButton.hidden = true;
+      sentenceSpeakButton.hidden = true;
       letterBuilder.hidden = true;
       form.hidden = true;
       feedback.textContent = '⭐ Great work! ⭐';
@@ -537,6 +560,8 @@ void (async () => {
     shownWord.hidden = true;
     copySpeakButton.hidden = true;
     speakButton.hidden = true;
+    copySentenceSpeakButton.hidden = true;
+    sentenceSpeakButton.hidden = true;
     letterBuilder.hidden = true;
     form.hidden = true;
     feedback.textContent = '⭐ ⭐ ⭐';
@@ -577,6 +602,8 @@ void (async () => {
   answerField.addEventListener('click', () => answer.focus());
   speakButton.addEventListener('click', () => speak(speakButton));
   copySpeakButton.addEventListener('click', () => speak(copySpeakButton));
+  sentenceSpeakButton.addEventListener('click', () => speakSentence(sentenceSpeakButton));
+  copySentenceSpeakButton.addEventListener('click', () => speakSentence(copySentenceSpeakButton));
   select.addEventListener('change', loadList);
   newDayButton.addEventListener('click', () => {
     state = freshState(state.day + 1);

@@ -40,7 +40,7 @@ After completing a practice day, **Start a new day** advances the saved day coun
 
 ## Classroom setup exchange
 
-The Settings page can export the current word lists, lesson plan, and test length as a versioned `.spellingb` classroom setup. The file contains no student progress, scores, metrics, or day counters. Students can import it with the file picker or drag-and-drop, preview its contents, and either replace their lists or merge lists with matching titles. Every import saves the previously stored configuration as a one-click recoverable backup.
+The Settings page can export the current word lists, optional example sentences, sentence-generation instructions, lesson plan, and test length as a versioned `.spellingb` classroom setup. The file contains no student progress, scores, metrics, or day counters. Students can import it with the file picker or drag-and-drop, preview its contents, and either replace their lists or merge lists with matching titles. Every import saves the previously stored configuration as a one-click recoverable backup.
 
 Teachers can also import existing `.csv`, `.tsv`, and `.xlsx` workbooks. The on-device preview supports six layouts: titled columns, titled rows, two-column list/word records, one flat list, untitled rows, and untitled columns. CSV imports detect comma, tab, semicolon, and pipe delimiters, while still allowing the teacher to choose the delimiter. Multi-sheet XLSX files include a worksheet picker. Spreadsheet imports change word lists only; lesson settings remain unchanged.
 
@@ -77,7 +77,17 @@ The **Typing** page is a seven-level daily trail with tactile F/J markers and pa
 
 ## Text-to-speech voices
 
-The Settings page explains how to choose or install voices on ChromeOS, Windows, and Linux and includes a voice-preview button. On ChromeOS, an English voice labeled **(Natural)** is recommended. Some system-provided Natural voices may process speech online; this is controlled by ChromeOS rather than Spelling B.
+The Settings page explains how to choose or install voices on ChromeOS, Windows, and Linux and includes a voice-preview button. On ChromeOS, an English voice labeled **(Natural)** is recommended. Sentence playback removes trailing punctuation, then emphasizes the spelling word using separate speech segments with slower speech and a slight pitch lift. This avoids punctuation-only speech segments and avoids passing SSML markup to system voices that read unsupported XML aloud. Markdown and punctuation markers such as `**word**` or `!word!` are stripped rather than sent to TTS. Some system-provided Natural voices may process speech online; this is controlled by ChromeOS rather than Spelling B.
+
+## AI-generated example sentences
+
+On supported devices, the Chrome extension can use Chrome's built-in on-device Prompt API to generate a short example for each spelling word. Settings exposes style, vocabulary, and preferred-length instructions in an editable text box with a one-click reset. This prompt-tuning build also temporarily exposes the model system prompt in an advanced editor with its own reset; the word list should not be pasted there because Spelling B supplies one word per model request. The default asks for one three-word phrase rather than a complete sentence, but longer or shorter results are accepted and shown for review. The JSON-output contract, exact-word check, plain-text cleanup, and requirement for wholesome content safe for an 8-year-old remain enforced separately.
+
+The model is managed by Chrome and may require a substantial first-time download. Before starting it, Spelling B shows an approval dialog with Chrome's operating-system, storage, GPU/CPU, memory, and network requirements; canceling leaves local file import and manual entry available. No spelling words are sent to the developer or a third-party API. Unsupported devices can import sentences locally from JSON, CSV, or TSV. JSON may be a word-to-sentence object, an object containing a `sentences` map, or an array of `{"word":"…","sentence":"…"}` records. Delimited files use `word,sentence` rows with an optional header.
+
+If Chrome reports that it cannot create a model session, restart Chrome and inspect `chrome://on-device-internals` → **Broker State** and `chrome://gpu`. Spelling B includes the Chrome version, availability before and after session creation, and user-activation state in its error message to make browser-level failures diagnosable.
+
+Saved sentences are included in classroom exports and can be distributed to students who do not have Chrome AI support. Each word list can also export its words and example sentences as a CSV file that can be edited in a spreadsheet and imported into another list. During practice, a second speech button reads the stored sentence using the same text-to-speech voice as the spelling word; no AI is needed at practice time.
 
 ## Spelling test
 
@@ -122,7 +132,7 @@ make GO=/usr/local/go/bin/go extension
 This creates:
 
 - `dist/chrome-extension/` — an unpacked build for local testing with **Load unpacked**;
-- `dist/spelling-b-chrome-extension-1.4.0.zip` — the final Chrome Web Store upload artifact;
+- `dist/spelling-b-chrome-extension-1.5.0-RC1.zip` — the prompt-tuning Chrome Web Store test artifact;
 - `dist/spelling-b-chrome-extension.sha256` — a copy-verification checksum.
 
 For local testing, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome-extension`. Click the Spelling B toolbar icon to open the full-page app.

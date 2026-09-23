@@ -31,9 +31,13 @@
       <div class="copy-word-row">
         <div id="shown-word" class="shown-word" aria-live="polite"></div>
         <button id="copy-speak" class="speaker copy-speaker" type="button" aria-label="Hear this word" hidden><span aria-hidden="true">🔊</span></button>
+        <button id="copy-sentence-speak" class="speaker copy-speaker sentence-speaker" type="button" aria-label="Hear this word in a sentence" title="Hear it in a sentence" hidden><span aria-hidden="true">💬</span></button>
       </div>
       <button id="review-word" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
-      <button id="speak" class="speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
+      <div class="speech-action-row">
+        <button id="speak" class="speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
+        <button id="sentence-speak" class="speaker sentence-speaker" type="button" aria-label="Hear this word in a sentence" title="Hear it in a sentence" hidden><span aria-hidden="true">💬</span></button>
+      </div>
 
       <section id="letter-builder" class="letter-builder" tabindex="0" hidden aria-label="Build the word with letters">
         <p id="letter-round" class="letter-round"></p>

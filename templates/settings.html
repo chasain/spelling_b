@@ -30,6 +30,29 @@
           <button id="add-list" class="secondary" type="button">+ Add list</button>
         </div>
         <div id="lists" class="lists"></div>
+        <div class="sentence-prompt-settings">
+          <div class="sentence-prompt-heading">
+            <div>
+              <p class="eyebrow">Chrome AI</p>
+              <h3>Sentence-generation instructions</h3>
+            </div>
+            <button id="reset-sentence-prompt" class="secondary" type="button">Reset prompt</button>
+          </div>
+          <label for="sentence-prompt">Editable prompt
+            <textarea id="sentence-prompt" rows="5" maxlength="2000" required></textarea>
+          </label>
+          <p>Enter style, vocabulary, and preferred-length instructions only—do not paste the word list here. Spelling B supplies one spelling word at a time and adds the structured-output and child-safety request rules. Sentence length is not rejected.</p>
+          <details class="system-prompt-editor">
+            <summary>Temporary tuning: system prompt</summary>
+            <label for="sentence-system-prompt">Editable system prompt
+              <textarea id="sentence-system-prompt" rows="7" maxlength="4000" required></textarea>
+            </label>
+            <div class="system-prompt-actions">
+              <button id="reset-sentence-system-prompt" class="secondary" type="button">Reset system prompt</button>
+            </div>
+            <p>This advanced control is included temporarily for prompt tuning. Changing it can weaken the model’s child-safety and formatting guidance, so review every result before saving.</p>
+          </details>
+        </div>
       </section>
 
       <section class="classroom-card" aria-labelledby="classroom-title">
@@ -214,6 +237,27 @@
       <button id="continue-table-import" class="primary" type="button">Preview word lists</button>
     </div>
   </dialog>
+  <dialog id="ai-model-dialog" class="classroom-dialog ai-model-dialog" aria-labelledby="ai-model-title">
+    <div class="classroom-dialog-heading">
+      <div><p class="eyebrow">Optional Chrome AI</p><h2 id="ai-model-title">Download the language model?</h2></div>
+      <button id="cancel-ai-model-x" class="dialog-close" type="button" aria-label="Cancel model download">×</button>
+    </div>
+    <p>Chrome needs to download and install its on-device language model before Spelling B can generate sentences. This can be a large download and may take several minutes.</p>
+    <div class="ai-requirements">
+      <strong>Chrome system requirements</strong>
+      <ul>
+        <li>Windows 10 or 11, macOS 13+, Linux, or a Chromebook Plus.</li>
+        <li>At least 22 GB of free storage on the drive containing your Chrome profile.</li>
+        <li>A GPU with more than 4 GB of video memory, or at least 16 GB of RAM and 4 CPU cores.</li>
+        <li>Unlimited data or an unmetered internet connection for the initial model download.</li>
+      </ul>
+    </div>
+    <p class="classroom-backup-note">The model is managed by Chrome and runs on this device. You can cancel and use <strong>Import file</strong> instead.</p>
+    <div class="classroom-dialog-actions">
+      <button id="cancel-ai-model" class="secondary" type="button">Cancel</button>
+      <button id="approve-ai-model" class="primary" type="button">Download model</button>
+    </div>
+  </dialog>
   <template id="list-template">
     <section class="word-list-card">
       <div class="list-card-heading">
@@ -222,6 +266,23 @@
       </div>
       <label>Words<textarea class="words-input" rows="7" required placeholder="apple&#10;friend&#10;school"></textarea></label>
       <span class="word-count">0 words</span>
+      <div class="sentence-tools">
+        <div>
+          <strong>Example sentences</strong>
+          <small>Generate locally with Chrome AI, or import and export word/sentence files.</small>
+        </div>
+        <div class="sentence-actions">
+          <button class="secondary generate-sentences" type="button">✨ Generate</button>
+          <button class="secondary import-sentences" type="button">Import file</button>
+          <button class="secondary export-sentences" type="button">Export file</button>
+        </div>
+        <input class="sentence-file sr-only" type="file" accept=".json,.csv,.tsv,application/json,text/csv,text/tab-separated-values">
+        <p class="sentence-status" role="status" aria-live="polite"></p>
+      </div>
+      <details class="sentence-editor" hidden>
+        <summary>Review example sentences</summary>
+        <div class="sentence-rows"></div>
+      </details>
     </section>
   </template>
   <script src="/static/runtime.js" defer></script>

@@ -4,7 +4,7 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "$0")/.." && pwd)"
 dist_dir="$project_dir/dist"
 extension_dir="$dist_dir/chrome-extension"
-zip_file="$dist_dir/spelling-b-chrome-extension-1.4.0.zip"
+zip_file="$dist_dir/spelling-b-chrome-extension-1.5.0-RC1.zip"
 
 rm -rf "$extension_dir"
 mkdir -p "$extension_dir/icons" "$extension_dir/hand-guides"

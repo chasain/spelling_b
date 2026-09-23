@@ -119,6 +119,12 @@ func TestOldConfigGetsDefaultTestLimit(t *testing.T) {
 	if got := store.Get().LessonPlan; got != defaultConfig.LessonPlan {
 		t.Fatalf("default lesson plan = %#v", got)
 	}
+	if got := store.Get().SentencePrompt; got != defaultSentencePrompt {
+		t.Fatalf("default sentence prompt = %q", got)
+	}
+	if got := store.Get().SentenceSystemPrompt; got != defaultSentenceSystemPrompt {
+		t.Fatalf("default sentence system prompt = %q", got)
+	}
 }
 
 func TestConfigAPIRejectsInvalidTestLimit(t *testing.T) {
@@ -152,6 +158,9 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/static/practice.js", contentType: "text/javascript", contains: "planForDay"},
 		{path: "/progress", contentType: "text/html", contains: "Session stars"},
 		{path: "/settings", contentType: "text/html", contains: "Export classroom setup"},
+		{path: "/settings", contentType: "text/html", contains: "Download the language model?"},
+		{path: "/settings", contentType: "text/html", contains: "export-sentences"},
+		{path: "/settings", contentType: "text/html", contains: "sentence-system-prompt"},
 		{path: "/static/settings.js", contentType: "text/javascript", contains: "spelling-b-classroom"},
 		{path: "/static/import-data.js", contentType: "text/javascript", contains: "readXlsx"},
 		{path: "/static/metrics.js", contentType: "text/javascript", contains: "copySpeed"},
@@ -344,7 +353,7 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.VersionName != "1.4.0" {
+	if manifest.VersionName != "1.5.0-RC1" {
 		t.Fatalf("version_name = %q", manifest.VersionName)
 	}
 	if len(manifest.Extra) != 0 {
@@ -352,5 +361,98 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	}
 	if strings.Join(manifest.Permissions, ",") != "storage,tts" {
 		t.Fatalf("permissions = %#v", manifest.Permissions)
+	}
+}
+
+func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	store, err := NewStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := Config{
+		Lists: []WordList{{
+			Title: "Examples",
+			Words: []string{" Apple ", "pear"},
+			Sentences: map[string]string{
+				"apple":  "  The apple is red.  ",
+				"PEAR":   "I ate a pear.",
+				"unused": "This should be removed.",
+			},
+		}},
+		TestWordsPerList:     2,
+		LessonPlan:           defaultConfig.LessonPlan,
+		SentencePrompt:       "  Use playful animal examples.  ",
+		SentenceSystemPrompt: "  Follow the teacher exactly.  ",
+	}
+	if err := store.Save(config); err != nil {
+		t.Fatal(err)
+	}
+
+	// Mutating a returned configuration must not mutate the store's maps.
+	got := store.Get()
+	got.Lists[0].Sentences["Apple"] = "Changed outside the store."
+	if sentence := store.Get().Lists[0].Sentences["Apple"]; sentence != "The apple is red." {
+		t.Fatalf("stored sentence changed through Get(): %q", sentence)
+	}
+
+	reloaded, err := NewStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if prompt := reloaded.Get().SentencePrompt; prompt != "Use playful animal examples." {
+		t.Fatalf("sentence prompt = %q", prompt)
+	}
+	if prompt := reloaded.Get().SentenceSystemPrompt; prompt != "Follow the teacher exactly." {
+		t.Fatalf("sentence system prompt = %q", prompt)
+	}
+	sentences := reloaded.Get().Lists[0].Sentences
+	if len(sentences) != 2 {
+		t.Fatalf("sentences = %#v", sentences)
+	}
+	if sentences["Apple"] != "The apple is red." || sentences["pear"] != "I ate a pear." {
+		t.Fatalf("sentences = %#v", sentences)
+	}
+	if _, exists := sentences["unused"]; exists {
+		t.Fatalf("sentence for removed word was persisted: %#v", sentences)
+	}
+}
+
+func TestConfigRejectsOverlongSentence(t *testing.T) {
+	config := Config{
+		Lists: []WordList{{
+			Title:     "Examples",
+			Words:     []string{"apple"},
+			Sentences: map[string]string{"apple": strings.Repeat("a", 301)},
+		}},
+		TestWordsPerList: 1,
+		LessonPlan:       defaultConfig.LessonPlan,
+	}
+	if err := validateConfig(config); err == nil {
+		t.Fatal("validateConfig() accepted an overlong sentence")
+	}
+}
+
+func TestConfigRejectsOverlongSentencePrompt(t *testing.T) {
+	config := Config{
+		Lists:            []WordList{{Title: "Examples", Words: []string{"apple"}}},
+		TestWordsPerList: 1,
+		LessonPlan:       defaultConfig.LessonPlan,
+		SentencePrompt:   strings.Repeat("a", 2001),
+	}
+	if err := validateConfig(config); err == nil {
+		t.Fatal("validateConfig() accepted an overlong sentence-generation prompt")
+	}
+}
+
+func TestConfigRejectsOverlongSentenceSystemPrompt(t *testing.T) {
+	config := Config{
+		Lists:                []WordList{{Title: "Examples", Words: []string{"apple"}}},
+		TestWordsPerList:     1,
+		LessonPlan:           defaultConfig.LessonPlan,
+		SentenceSystemPrompt: strings.Repeat("a", 4001),
+	}
+	if err := validateConfig(config); err == nil {
+		t.Fatal("validateConfig() accepted an overlong sentence-generation system prompt")
 	}
 }
