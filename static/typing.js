@@ -1,13 +1,14 @@
 void (async () => {
   const runtime = window.SpellingRuntime;
   await runtime.ready;
-  const typingDisplayDefaults = { showColors: true, showHands: true, splitKeyboard: true, gapMM: 25 };
+  const typingDisplayDefaults = { showColors: true, showHands: true, splitKeyboard: true, gapMM: 25, repetitionsPerKey: 2 };
   const storedTypingDisplay = runtime.read('spelling-b:typing-display:v1', {});
   const typingDisplay = {
     ...typingDisplayDefaults,
     ...(storedTypingDisplay && typeof storedTypingDisplay === 'object' ? storedTypingDisplay : {}),
   };
   typingDisplay.gapMM = Math.min(25, Math.max(0, Number(typingDisplay.gapMM) || 0));
+  typingDisplay.repetitionsPerKey = Math.min(6, Math.max(1, Math.round(Number(typingDisplay.repetitionsPerKey) || typingDisplayDefaults.repetitionsPerKey)));
   const storageKey = 'spelling-b:typing-progress:v2';
   const legacy = runtime.read('spelling-b:typing-progress:v1', {});
   const today = new Date().toLocaleDateString('en-CA');
@@ -141,9 +142,8 @@ void (async () => {
     'right-pinky': { label: 'Right pinky', keys: 'P · ; · /', image: 'left-pinky.png' },
     thumbs: { label: 'Either thumb', keys: 'Space', image: '' },
   };
-  const roundStarts = [0, 16, 30];
-  const roundEnds = [16, 30, 45];
   let typingMetric = null;
+  let lastMetricCorrectAt = 0;
   let lastMetricKeyAt = 0;
 
   function ensureTypingMetric(activity) {
@@ -164,6 +164,7 @@ void (async () => {
         characterAttempts: 0,
         correctCharacters: 0,
         activeSeconds: 0,
+        correctIntervals: [],
         cpm: null,
         accuracy: null,
       };
@@ -172,15 +173,27 @@ void (async () => {
     return typingMetric;
   }
 
+  function top75CPM(intervals) {
+    const samples = intervals.filter((seconds) => Number.isFinite(seconds) && seconds > 0).sort((left, right) => left - right);
+    const kept = samples.slice(0, Math.max(1, Math.ceil(samples.length * 0.75)));
+    const seconds = kept.reduce((total, sample) => total + sample, 0);
+    return seconds > 0 ? kept.length / seconds * 60 : 0;
+  }
   function recordTypingCharacter(activity, correct) {
     const session = ensureTypingMetric(activity);
     const now = performance.now();
     const gap = session.characterAttempts ? Math.min(10, Math.max(0, (now - lastMetricKeyAt) / 1000)) : 0.5;
     session.activeSeconds += gap;
     session.characterAttempts++;
-    if (correct) session.correctCharacters++;
+    if (correct) {
+      session.correctCharacters++;
+      if (lastMetricCorrectAt) session.correctIntervals.push(Math.min(60, Math.max(0.01, (now - lastMetricCorrectAt) / 1000)));
+      lastMetricCorrectAt = now;
+      session.cpm = top75CPM(session.correctIntervals);
+    }
     lastMetricKeyAt = now;
     runtime.saveMetricSession(session);
+    return session.cpm || 0;
   }
 
   function closeTypingMetric(completed = false) {
@@ -192,11 +205,13 @@ void (async () => {
     }
     typingMetric = null;
     lastMetricKeyAt = 0;
+    lastMetricCorrectAt = 0;
   }
 
   function dailyLevel() {
     const key = String(state.level);
-    if (!state.daily.levels[key]) state.daily.levels[key] = { correct: 0, tested: false };
+    if (!state.daily.levels[key]) state.daily.levels[key] = { correct: 0, tested: false, practiceCPM: 0 };
+    if (!Number.isFinite(Number(state.daily.levels[key].practiceCPM))) state.daily.levels[key].practiceCPM = 0;
     return state.daily.levels[key];
   }
 
@@ -204,6 +219,27 @@ void (async () => {
     return levels.slice(0, levelIndex + 1).map((level) => level.newKeys).join('') + ' ';
   }
 
+  function practicePools() {
+    const newKeys = Array.from(levels[state.level].newKeys);
+    const available = Array.from(availableKeys());
+    return [newKeys, available, available];
+  }
+
+  function roundLengths() {
+    return practicePools().map((pool) => pool.length * typingDisplay.repetitionsPerKey);
+  }
+
+  function roundStarts() {
+    const lengths = roundLengths();
+    return [0, lengths[0], lengths[0] + lengths[1]];
+  }
+
+  function roundEnds() {
+    const starts = roundStarts();
+    return roundLengths().map((length, index) => starts[index] + length);
+  }
+
+  const trainingTotal = () => roundEnds().at(-1) || 0;
   function save() {
     runtime.write(storageKey, {
       level: state.level,
@@ -278,7 +314,7 @@ void (async () => {
   }
 
   function currentRound(correct = dailyLevel().correct) {
-    const index = roundEnds.findIndex((end) => correct < end);
+    const index = roundEnds().findIndex((end) => correct < end);
     return index < 0 ? 3 : index;
   }
 
@@ -300,8 +336,9 @@ void (async () => {
   function choosePracticeTarget() {
     const daily = dailyLevel();
     const round = currentRound(daily.correct);
-    const pool = round === 0 ? levels[state.level].newKeys : availableKeys().trimEnd();
-    const position = Math.max(0, daily.correct - (roundStarts[round] || 0));
+    const pool = practicePools()[round] || [];
+    const starts = roundStarts();
+    const position = Math.max(0, daily.correct - (starts[round] || 0));
     const cycle = Math.floor(position / pool.length);
     const cyclePosition = position % pool.length;
     const order = seededKeyOrder(pool, `${today}:${state.level}:${round}:${cycle}`);
@@ -352,33 +389,41 @@ void (async () => {
   function renderMission() {
     const daily = dailyLevel();
     const round = currentRound(daily.correct);
+    const starts = roundStarts();
+    const ends = roundEnds();
+    const total = trainingTotal();
+    const testReady = daily.correct >= total && daily.practiceCPM >= 60;
     const labels = ['Follow the highlighted key', 'Find the key yourself', 'Memory keyboard'];
-    missionStars.replaceChildren(...roundEnds.map((end) => {
+    missionStars.replaceChildren(...ends.map((end) => {
       const star = document.createElement('span');
       star.textContent = daily.correct >= end ? '★' : '☆';
       star.classList.toggle('earned', daily.correct >= end);
       return star;
     }));
     if (round >= 3) {
-      roundLabel.textContent = 'Training complete';
-      roundDetail.textContent = 'Your 60 CPM level test is ready.';
+      roundLabel.textContent = testReady ? 'Test ready! ⭐' : 'Training complete';
+      roundDetail.textContent = testReady
+        ? `${Math.round(daily.practiceCPM)} CPM · your level test is ready.`
+        : `${Math.round(daily.practiceCPM)} CPM · reach 60 CPM to unlock the test.`;
     } else {
       roundLabel.textContent = `Round ${round + 1} of 3 · ${labels[round]}`;
-      roundDetail.textContent = `${daily.correct - roundStarts[round]} of ${roundEnds[round] - roundStarts[round]} correct keys`;
+      const speed = daily.practiceCPM > 0 ? `${Math.round(daily.practiceCPM)} CPM` : 'measuring speed';
+      roundDetail.textContent = `${daily.correct - starts[round]} of ${ends[round] - starts[round]} correct keys · ${speed}`;
     }
-    const percent = Math.min(100, Math.round(daily.correct / 45 * 100));
+    const percent = Math.min(100, Math.round(daily.correct / total * 100));
     progressFill.style.width = `${percent}%`;
-    progress.setAttribute('aria-valuenow', String(Math.min(45, daily.correct)));
-    progress.setAttribute('aria-valuemax', '45');
-    testButton.disabled = daily.correct < 45;
+    progress.setAttribute('aria-valuenow', String(Math.min(total, daily.correct)));
+    progress.setAttribute('aria-valuemax', String(total));
+    testButton.hidden = !testReady;
+    testButton.disabled = !testReady;
   }
 
   function renderPracticePrompt() {
     const daily = dailyLevel();
     prompt.replaceChildren();
-    if (daily.correct >= 45) {
+    if (daily.correct >= trainingTotal()) {
       const ready = document.createElement('strong');
-      ready.textContent = 'Test ready! ⭐';
+      ready.textContent = daily.practiceCPM >= 60 ? 'Test ready! ⭐' : `Training complete · ${Math.round(daily.practiceCPM)} CPM`;
       prompt.append(ready);
       showKeyboard();
     } else {
@@ -451,7 +496,7 @@ void (async () => {
     best.textContent = high ? `Best: ${Math.round(high.cpm)} CPM · ${high.rank}` : 'No test score yet';
     unlockNote.textContent = state.mastered[state.level]
       ? '★ Level mastered. Complete today’s mission to keep your streak growing.'
-      : 'Complete all three training rounds and reach 60 CPM on the test to unlock the next level.';
+      : 'Reach 60 CPM in all three training rounds to open the test, then reach 60 CPM on the test to unlock the next level.';
     towel.hidden = state.level === 0 || state.level === levels.length - 1;
     guidance.hidden = false;
     result.hidden = true;
@@ -461,7 +506,7 @@ void (async () => {
 
   function startPractice(reset = false) {
     closeTypingMetric(false);
-    if (reset) state.daily.levels[String(state.level)] = { correct: 0, tested: false };
+    if (reset) state.daily.levels[String(state.level)] = { correct: 0, tested: false, practiceCPM: 0 };
     state.mode = 'practice';
     state.position = 0;
     state.correct = 0;
@@ -472,10 +517,12 @@ void (async () => {
     state.marks = [];
     guidance.hidden = false;
     result.hidden = true;
-    feedback.textContent = dailyLevel().correct >= 45
-      ? 'Today’s training is complete. Take the level test when you are ready.'
-      : 'Three short rounds make up today’s training.';
-    choosePracticeTarget();
+    const daily = dailyLevel();
+    const testReady = daily.correct >= trainingTotal() && daily.practiceCPM >= 60;
+    feedback.textContent = daily.correct >= trainingTotal()
+      ? testReady ? 'Today’s training is complete. Your level test is ready.' : 'Training complete. Restart today’s training to build toward 60 CPM.'
+      : 'Three rounds make up today’s training.';
+    if (daily.correct < trainingTotal()) choosePracticeTarget();
     renderPracticePrompt();
     save();
     capture.value = '';
@@ -483,7 +530,8 @@ void (async () => {
   }
 
   function startTest() {
-    if (dailyLevel().correct < 45) return;
+    const daily = dailyLevel();
+    if (daily.correct < trainingTotal() || daily.practiceCPM < 60) return;
     closeTypingMetric(false);
     touchDay();
     state.mode = 'test';
@@ -546,20 +594,23 @@ void (async () => {
     if (state.mode !== 'practice' && state.mode !== 'test') return;
     if (state.mode === 'practice') {
       const daily = dailyLevel();
-      if (daily.correct >= 45) return;
+      if (daily.correct >= trainingTotal()) return;
       state.attempts++;
       const correct = character.toLocaleLowerCase() === state.practiceTarget;
-      recordTypingCharacter('typing-practice', correct);
+      daily.practiceCPM = recordTypingCharacter('typing-practice', correct);
       if (correct) {
         touchDay();
         state.correct++;
         daily.correct++;
-        feedback.textContent = daily.correct >= 45 ? 'Daily training complete! Your test is ready. ⭐' : 'Nice key!';
+        const completed = daily.correct >= trainingTotal();
+        feedback.textContent = completed
+          ? daily.practiceCPM >= 60 ? 'Daily training complete! Your test is ready. ⭐' : `Training complete at ${Math.round(daily.practiceCPM)} CPM. Restart to build more speed.`
+          : 'Nice key!';
         state.practiceMistakes = 0;
-        choosePracticeTarget();
+        if (!completed) choosePracticeTarget();
         save();
         renderPracticePrompt();
-        if (daily.correct >= 45) closeTypingMetric(true);
+        if (completed) closeTypingMetric(true);
       } else {
         const round = currentRound(daily.correct);
         state.practiceMistakes++;
@@ -579,6 +630,8 @@ void (async () => {
         keyboard.classList.remove('key-error');
         void keyboard.offsetWidth;
         keyboard.classList.add('key-error');
+        save();
+        renderMission();
       }
       return;
     }
@@ -600,17 +653,20 @@ void (async () => {
     else renderTestPrompt();
   }
 
-  capture.addEventListener('keydown', (event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey || event.key === 'Tab') return;
+  document.addEventListener('keydown', (event) => {
+    if (state.mode !== 'practice' && state.mode !== 'test') return;
+    if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.key === 'Tab') return;
+    if (event.target !== capture && event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (event.key === 'Backspace') {
       event.preventDefault();
       return;
     }
     if (event.key.length === 1) {
       event.preventDefault();
+      capture.focus({ preventScroll: true });
       handleCharacter(event.key);
     }
-  });
+  }, true);
   document.querySelector('.typing-card').addEventListener('click', (event) => {
     if (!event.target.closest('button')) capture.focus();
   });

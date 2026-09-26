@@ -19,8 +19,16 @@
       <p>Manage practice words, lesson pacing, classroom sharing, and speech.</p>
     </header>
 
+    <nav class="settings-tabs" role="tablist" aria-label="Settings sections">
+      <button id="settings-tab-word-lists" type="button" role="tab" aria-controls="settings-panel-word-lists" data-settings-tab="word-lists">📝 Word Lists</button>
+      <button id="settings-tab-practice" type="button" role="tab" aria-controls="settings-panel-practice" data-settings-tab="practice">🌱 Practice Plan</button>
+      <button id="settings-tab-classroom" type="button" role="tab" aria-controls="settings-panel-classroom" data-settings-tab="classroom">🎒 Classroom</button>
+      <button id="settings-tab-appearance" type="button" role="tab" aria-controls="settings-panel-appearance" data-settings-tab="appearance">🎨 Appearance &amp; Voice</button>
+      <button id="settings-tab-guides" type="button" role="tab" aria-controls="settings-panel-guides" data-settings-tab="guides">📖 Guides</button>
+    </nav>
+
     <form id="settings-form">
-      <section class="settings-section word-lists-section" aria-labelledby="word-lists-title">
+      <section id="settings-panel-word-lists" class="settings-section word-lists-section" data-settings-panel="word-lists" role="tabpanel" aria-labelledby="settings-tab-word-lists word-lists-title">
         <div class="settings-section-heading">
           <div>
             <p class="eyebrow">Word lists</p>
@@ -42,24 +50,20 @@
             <textarea id="sentence-prompt" rows="5" maxlength="2000" required></textarea>
           </label>
           <p>Enter style, vocabulary, and preferred-length instructions only—do not paste the word list here. Spelling B supplies one spelling word at a time and adds the structured-output and child-safety request rules. Sentence length is not rejected.</p>
-          <details class="system-prompt-editor">
-            <summary>Temporary tuning: system prompt</summary>
-            <label for="sentence-system-prompt">Editable system prompt
-              <textarea id="sentence-system-prompt" rows="7" maxlength="4000" required></textarea>
-            </label>
-            <div class="system-prompt-actions">
-              <button id="reset-sentence-system-prompt" class="secondary" type="button">Reset system prompt</button>
-            </div>
-            <p>This advanced control is included temporarily for prompt tuning. Changing it can weaken the model’s child-safety and formatting guidance, so review every result before saving.</p>
-          </details>
         </div>
       </section>
 
-      <section class="classroom-card" aria-labelledby="classroom-title">
+      <section id="settings-panel-classroom" class="classroom-card" data-settings-panel="classroom" role="tabpanel" aria-labelledby="settings-tab-classroom classroom-title">
         <div class="classroom-heading">
           <div><p class="eyebrow">Classroom sharing</p><h2 id="classroom-title">Share a classroom setup</h2><p>Export these word lists and lesson settings once, then import the same offline file on every student's device.</p></div>
           <span class="classroom-file-badge">.spellingb · CSV · XLSX</span>
         </div>
+        <ol class="teacher-quick-start" aria-label="Teacher quick start">
+          <li><strong>Build</strong><span>Create lists here or import an existing spreadsheet.</span></li>
+          <li><strong>Review</strong><span>Check words, examples, and the practice plan.</span></li>
+          <li><strong>Export</strong><span>Make one offline <code>.spellingb</code> setup file.</span></li>
+          <li><strong>Share</strong><span>Students import that same file on each device.</span></li>
+        </ol>
         <label class="classroom-name" for="classroom-name">Package name
           <input id="classroom-name" type="text" maxlength="120" value="Spelling B classroom setup" placeholder="e.g. Mrs. Smith — Week 4">
         </label>
@@ -76,7 +80,7 @@
         <p id="classroom-status" class="classroom-status" role="status" aria-live="polite"></p>
       </section>
 
-      <section class="lesson-settings" aria-labelledby="practice-plan-title">
+      <section id="settings-panel-practice" class="lesson-settings" data-settings-panel="practice" role="tabpanel" aria-labelledby="settings-tab-practice practice-plan-title">
         <div class="lesson-settings-heading">
           <div><p class="eyebrow">Practice plan</p><h2 id="practice-plan-title">Lesson stages</h2><p>Set a lesson to 0 repetitions to turn it off for that mode.</p></div>
           <label for="beginner-days">Beginner-mode days
@@ -114,9 +118,14 @@
             <input id="test-limit" type="number" min="1" max="100" value="5" required>
           </label>
         </div>
+        <label class="typing-gap-setting" for="typing-practice-repetitions">
+          <span><strong>Daily typing length</strong><small>How many times each selected key appears during a training round.</small></span>
+          <input id="typing-practice-repetitions" type="range" min="1" max="6" step="1" value="2">
+          <output id="typing-practice-repetitions-value" for="typing-practice-repetitions">2× per key</output>
+        </label>
       </section>
 
-      <section class="settings-section typing-display-settings" aria-labelledby="typing-display-title">
+      <section id="settings-panel-appearance" class="settings-section typing-display-settings" data-settings-panel="appearance" role="tabpanel" aria-labelledby="settings-tab-appearance typing-display-title">
         <div class="settings-section-heading">
           <div>
             <p class="eyebrow">Typing</p>
@@ -145,10 +154,24 @@
         </label>
       </section>
 
-      <section class="voice-settings-card" aria-labelledby="voice-settings-title">
+      <section class="voice-settings-card" data-settings-panel="appearance" role="tabpanel" aria-labelledby="settings-tab-appearance voice-settings-title">
         <div class="voice-settings-heading">
           <div><p class="eyebrow">Speech</p><h2 id="voice-settings-title">🔊 Voice quality</h2><p>Spelling B uses the text-to-speech voice selected by Chrome or your operating system.</p></div>
           <button id="test-settings-voice" class="secondary" type="button">Test voice</button>
+        </div>
+        <div class="speech-emphasis-settings">
+          <div class="speech-emphasis-heading">
+            <div><h3>Sentence emphasis</h3><p>Tune how the spelling word differs from the surrounding words. These settings stay on this device.</p></div>
+            <div class="speech-emphasis-actions">
+              <button id="reset-speech-emphasis" class="secondary" type="button">Reset</button>
+              <button id="test-speech-emphasis" class="secondary" type="button">Test emphasis</button>
+            </div>
+          </div>
+          <div class="speech-emphasis-grid">
+            <label for="speech-normal-rate"><span><strong>Regular rate</strong><small>Speed of the surrounding words and normal word playback.</small></span><input id="speech-normal-rate" type="range" min="0.5" max="1.5" step="0.02" value="0.82"><output id="speech-normal-rate-value" for="speech-normal-rate">0.82×</output></label>
+            <label for="speech-emphasis-rate"><span><strong>Emphasized rate</strong><small>Speed of the spelling word in an example.</small></span><input id="speech-emphasis-rate" type="range" min="0.5" max="1.5" step="0.02" value="0.66"><output id="speech-emphasis-rate-value" for="speech-emphasis-rate">0.66×</output></label>
+            <label for="speech-emphasis-pitch"><span><strong>Emphasized pitch</strong><small>Pitch of the spelling word; 1.00 is unchanged.</small></span><input id="speech-emphasis-pitch" type="range" min="0.5" max="1.5" step="0.02" value="1.12"><output id="speech-emphasis-pitch-value" for="speech-emphasis-pitch">1.12×</output></label>
+          </div>
         </div>
         <details open>
           <summary>ChromeOS — recommended</summary>
@@ -164,6 +187,41 @@
           <p>Chrome uses voices provided by the installed system speech service. Install or select an English text-to-speech voice through your distribution, then restart Chrome. Names and menus vary by distribution.</p>
         </details>
         <p class="voice-help-links"><a href="https://support.google.com/chromebook/answer/11221616" target="_blank" rel="noopener">ChromeOS voice help</a> · <a href="https://support.microsoft.com/en-us/accessibility/windows/narrator/appendix-a-supported-languages-and-voices" target="_blank" rel="noopener">Windows voice help</a></p>
+      </section>
+
+      <section id="settings-panel-guides" class="settings-section persona-guides" data-settings-panel="guides" role="tabpanel" aria-labelledby="settings-tab-guides persona-guides-title">
+        <div class="settings-section-heading">
+          <div><p class="eyebrow">How to use Spelling B</p><h2 id="persona-guides-title">Guides for every grown-up and learner</h2><p>Open the guide that matches what you want to do.</p></div>
+        </div>
+        <div class="persona-guide-list">
+          <details class="persona-guide" open>
+            <summary><span aria-hidden="true">🌟</span><span><strong>Student guide</strong><small>Practice independently and know what comes next.</small></span></summary>
+            <div class="persona-guide-body">
+              <h3>Daily routine</h3>
+              <ol><li>Open Word Lists and choose the list your adult assigned.</li><li>Finish each practice stage. Use the speaker whenever you need to hear a word.</li><li>When the stars are full, start a new day next time.</li></ol>
+              <h3>Other practice</h3><p>Use Phonics and High Frequency for focused word practice. Typing unlocks harder key groups as accuracy and speed improve.</p>
+              <h3>When stuck</h3><p>Slow down, listen again, and read the correction before retrying. Ask an adult if speech is silent or a word looks wrong.</p>
+            </div>
+          </details>
+          <details class="persona-guide">
+            <summary><span aria-hidden="true">🏠</span><span><strong>Parent guide</strong><small>Set up useful practice and understand progress.</small></span></summary>
+            <div class="persona-guide-body">
+              <h3>Set up a list</h3>
+              <ol><li>Open the Word Lists tab.</li><li>Add a list, give it a clear title, and enter one word per line.</li><li>Optionally add short examples for words that sound alike.</li><li>Save, return to Word Lists, and select it.</li></ol>
+              <h3>Tune practice</h3><p>Practice Plan controls beginner days, lesson repetitions, test size, and typing-practice length. Appearance &amp; Voice controls keyboard guidance and speech.</p>
+              <h3>Review progress</h3><p>Use Progress to look for patterns over several sessions. Accuracy and word-level timing matter more than one unusually fast or slow attempt.</p>
+            </div>
+          </details>
+          <details class="persona-guide">
+            <summary><span aria-hidden="true">🎒</span><span><strong>Teacher guide</strong><small>Prepare once and distribute the same setup offline.</small></span></summary>
+            <div class="persona-guide-body">
+              <h3>Build, review, and share</h3>
+              <ol><li>Create lists, or use Classroom to import CSV, TSV, or XLSX.</li><li>Review words, examples, and the Practice Plan, then try one lesson.</li><li>Export one named <code>.spellingb</code> file and copy it to each device.</li><li>Import it on each device and choose Replace for identical class setups.</li></ol>
+              <h3>Updating a class</h3><p>Export a newly dated package. Importing preserves student progress and creates a recoverable pre-import backup. Choose Merge only when learners should retain additional personal lists.</p>
+              <h3>Quick check</h3><ul><li>The same lists and plan appear on a sample device.</li><li>Speech works with the selected English voice.</li><li>The assigned list remains selected after navigating away and back.</li><li>The package contains setup only, never student results.</li></ul>
+            </div>
+          </details>
+        </div>
       </section>
 
       <div class="save-row">
@@ -237,6 +295,18 @@
       <button id="continue-table-import" class="primary" type="button">Preview word lists</button>
     </div>
   </dialog>
+  <dialog id="sentence-reminder-dialog" class="classroom-dialog sentence-reminder-dialog" aria-labelledby="sentence-reminder-title">
+    <div class="classroom-dialog-heading">
+      <div><p class="eyebrow">Optional learning aid</p><h2 id="sentence-reminder-title">Add example sentences?</h2></div>
+    </div>
+    <p>Example sentences help children tell similar-sounding words apart. You can generate them on-device, import them, or type your own in each word list.</p>
+    <p class="classroom-backup-note">This is only a reminder—you can save without sentences, and Spelling B will not show this message again.</p>
+    <div class="classroom-dialog-actions">
+      <button id="sentence-reminder-back" class="secondary" type="button">Add sentences now</button>
+      <button id="sentence-reminder-save" class="primary" type="button">Save without sentences</button>
+    </div>
+  </dialog>
+
   <dialog id="ai-model-dialog" class="classroom-dialog ai-model-dialog" aria-labelledby="ai-model-title">
     <div class="classroom-dialog-heading">
       <div><p class="eyebrow">Optional Chrome AI</p><h2 id="ai-model-title">Download the language model?</h2></div>
@@ -259,13 +329,16 @@
     </div>
   </dialog>
   <template id="list-template">
-    <section class="word-list-card">
+    <details class="word-list-card">
+      <summary class="word-list-summary">
+        <span><strong class="list-summary-title">Untitled list</strong><small class="word-count">0 words</small></span>
+        <span class="list-summary-action">Edit</span>
+      </summary>
       <div class="list-card-heading">
         <label>List title<input class="title-input" type="text" maxlength="80" required placeholder="e.g. Week 1"></label>
         <button class="remove-list" type="button" aria-label="Remove this list">Remove</button>
       </div>
       <label>Words<textarea class="words-input" rows="7" required placeholder="apple&#10;friend&#10;school"></textarea></label>
-      <span class="word-count">0 words</span>
       <div class="sentence-tools">
         <div>
           <strong>Example sentences</strong>
@@ -273,17 +346,24 @@
         </div>
         <div class="sentence-actions">
           <button class="secondary generate-sentences" type="button">✨ Generate</button>
+          <button class="secondary copy-sentence-prompt" type="button">Copy AI prompt</button>
           <button class="secondary import-sentences" type="button">Import file</button>
           <button class="secondary export-sentences" type="button">Export file</button>
         </div>
         <input class="sentence-file sr-only" type="file" accept=".json,.csv,.tsv,application/json,text/csv,text/tab-separated-values">
         <p class="sentence-status" role="status" aria-live="polite"></p>
+        <details class="external-model-workflow">
+          <summary>Paste a response from an online model</summary>
+          <p>After using Copy AI prompt, paste the returned JSON here. Spelling B validates it before filling the sentence fields.</p>
+          <textarea class="external-model-response" rows="5" placeholder='{"apple":"red apple"}'></textarea>
+          <button class="secondary load-model-response" type="button">Load pasted response</button>
+        </details>
       </div>
       <details class="sentence-editor" hidden>
         <summary>Review example sentences</summary>
         <div class="sentence-rows"></div>
       </details>
-    </section>
+    </details>
   </template>
   <script src="/static/runtime.js" defer></script>
   <script src="/static/import-data.js" defer></script>

@@ -218,6 +218,10 @@ void (async () => {
   startButton.addEventListener('click', startTest);
   takeAgain.addEventListener('click', startTest);
   speakButton.addEventListener('click', speak);
+  runtime.captureTextInput(answer, {
+    active: () => !questionPanel.hidden && !answer.disabled,
+    onBackspace: () => { if (answer.value) corrections++; },
+  });
   answer.addEventListener('keydown', (event) => {
     if (event.key === 'Backspace' && answer.value) corrections++;
   });

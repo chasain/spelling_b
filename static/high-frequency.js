@@ -308,6 +308,10 @@ void (async () => {
   });
   startButton.addEventListener('click', beginPractice);
   speakButton.addEventListener('click', () => runtime.speak(currentWord(), { button: speakButton }));
+  runtime.captureTextInput(answer, {
+    active: () => !activity.hidden && !answer.disabled,
+    onBackspace: () => { if (answer.value) corrections++; },
+  });
   answer.addEventListener('input', () => {
     renderTyped();
     submit.disabled = reviewMode || normalized(answer.value) === '';

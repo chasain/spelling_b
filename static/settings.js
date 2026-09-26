@@ -6,18 +6,26 @@
   const testLimit = document.querySelector('#test-limit');
   const sentencePrompt = document.querySelector('#sentence-prompt');
   const resetSentencePrompt = document.querySelector('#reset-sentence-prompt');
-  const sentenceSystemPrompt = document.querySelector('#sentence-system-prompt');
-  const resetSentenceSystemPrompt = document.querySelector('#reset-sentence-system-prompt');
   const beginnerDays = document.querySelector('#beginner-days');
   const lessonInput = (mode, lesson) => document.querySelector(`#${mode}-${lesson}`);
   const lessons = ['copy', 'letters', 'guided', 'spell'];
   const status = document.querySelector('#save-status');
   const testVoice = document.querySelector('#test-settings-voice');
+  const testSpeechEmphasis = document.querySelector('#test-speech-emphasis');
+  const resetSpeechEmphasis = document.querySelector('#reset-speech-emphasis');
+  const speechNormalRate = document.querySelector('#speech-normal-rate');
+  const speechNormalRateValue = document.querySelector('#speech-normal-rate-value');
+  const speechEmphasisRate = document.querySelector('#speech-emphasis-rate');
+  const speechEmphasisRateValue = document.querySelector('#speech-emphasis-rate-value');
+  const speechEmphasisPitch = document.querySelector('#speech-emphasis-pitch');
+  const speechEmphasisPitchValue = document.querySelector('#speech-emphasis-pitch-value');
   const typingShowColors = document.querySelector('#typing-show-colors');
   const typingShowHands = document.querySelector('#typing-show-hands');
   const typingSplitKeyboard = document.querySelector('#typing-split-keyboard');
   const typingKeyboardGap = document.querySelector('#typing-keyboard-gap');
   const typingKeyboardGapValue = document.querySelector('#typing-keyboard-gap-value');
+  const typingPracticeRepetitions = document.querySelector('#typing-practice-repetitions');
+  const typingPracticeRepetitionsValue = document.querySelector('#typing-practice-repetitions-value');
   const classroomName = document.querySelector('#classroom-name');
   const exportClassroom = document.querySelector('#export-classroom');
   const importClassroom = document.querySelector('#import-classroom');
@@ -59,18 +67,89 @@
   const cancelImportX = document.querySelector('#cancel-classroom-import-x');
   const runtime = window.SpellingRuntime;
   const typingDisplayKey = 'spelling-b:typing-display:v1';
-  const typingDisplayDefaults = { showColors: true, showHands: true, splitKeyboard: true, gapMM: 25 };
+  const typingDisplayDefaults = { showColors: true, showHands: true, splitKeyboard: true, gapMM: 25, repetitionsPerKey: 2 };
+  const speechSettingsKey = 'spelling-b:speech-emphasis:v1';
+  const speechSettingsDefaults = { normalRate: 0.82, emphasisRate: 0.66, emphasisPitch: 1.12 };
+
+  const settingsTabKey = 'spelling-b:settings-tab:v1';
+  const sentenceReminderKey = 'spelling-b:sentence-reminder-seen:v1';
 
   const packageFormat = 'spelling-b-classroom';
   const packageVersion = 1;
-  const appVersion = '1.5.0-RC1';
+  const appVersion = '1.5.0';
   const backupKey = 'spelling-b:classroom-import-backup:v1';
   const maxPackageBytes = 1024 * 1024;
   const maxSpreadsheetBytes = 5 * 1024 * 1024;
   let pendingPackage = null;
   let pendingTable = null;
   let aiModelDecision = null;
+  let settingsReady = false;
+  let hasUnsavedChanges = false;
+  let sentenceReminderDecision = null;
 
+  function markDirty() {
+    if (!settingsReady) return;
+    hasUnsavedChanges = true;
+    status.textContent = 'You have unsaved changes.';
+    status.className = 'save-status';
+  }
+
+  function resetDirty() {
+    hasUnsavedChanges = false;
+  }
+
+  function showSettingsTab(name) {
+    const tabs = Array.from(document.querySelectorAll('[data-settings-tab]'));
+    const requestedName = name === 'device' ? 'appearance' : name;
+    const validName = tabs.some((tab) => tab.dataset.settingsTab === requestedName) ? requestedName : 'word-lists';
+    tabs.forEach((tab) => {
+      const selected = tab.dataset.settingsTab === validName;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelectorAll('[data-settings-panel]').forEach((panel) => {
+      panel.hidden = panel.dataset.settingsPanel !== validName;
+    });
+    runtime.write(settingsTabKey, validName);
+  }
+
+  function listNeedsSentences(card) {
+    if (card.dataset.newList !== 'true') return false;
+    const words = normalizedWords(card.querySelector('.words-input').value);
+    return words.length > 0 && words.some((word) => {
+      const key = Object.keys(card.sentenceMap || {}).find((candidate) => candidate.toLocaleLowerCase() === word.toLocaleLowerCase());
+      return !key || !String(card.sentenceMap[key] || '').trim();
+    });
+  }
+
+  async function maybeShowSentenceReminder() {
+    if (runtime.read(sentenceReminderKey, false)) return true;
+    const card = Array.from(lists.children).find(listNeedsSentences);
+    if (!card) return true;
+    await runtime.persist(sentenceReminderKey, true);
+    const dialog = document.querySelector('#sentence-reminder-dialog');
+    const continueSaving = await new Promise((resolve) => {
+      sentenceReminderDecision = resolve;
+      dialog.showModal();
+    });
+    if (!continueSaving) {
+      showSettingsTab('word-lists');
+      card.open = true;
+      const editor = card.querySelector('.sentence-editor');
+      if (editor && !editor.hidden) editor.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return continueSaving;
+  }
+
+  function settleSentenceReminder(continueSaving) {
+    if (!sentenceReminderDecision) return;
+    const resolve = sentenceReminderDecision;
+    sentenceReminderDecision = null;
+
+    document.querySelector('#sentence-reminder-dialog').close();
+    resolve(continueSaving);
+  }
   async function loadConfig() {
     if (runtime.isExtension) return runtime.loadConfig();
     const response = await fetch('/api/config');
@@ -218,10 +297,7 @@
       ? candidate.sentencePrompt.trim()
       : runtime.defaults.sentencePrompt;
     if (sentencePromptValue.length > 2000) throw new Error('Sentence-generation instructions must be 2,000 characters or fewer.');
-    const sentenceSystemPromptValue = typeof candidate.sentenceSystemPrompt === 'string' && candidate.sentenceSystemPrompt.trim()
-      ? candidate.sentenceSystemPrompt.trim()
-      : runtime.defaults.sentenceSystemPrompt;
-    if (sentenceSystemPromptValue.length > 4000) throw new Error('Sentence-generation system prompt must be 4,000 characters or fewer.');
+    const sentenceSystemPromptValue = runtime.defaults.sentenceSystemPrompt;
 
     return {
       testWordsPerList: integerBetween(candidate.testWordsPerList, 1, 100, 'Words per list'),
@@ -232,21 +308,34 @@
     };
   }
 
-  function addList(list = { title: '', words: [] }) {
+  function addList(list = { title: '', words: [] }, options = {}) {
     const card = template.content.firstElementChild.cloneNode(true);
     const title = card.querySelector('.title-input');
     const words = card.querySelector('.words-input');
     const count = card.querySelector('.word-count');
+    const summaryTitle = card.querySelector('.list-summary-title');
+    const summaryAction = card.querySelector('.list-summary-action');
     const sentenceEditor = card.querySelector('.sentence-editor');
     const sentenceRows = card.querySelector('.sentence-rows');
     const sentenceStatus = card.querySelector('.sentence-status');
     const generateSentences = card.querySelector('.generate-sentences');
+    const copySentencePrompt = card.querySelector('.copy-sentence-prompt');
     const importSentences = card.querySelector('.import-sentences');
     const exportSentences = card.querySelector('.export-sentences');
     const sentenceFile = card.querySelector('.sentence-file');
+    const externalModelWorkflow = card.querySelector('.external-model-workflow');
+    const externalModelResponse = card.querySelector('.external-model-response');
+    const loadModelResponse = card.querySelector('.load-model-response');
     card.sentenceMap = cleanSentences(list.words || [], list.sentences || {});
+    card.dataset.newList = String(options.newList === true);
+    card.open = options.open === true;
     title.value = list.title;
     words.value = list.words.join('\n');
+    const updateSummaryTitle = () => {
+      summaryTitle.textContent = title.value.trim() || 'Untitled list';
+    };
+    title.addEventListener('input', updateSummaryTitle);
+    updateSummaryTitle();
     const renderSentenceEditor = (open = false) => {
       const currentWords = normalizedWords(words.value);
       const editableSentences = {};
@@ -277,12 +366,12 @@
         sentenceRows.append(row);
       });
       sentenceEditor.hidden = currentWords.length === 0;
-      if (open && !sentenceEditor.hidden) sentenceEditor.open = true;
+      if (!sentenceEditor.hidden) sentenceEditor.open = open;
     };
-    const updateCount = () => {
+    const updateCount = (openEditor = true) => {
       const total = normalizedWords(words.value).length;
       count.textContent = `${total} ${total === 1 ? 'word' : 'words'}`;
-      if (!sentenceEditor.hidden || Object.keys(card.sentenceMap).length) renderSentenceEditor(false);
+      renderSentenceEditor(openEditor === true);
     };
     words.addEventListener('input', updateCount);
     card.querySelector('.remove-list').addEventListener('click', () => {
@@ -292,10 +381,45 @@
         return;
       }
       card.remove();
+      markDirty();
     });
     generateSentences.addEventListener('click', () => generateListSentences(card, renderSentenceEditor));
+    copySentencePrompt.addEventListener('click', async () => {
+      const currentWords = normalizedWords(words.value);
+      if (!currentWords.length) {
+        sentenceStatus.textContent = 'Add words before copying an AI prompt.';
+        sentenceStatus.className = 'sentence-status error';
+        return;
+      }
+      try {
+        await copyText(externalSentencePrompt(currentWords));
+        externalModelWorkflow.open = true;
+        sentenceStatus.textContent = 'Prompt copied. Paste it into an online model, then paste the returned JSON below.';
+        sentenceStatus.className = 'sentence-status success';
+      } catch (error) {
+        sentenceStatus.textContent = 'Could not copy the prompt: ' + error.message;
+        sentenceStatus.className = 'sentence-status error';
+      }
+    });
     importSentences.addEventListener('click', () => sentenceFile.click());
     exportSentences.addEventListener('click', () => exportListSentences(card, title.value, words.value, sentenceStatus));
+    loadModelResponse.addEventListener('click', () => {
+      try {
+        const currentWords = normalizedWords(words.value);
+        const imported = parseSentenceJSON(externalModelResponse.value);
+        const matched = cleanSentences(currentWords, imported, true);
+        const importedCount = Object.keys(matched).length;
+        if (!importedCount) throw new Error('The response did not contain sentences for this list.');
+        card.sentenceMap = { ...card.sentenceMap, ...matched };
+        renderSentenceEditor(true);
+        sentenceStatus.textContent = 'Loaded ' + importedCount + ' sentence' + (importedCount === 1 ? '' : 's') + '. Review them, then save settings.';
+        sentenceStatus.className = 'sentence-status success';
+        markDirty();
+      } catch (error) {
+        sentenceStatus.textContent = error.message;
+        sentenceStatus.className = 'sentence-status error';
+      }
+    });
     sentenceFile.addEventListener('change', async () => {
       const file = sentenceFile.files[0];
       sentenceFile.value = '';
@@ -310,21 +434,24 @@
         renderSentenceEditor(true);
         sentenceStatus.textContent = 'Imported ' + importedCount + ' sentence' + (importedCount === 1 ? '' : 's') + '. Review them, then save settings.';
         sentenceStatus.className = 'sentence-status success';
+        markDirty();
       } catch (error) {
         sentenceStatus.textContent = error.message;
         sentenceStatus.className = 'sentence-status error';
       }
     });
-    updateCount();
-    if (Object.keys(card.sentenceMap).length) renderSentenceEditor(false);
+    card.addEventListener('toggle', () => {
+      summaryAction.textContent = card.open ? 'Close' : 'Edit';
+    });
+    updateCount(false);
     lists.append(card);
+    summaryAction.textContent = card.open ? 'Close' : 'Edit';
     if (!list.title) title.focus();
   }
 
   function renderConfig(config) {
     testLimit.value = config.testWordsPerList;
     sentencePrompt.value = config.sentencePrompt;
-    sentenceSystemPrompt.value = config.sentenceSystemPrompt;
     beginnerDays.value = config.lessonPlan.beginnerDays;
     for (const mode of ['beginner', 'advanced']) {
       for (const lesson of lessons) {
@@ -346,6 +473,8 @@
     typingShowHands.checked = settings.showHands !== false;
     typingSplitKeyboard.checked = settings.splitKeyboard !== false;
     typingKeyboardGap.value = String(Math.min(25, Math.max(0, Number(settings.gapMM) || 0)));
+    typingPracticeRepetitions.value = String(Math.min(6, Math.max(1, Number(settings.repetitionsPerKey) || typingDisplayDefaults.repetitionsPerKey)));
+    typingPracticeRepetitionsValue.textContent = `${typingPracticeRepetitions.value}× per key`;
     typingKeyboardGap.disabled = !typingSplitKeyboard.checked;
     typingKeyboardGapValue.textContent = `${typingKeyboardGap.value} mm`;
   }
@@ -354,8 +483,35 @@
     return {
       showColors: typingShowColors.checked,
       showHands: typingShowHands.checked,
+      repetitionsPerKey: integerBetween(typingPracticeRepetitions.value, 1, 6, 'Typing practice length'),
       splitKeyboard: typingSplitKeyboard.checked,
       gapMM: integerBetween(typingKeyboardGap.value, 0, 25, 'Keyboard gap'),
+    };
+  }
+
+  function speechEmphasisSettings() {
+    const saved = runtime.read(speechSettingsKey, {});
+    return { ...speechSettingsDefaults, ...(saved && typeof saved === 'object' ? saved : {}) };
+  }
+
+  function updateSpeechEmphasisLabels() {
+    speechNormalRateValue.textContent = Number(speechNormalRate.value).toFixed(2) + '×';
+    speechEmphasisRateValue.textContent = Number(speechEmphasisRate.value).toFixed(2) + '×';
+    speechEmphasisPitchValue.textContent = Number(speechEmphasisPitch.value).toFixed(2) + '×';
+  }
+
+  function renderSpeechEmphasis(settings = speechEmphasisSettings()) {
+    speechNormalRate.value = String(settings.normalRate ?? speechSettingsDefaults.normalRate);
+    speechEmphasisRate.value = String(settings.emphasisRate ?? speechSettingsDefaults.emphasisRate);
+    speechEmphasisPitch.value = String(settings.emphasisPitch ?? speechSettingsDefaults.emphasisPitch);
+    updateSpeechEmphasisLabels();
+  }
+
+  function collectSpeechEmphasis() {
+    return {
+      normalRate: Number(speechNormalRate.value),
+      emphasisRate: Number(speechEmphasisRate.value),
+      emphasisPitch: Number(speechEmphasisPitch.value),
     };
   }
 
@@ -369,7 +525,7 @@
     return cleanAndValidate({
       testWordsPerList: Number(testLimit.value),
       sentencePrompt: sentencePrompt.value,
-      sentenceSystemPrompt: sentenceSystemPrompt.value,
+      sentenceSystemPrompt: runtime.defaults.sentenceSystemPrompt,
       lessonPlan: {
         beginnerDays: Number(beginnerDays.value),
         beginner: repetitionsFor('beginner'),
@@ -387,6 +543,59 @@
     });
   }
 
+  async function copyText(value) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch (_) {
+      const field = document.createElement('textarea');
+      field.value = value;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.append(field);
+      field.select();
+      const copied = document.execCommand('copy');
+      field.remove();
+      if (!copied) throw new Error('Clipboard access was denied.');
+    }
+  }
+
+  function externalSentencePrompt(words) {
+    const systemInstructions = runtime.defaults.sentenceSystemPrompt;
+    const teacherInstructions = sentencePrompt.value.trim() || runtime.defaults.sentencePrompt;
+    return [
+      'Create one short spelling-practice example for each supplied spelling word.',
+      'System guidance:\n' + systemInstructions,
+      'Teacher instructions:\n' + teacherInstructions,
+      'Fixed requirements: Use every spelling word exactly once in its own example. Keep all content wholesome and safe for an 8-year-old. Do not use Markdown, HTML, commentary, or alternative answers.',
+      'Return only one valid JSON object. Each key must be the exact spelling word and each value must be its example. Do not wrap the JSON in a code fence.',
+      'Spelling words:\n' + JSON.stringify(words, null, 2),
+    ].join('\n\n');
+  }
+
+  function sentenceObjectFromParsed(parsed) {
+    if (parsed?.sentences && typeof parsed.sentences === 'object') parsed = parsed.sentences;
+    if (Array.isArray(parsed)) {
+      return Object.fromEntries(parsed.filter((item) => item && typeof item.word === 'string' && typeof item.sentence === 'string').map((item) => [item.word, item.sentence]));
+    }
+    if (!parsed || typeof parsed !== 'object') throw new Error('The response must be a word-to-sentence JSON object.');
+    return parsed;
+  }
+
+  function parseSentenceJSON(text) {
+    const cleaned = String(text || '').trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '');
+    if (!cleaned) throw new Error('Paste the model’s JSON response first.');
+    try {
+      return sentenceObjectFromParsed(JSON.parse(cleaned));
+    } catch (error) {
+      if (error instanceof SyntaxError) throw new Error('The pasted response is not valid JSON. Ask the model to return only the JSON object.');
+      throw error;
+    }
+  }
+
   async function readSentenceFile(file) {
     if (file.size > 256 * 1024) throw new Error('Sentence files must be 256 KB or smaller.');
     const text = await file.text();
@@ -397,12 +606,7 @@
       } catch (_) {
         throw new Error('That JSON sentence file is not valid.');
       }
-      if (parsed?.sentences && typeof parsed.sentences === 'object') parsed = parsed.sentences;
-      if (Array.isArray(parsed)) {
-        return Object.fromEntries(parsed.filter((item) => item && typeof item.word === 'string' && typeof item.sentence === 'string').map((item) => [item.word, item.sentence]));
-      }
-      if (!parsed || typeof parsed !== 'object') throw new Error('JSON must be a word-to-sentence object or an array of word/sentence records.');
-      return parsed;
+      return sentenceObjectFromParsed(parsed);
     }
     const delimiter = /\.tsv$/i.test(file.name) ? '\t' : tabular.detectDelimiter(text);
     const rows = tabular.parseDelimited(text, delimiter);
@@ -468,7 +672,13 @@
     let availability = 'unknown';
     let creationHadUserActivation = 'not attempted';
     try {
-      availability = await LanguageModel.availability(modelOptions);
+      sentenceStatus.textContent = 'Checking Chrome AI…';
+      sentenceStatus.className = 'sentence-status';
+      availability = await promiseWithTimeout(
+        LanguageModel.availability(modelOptions),
+        20000,
+        'Chrome AI did not answer the availability check within 20 seconds. Restart Chrome and check chrome://on-device-internals → Broker State.',
+      );
       if (availability === 'unavailable') throw new Error('This device does not support Chrome AI. Use Import file instead.');
       const createSession = () => {
         creationHadUserActivation = navigator.userActivation?.isActive ?? 'unsupported';
@@ -476,7 +686,7 @@
           ...modelOptions,
           initialPrompts: [{
             role: 'system',
-            content: sentenceSystemPrompt.value.trim() || runtime.defaults.sentenceSystemPrompt,
+            content: runtime.defaults.sentenceSystemPrompt,
           }],
           monitor(monitor) {
             monitor.addEventListener('downloadprogress', (event) => {
@@ -530,6 +740,7 @@
       const missing = words.filter((word) => !generated[word]);
       card.sentenceMap = { ...card.sentenceMap, ...drafts, ...generated };
       renderSentenceEditor(true);
+      markDirty();
       sentenceStatus.textContent = missing.length
         ? 'Generated ' + Object.keys(generated).length + '. Check and fix: ' + missing.join(', ') + '. Draft model output is shown below when available.'
         : 'Generated ' + words.length + ' sentences. Review them, then save settings.';
@@ -539,14 +750,17 @@
       if (!session) {
         let latestAvailability = availability;
         try {
-          latestAvailability = await LanguageModel.availability(modelOptions);
+          latestAvailability = await promiseWithTimeout(LanguageModel.availability(modelOptions), 5000, 'Availability recheck timed out.');
         } catch (_) {}
         const chromeVersion = navigator.userAgent.match(/Chrom(?:e|ium)\/(\d+)/)?.[1] || 'unknown';
         detail += ' Chrome ' + chromeVersion + ' reported “' + availability + '” before creation and “' + latestAvailability + '” afterward; user activation at creation: ' + String(creationHadUserActivation) + '. Restart Chrome, then check chrome://on-device-internals → Broker State and chrome://gpu.';
       }
       const kept = Object.keys(generated).length;
       const draftCount = Object.keys(drafts).length;
-      if (kept || draftCount) card.sentenceMap = { ...card.sentenceMap, ...drafts, ...generated };
+      if (kept || draftCount) {
+        card.sentenceMap = { ...card.sentenceMap, ...drafts, ...generated };
+        markDirty();
+      }
       sentenceStatus.textContent = 'Could not finish generation: ' + detail
         + (kept ? ' Kept ' + kept + ' completed example' + (kept === 1 ? '.' : 's.') : '')
         + (draftCount ? ' Showing ' + draftCount + ' model draft' + (draftCount === 1 ? ' for editing.' : 's for editing.') : '')
@@ -557,6 +771,16 @@
       if (session) session.destroy();
       button.disabled = false;
     }
+  }
+
+  function promiseWithTimeout(promise, timeoutMilliseconds, message) {
+    let timeout;
+    return Promise.race([
+      Promise.resolve(promise),
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(new Error(message)), timeoutMilliseconds);
+      }),
+    ]).finally(() => clearTimeout(timeout));
   }
 
   function approveModelDownload(createSession) {
@@ -889,22 +1113,65 @@
       const config = cleanAndValidate(await loadConfig());
       renderConfig(config);
       renderTypingDisplay();
+      renderSpeechEmphasis();
       exportClassroom.disabled = false;
       importClassroom.disabled = false;
       dropZone.disabled = false;
       updateBackupButton();
+      const query = new URLSearchParams(window.location.search);
+      const requestedTab = query.get('tab') || runtime.read(settingsTabKey, 'word-lists');
+      showSettingsTab(requestedTab);
+      settingsReady = true;
+      resetDirty();
+      if (query.get('add') === '1') {
+        showSettingsTab('word-lists');
+        addList({ title: '', words: [] }, { newList: true, open: true });
+        markDirty();
+        const cleanURL = new URL(window.location.href);
+        cleanURL.searchParams.delete('add');
+        cleanURL.searchParams.delete('tab');
+        window.history.replaceState({}, '', cleanURL.pathname + cleanURL.search + cleanURL.hash);
+      }
     } catch (error) {
       status.textContent = error.message;
       status.className = 'save-status error';
     }
   }
 
-  addButton.addEventListener('click', () => addList());
-  testVoice.addEventListener('click', () => {
-    runtime.speak('Welcome to Spelling B. This is your current English voice.');
+  document.querySelectorAll('[data-settings-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => showSettingsTab(tab.dataset.settingsTab));
+    tab.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      const tabs = Array.from(document.querySelectorAll('[data-settings-tab]'));
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      const next = tabs[(tabs.indexOf(tab) + direction + tabs.length) % tabs.length];
+      event.preventDefault();
+      showSettingsTab(next.dataset.settingsTab);
+      next.focus();
+    });
   });
+  addButton.addEventListener('click', () => {
+    addList({ title: '', words: [] }, { newList: true, open: true });
+    markDirty();
+  });
+  testVoice.addEventListener('click', () => {
+    runtime.speak('Welcome to Spelling B. This is your current English voice.', { speechSettings: collectSpeechEmphasis() });
+  });
+  testSpeechEmphasis.addEventListener('click', () => {
+    runtime.speak('The second word was emphasized', { emphasize: 'second', speechSettings: collectSpeechEmphasis() });
+  });
+  resetSpeechEmphasis.addEventListener('click', () => {
+    renderSpeechEmphasis(speechSettingsDefaults);
+    markDirty();
+  });
+  for (const input of [speechNormalRate, speechEmphasisRate, speechEmphasisPitch]) {
+    input.addEventListener('input', updateSpeechEmphasisLabels);
+  }
   typingKeyboardGap.addEventListener('input', () => {
     typingKeyboardGapValue.textContent = `${typingKeyboardGap.value} mm`;
+  });
+  typingPracticeRepetitions.addEventListener('input', () => {
+    typingPracticeRepetitionsValue.textContent = `${typingPracticeRepetitions.value}× per key`;
   });
   typingSplitKeyboard.addEventListener('change', () => {
     typingKeyboardGap.disabled = !typingSplitKeyboard.checked;
@@ -934,8 +1201,10 @@
   cancelTableImport.addEventListener('click', () => tableDialog.close());
   cancelTableImportX.addEventListener('click', () => tableDialog.close());
   approveAIModel.addEventListener('click', () => settleModelDownload(true));
-  resetSentencePrompt.addEventListener('click', () => { sentencePrompt.value = runtime.defaults.sentencePrompt; });
-  resetSentenceSystemPrompt.addEventListener('click', () => { sentenceSystemPrompt.value = runtime.defaults.sentenceSystemPrompt; });
+  resetSentencePrompt.addEventListener('click', () => {
+    sentencePrompt.value = runtime.defaults.sentencePrompt;
+    markDirty();
+  });
   cancelAIModel.addEventListener('click', () => settleModelDownload(false));
   cancelAIModelX.addEventListener('click', () => settleModelDownload(false));
   aiModelDialog.addEventListener('cancel', (event) => {
@@ -954,18 +1223,40 @@
     dialogStatus.textContent = '';
   });
 
+  document.querySelector('#sentence-reminder-back').addEventListener('click', () => settleSentenceReminder(false));
+  document.querySelector('#sentence-reminder-save').addEventListener('click', () => settleSentenceReminder(true));
+  document.querySelector('#sentence-reminder-dialog').addEventListener('cancel', (event) => {
+    event.preventDefault();
+    settleSentenceReminder(false);
+  });
+  for (const eventName of ['input', 'change']) {
+    form.addEventListener(eventName, (event) => {
+      if (event.target === classroomName || event.target.type === 'file' || event.target.classList.contains('external-model-response')) return;
+      markDirty();
+    });
+  }
+  window.addEventListener('beforeunload', (event) => {
+    if (!hasUnsavedChanges) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    status.textContent = 'Saving…';
-    status.className = 'save-status';
     try {
+      const config = collectConfig();
+      if (!(await maybeShowSentenceReminder())) return;
+      status.textContent = 'Saving…';
+      status.className = 'save-status';
       await Promise.all([
-        saveConfig(collectConfig()),
+        saveConfig(config),
         runtime.persist(typingDisplayKey, collectTypingDisplay()),
+        runtime.persist(speechSettingsKey, collectSpeechEmphasis()),
       ]);
       status.textContent = 'Saved!';
       status.className = 'save-status success';
       setTimeout(() => { window.location.href = runtime.homeURL; }, 550);
+      resetDirty();
     } catch (error) {
       status.textContent = error.message;
       status.className = 'save-status error';

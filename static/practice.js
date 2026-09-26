@@ -40,6 +40,7 @@ void (async () => {
     spell: { name: 'Spell', icon: '🎯', instruction: 'Listen carefully and spell it all by yourself.' },
   };
   const metricsStorageKey = 'spelling-b:session-metrics:v1';
+  const currentListKey = 'spelling-b:current-word-list:v1';
   const planSignature = JSON.stringify(config.lessonPlan);
 
   let list;
@@ -574,7 +575,13 @@ void (async () => {
     clearTimeout(nextTimer);
     closeSession(false);
     runtime.stopSpeaking();
-    list = config.lists[Number(select.value)];
+    const listIndex = Number(select.value);
+    list = config.lists[listIndex];
+    if (!list) return;
+    runtime.write(currentListKey, {
+      index: listIndex,
+      signature: JSON.stringify([list.title, list.words]),
+    });
     words = list.words;
     title.textContent = list.title;
     currentWord = '';
@@ -583,6 +590,11 @@ void (async () => {
     else updateSessionMetrics();
     chooseWord();
   }
+
+  runtime.captureTextInput(answer, {
+    active: () => Boolean(state && !state.completed && currentStage() !== 'letters' && !form.hidden && !answer.disabled),
+    onBackspace: () => { if (answer.value && session) session.corrections++; },
+  });
 
   answer.addEventListener('input', () => {
     renderTyped();
@@ -604,7 +616,15 @@ void (async () => {
   copySpeakButton.addEventListener('click', () => speak(copySpeakButton));
   sentenceSpeakButton.addEventListener('click', () => speakSentence(sentenceSpeakButton));
   copySentenceSpeakButton.addEventListener('click', () => speakSentence(copySentenceSpeakButton));
-  select.addEventListener('change', loadList);
+  select.addEventListener('change', () => {
+    if (select.value === '__add__') {
+      const selected = runtime.read(currentListKey, { index: 0 });
+      select.value = String(Math.min(config.lists.length - 1, Math.max(0, Number(selected?.index) || 0)));
+      window.location.href = runtime.isExtension ? 'settings.html?tab=word-lists&add=1' : '/settings?tab=word-lists&add=1';
+      return;
+    }
+    loadList();
+  });
   newDayButton.addEventListener('click', () => {
     state = freshState(state.day + 1);
     saveState();
@@ -671,13 +691,21 @@ void (async () => {
       attemptStartedAt = performance.now();
     }
   });
-  if (!select.options.length) {
-    config.lists.forEach((wordList, index) => {
-      const option = document.createElement('option');
-      option.value = String(index);
-      option.textContent = wordList.title;
-      select.append(option);
-    });
-  }
+  select.replaceChildren(...config.lists.map((wordList, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = wordList.title;
+    return option;
+  }));
+  const addListOption = document.createElement('option');
+  addListOption.value = '__add__';
+  addListOption.textContent = '+ Add New List';
+  select.append(addListOption);
+  const savedList = runtime.read(currentListKey, null);
+  const matchingIndex = savedList?.signature
+    ? config.lists.findIndex((wordList) => JSON.stringify([wordList.title, wordList.words]) === savedList.signature)
+    : -1;
+  const fallbackIndex = Math.min(config.lists.length - 1, Math.max(0, Number(savedList?.index) || 0));
+  select.value = String(matchingIndex >= 0 ? matchingIndex : fallbackIndex);
   loadList();
 })();

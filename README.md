@@ -2,6 +2,12 @@
 
 A dependency-free Go and Manifest V3 learning app with configurable word-list practice, 100 high-frequency word levels, 120 phonics lessons, and a seven-level daily typing trail. The Chrome extension works fully offline; speech uses an installed browser or ChromeOS voice and feedback sounds use the Web Audio API.
 
+## Guides and user workflows
+
+The dependency-free documentation site in [docs/index.html](docs/index.html) provides separate Student, Parent, and Teacher guides. The same guides are embedded in the Settings → Guides tab for offline access inside the app. Settings also includes Word Lists, Practice Plan, Classroom, and Appearance & Voice tabs; the Classroom tab includes the build, review, export, and distribute workflow.
+
+Word Lists remembers the current list across page visits. Its selector also includes **+ Add New List**, which opens a new collapsible list card in Settings. Settings warns before leaving with unsaved changes and gives a one-time example-sentence reminder after a newly created list is saved without complete examples.
+
 ## Run
 
 ```sh
@@ -73,17 +79,17 @@ The **Phonics** page contains all 120 sequential Open Source Phonics lessons. St
 
 ## Typing
 
-The **Typing** page is a seven-level daily trail with tactile F/J markers and page-wide focus recovery for accidental trackpad clicks. It begins with Home Row and adds groups of two to four keys from the middle of the keyboard outward until the full letter keyboard is available. Balanced shuffled cycles ensure every new key appears during the first round. Color-coded finger zones, consistent illustrated hand guides, a split keyboard, and a 0–25 mm split-gap control can each be configured in Settings; the original unified, uncolored keyboard remains available. Each daily mission has three short training rounds followed by a three-sentence test; reaching 60 CPM unlocks the next level. Tests retain the learner's best CPM score and award Growing Typist, Keyboard Explorer, Gold Star Typist, or Lightning Bee rankings. Daily participation and streaks stay on the device.
+The **Typing** page is a seven-level daily trail with tactile F/J markers and page-wide keyboard capture after accidental trackpad clicks. It begins with Home Row and adds groups of two to four keys from the middle of the keyboard outward until the full letter keyboard is available. Balanced shuffled cycles give every eligible key the configured number of turns in each round. Color-coded finger zones, consistent illustrated hand guides, a split keyboard, a 0–25 mm split-gap control, and one to six repetitions per key can each be configured in Settings; the original unified, uncolored keyboard remains available. Each daily mission has three training rounds and tracks session CPM using the fastest 75% of correct-key intervals. A 60 CPM practice session offers the three-sentence test, and reaching 60 CPM on that test unlocks the next level. Tests retain the learner's best CPM score and award Growing Typist, Keyboard Explorer, Gold Star Typist, or Lightning Bee rankings. Daily participation and streaks stay on the device.
 
 ## Text-to-speech voices
 
-The Settings page explains how to choose or install voices on ChromeOS, Windows, and Linux and includes a voice-preview button. On ChromeOS, an English voice labeled **(Natural)** is recommended. Sentence playback removes trailing punctuation, then emphasizes the spelling word using separate speech segments with slower speech and a slight pitch lift. This avoids punctuation-only speech segments and avoids passing SSML markup to system voices that read unsupported XML aloud. Markdown and punctuation markers such as `**word**` or `!word!` are stripped rather than sent to TTS. Some system-provided Natural voices may process speech online; this is controlled by ChromeOS rather than Spelling B.
+The Settings page explains how to choose or install voices on ChromeOS, Windows, and Linux and includes a voice-preview button. On ChromeOS, an English voice labeled **(Natural)** is recommended. Sentence playback removes trailing punctuation and emphasizes the spelling word using separate plain-text speech segments. Device-local Settings controls let the user tune regular rate, emphasized-word rate, and emphasized-word pitch, with an immediate preview. Markdown and punctuation markers such as `**word**` or `!word!` are stripped rather than sent to TTS. Some system-provided Natural voices may process speech online; this is controlled by ChromeOS rather than Spelling B.
 
 ## AI-generated example sentences
 
-On supported devices, the Chrome extension can use Chrome's built-in on-device Prompt API to generate a short example for each spelling word. Settings exposes style, vocabulary, and preferred-length instructions in an editable text box with a one-click reset. This prompt-tuning build also temporarily exposes the model system prompt in an advanced editor with its own reset; the word list should not be pasted there because Spelling B supplies one word per model request. The default asks for one three-word phrase rather than a complete sentence, but longer or shorter results are accepted and shown for review. The JSON-output contract, exact-word check, plain-text cleanup, and requirement for wholesome content safe for an 8-year-old remain enforced separately.
+On supported devices, the Chrome extension can use Chrome's built-in on-device Prompt API to generate a short example for each spelling word. Settings exposes style, vocabulary, and preferred-length instructions in an editable text box with a one-click reset. The reviewed child-safety system prompt is built in and is no longer editable. Spelling B supplies one word per model request. The default teacher prompt asks for one three-word phrase rather than a complete sentence, but longer or shorter results are accepted and shown for review. The JSON-output contract, exact-word check, plain-text cleanup, and requirement for wholesome content safe for an 8-year-old remain enforced separately.
 
-The model is managed by Chrome and may require a substantial first-time download. Before starting it, Spelling B shows an approval dialog with Chrome's operating-system, storage, GPU/CPU, memory, and network requirements; canceling leaves local file import and manual entry available. No spelling words are sent to the developer or a third-party API. Unsupported devices can import sentences locally from JSON, CSV, or TSV. JSON may be a word-to-sentence object, an object containing a `sentences` map, or an array of `{"word":"…","sentence":"…"}` records. Delimited files use `word,sentence` rows with an optional header.
+The model is managed by Chrome and may require a substantial first-time download. Before starting it, Spelling B shows an approval dialog with Chrome's operating-system, storage, GPU/CPU, memory, and network requirements; canceling leaves local file import and manual entry available. No spelling words are sent to the developer or a third-party API. Unsupported devices can copy a list-specific prompt into an online model and paste its JSON response directly into the list, or import sentences locally from JSON, CSV, or TSV. Spelling B never sends the copied prompt itself. JSON may be a word-to-sentence object, an object containing a `sentences` map, or an array of `{"word":"…","sentence":"…"}` records. Delimited files use `word,sentence` rows with an optional header.
 
 If Chrome reports that it cannot create a model session, restart Chrome and inspect `chrome://on-device-internals` → **Broker State** and `chrome://gpu`. Spelling B includes the Chrome version, availability before and after session creation, and user-activation state in its error message to make browser-level failures diagnosable.
 
@@ -132,7 +138,7 @@ make GO=/usr/local/go/bin/go extension
 This creates:
 
 - `dist/chrome-extension/` — an unpacked build for local testing with **Load unpacked**;
-- `dist/spelling-b-chrome-extension-1.5.0-RC1.zip` — the prompt-tuning Chrome Web Store test artifact;
+- `dist/spelling-b-chrome-extension-1.5.0.zip` — the Chrome Web Store release artifact;
 - `dist/spelling-b-chrome-extension.sha256` — a copy-verification checksum.
 
 For local testing, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome-extension`. Click the Spelling B toolbar icon to open the full-page app.

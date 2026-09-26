@@ -75,6 +75,7 @@ func TestConfigAPIRejectsEmptyList(t *testing.T) {
 	store, _ := NewStore(filepath.Join(dir, "settings.json"))
 	app, _ := NewApp(store, "templates", "static")
 	req := httptest.NewRequest(http.MethodPost, "/api/config", strings.NewReader(`{"testWordsPerList":2,"lessonPlan":{"beginnerDays":2,"beginner":{"copy":3,"letterBuilder":3,"guided":3,"spell":0},"advanced":{"copy":0,"letterBuilder":0,"guided":3,"spell":3}},"lists":[]}`))
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	app.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {
@@ -132,9 +133,75 @@ func TestConfigAPIRejectsInvalidTestLimit(t *testing.T) {
 	app, _ := NewApp(store, "templates", "static")
 	body := `{"testWordsPerList":101,"lessonPlan":{"beginnerDays":2,"beginner":{"copy":3,"letterBuilder":3,"guided":3,"spell":0},"advanced":{"copy":0,"letterBuilder":0,"guided":3,"spell":3}},"lists":[{"title":"List","words":["word"]}]}`
 	req := httptest.NewRequest(http.MethodPost, "/api/config", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	app.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestConfigAPIRejectsCrossOriginWrite(t *testing.T) {
+	store, _ := NewStore(filepath.Join(t.TempDir(), "settings.json"))
+	app, _ := NewApp(store, "templates", "static")
+	body := `{"testWordsPerList":1,"lessonPlan":{"beginnerDays":0,"beginner":{"copy":0,"letterBuilder":0,"guided":0,"spell":0},"advanced":{"copy":1,"letterBuilder":0,"guided":0,"spell":0}},"lists":[{"title":"Changed","words":["word"]}]}`
+	req := httptest.NewRequest(http.MethodPost, "http://spelling.test/api/config", strings.NewReader(body))
+	req.Header.Set("Content-Type", "text/plain;charset=UTF-8")
+	req.Header.Set("Origin", "https://evil.example")
+	rec := httptest.NewRecorder()
+
+	app.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	if got := store.Get().Lists[0].Title; got != defaultConfig.Lists[0].Title {
+		t.Fatalf("cross-origin request changed the stored list to %q", got)
+	}
+}
+
+func TestConfigAPIRequiresJSONContentType(t *testing.T) {
+	store, _ := NewStore(filepath.Join(t.TempDir(), "settings.json"))
+	app, _ := NewApp(store, "templates", "static")
+	req := httptest.NewRequest(http.MethodPost, "http://127.0.0.1:8080/api/config", strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Origin", "http://127.0.0.1:8080")
+	rec := httptest.NewRecorder()
+
+	app.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnsupportedMediaType {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestConfigAPIAllowsSameOriginWrite(t *testing.T) {
+	store, _ := NewStore(filepath.Join(t.TempDir(), "settings.json"))
+	app, _ := NewApp(store, "templates", "static")
+	body := `{"testWordsPerList":1,"lessonPlan":{"beginnerDays":0,"beginner":{"copy":0,"letterBuilder":0,"guided":0,"spell":0},"advanced":{"copy":1,"letterBuilder":0,"guided":0,"spell":0}},"lists":[{"title":"Same origin","words":["word"]}]}`
+	req := httptest.NewRequest(http.MethodPost, "http://127.0.0.1:8080/api/config", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Origin", "http://127.0.0.1:8080")
+	rec := httptest.NewRecorder()
+
+	app.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestConfigAPIRejectsDNSRebindingOrigin(t *testing.T) {
+	store, _ := NewStore(filepath.Join(t.TempDir(), "settings.json"))
+	app, _ := NewApp(store, "templates", "static")
+	req := httptest.NewRequest(http.MethodPost, "http://attacker.example/api/config", strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", "http://attacker.example")
+	rec := httptest.NewRecorder()
+
+	app.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusForbidden {
 		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 }
@@ -160,7 +227,13 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/settings", contentType: "text/html", contains: "Export classroom setup"},
 		{path: "/settings", contentType: "text/html", contains: "Download the language model?"},
 		{path: "/settings", contentType: "text/html", contains: "export-sentences"},
-		{path: "/settings", contentType: "text/html", contains: "sentence-system-prompt"},
+		{path: "/settings", contentType: "text/html", contains: "settings-panel-guides"},
+		{path: "/settings", contentType: "text/html", contains: "speech-normal-rate"},
+		{path: "/settings", contentType: "text/html", contains: "Copy AI prompt"},
+		{path: "/settings", contentType: "text/html", contains: "typing-practice-repetitions"},
+		{path: "/static/runtime.js", contentType: "text/javascript", contains: "captureTextInput"},
+		{path: "/static/runtime.js", contentType: "text/javascript", contains: "requestSubmit(submitter)"},
+		{path: "/static/runtime.js", contentType: "text/javascript", contains: "closest('.speaker')"},
 		{path: "/static/settings.js", contentType: "text/javascript", contains: "spelling-b-classroom"},
 		{path: "/static/import-data.js", contentType: "text/javascript", contains: "readXlsx"},
 		{path: "/static/metrics.js", contentType: "text/javascript", contains: "copySpeed"},
@@ -353,7 +426,7 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.VersionName != "1.5.0-RC1" {
+	if manifest.VersionName != "1.5.0" {
 		t.Fatalf("version_name = %q", manifest.VersionName)
 	}
 	if len(manifest.Extra) != 0 {
