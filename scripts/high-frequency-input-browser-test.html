@@ -1,0 +1,94 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>High Frequency input test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" src="../dist/chrome-extension/high-frequency.html" width="1000" height="700"></iframe>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for High Frequency practice.'));
+    else setTimeout(check, 25);
+  };
+  check();
+});
+
+void (async () => {
+  const frame = document.querySelector('#app');
+  await new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  let app = frame.contentDocument;
+  await waitFor(() => app.querySelector('#frequency-title')?.textContent === 'Words 1–10');
+  app.querySelector('#frequency-start').click();
+  await waitFor(() => !app.querySelector('#frequency-activity').hidden);
+
+  const failures = [];
+  const field = app.querySelector('#frequency-answer-field');
+  const display = app.querySelector('#frequency-typed');
+  const input = app.querySelector('#frequency-answer');
+  if (display.parentElement !== field || input.parentElement !== field) failures.push('input layers are not in one field');
+  if (!display.textContent.includes('Copy the word here')) failures.push('copy placeholder is missing');
+  if (Number.parseFloat(frame.contentWindow.getComputedStyle(input).opacity) > 0.1) failures.push('native input is visibly duplicated');
+
+  input.value = 'the';
+  input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'the' }));
+  if (display.textContent !== 'the') failures.push(`mirrored text is ${JSON.stringify(display.textContent)}`);
+  if (display.querySelectorAll('.typed-caret').length !== 1) failures.push('visible caret is missing');
+  input.focus();
+  input.setSelectionRange(1, 1);
+  input.dispatchEvent(new Event('select', { bubbles: true }));
+  if (!display.children[1]?.classList.contains('typed-caret')) failures.push('caret did not move with selection');
+
+  const course = await (await frame.contentWindow.fetch('high-frequency-words.json')).json();
+  const level = course.levels[0];
+  const loadStage = async (stage) => {
+    await frame.contentWindow.SpellingRuntime.persist('spelling-b:high-frequency-progress:v1', {
+      current: 0,
+      completed: [],
+      practice: {
+        [level.number]: {
+          signature: JSON.stringify(level.words),
+          started: true,
+          complete: false,
+          stage,
+          round: 0,
+          word: 0,
+        },
+      },
+      mastery: {},
+      masteryVersion: 1,
+    });
+    const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+    frame.contentWindow.location.reload();
+    await loaded;
+    app = frame.contentDocument;
+    await waitFor(() => !app.querySelector('#frequency-activity')?.hidden);
+    return {
+      field: app.querySelector('#frequency-answer-field'),
+      display: app.querySelector('#frequency-typed'),
+      input: app.querySelector('#frequency-answer'),
+    };
+  };
+
+  const guided = await loadStage(1);
+  if (!guided.display.textContent.includes('Type what you hear')) failures.push('guided placeholder is missing');
+  guided.input.value = `${level.words[0][0]}x`;
+  guided.input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: guided.input.value }));
+  if (guided.display.querySelectorAll('.letter-correct').length !== 1) failures.push('guided correct-letter color is missing');
+  if (guided.display.querySelectorAll('.letter-incorrect').length !== 1) failures.push('guided incorrect-letter color is missing');
+  if (Number.parseFloat(frame.contentWindow.getComputedStyle(guided.input).opacity) > 0.1) failures.push('guided native input is visibly duplicated');
+
+  const spell = await loadStage(2);
+  if (!spell.display.textContent.includes('Type what you hear')) failures.push('spell placeholder is missing');
+  spell.input.value = 'tx';
+  spell.input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'tx' }));
+  if (spell.display.querySelector('.letter-correct, .letter-incorrect')) failures.push('spell stage shows guided color hints');
+  if (Number.parseFloat(frame.contentWindow.getComputedStyle(spell.input).opacity) > 0.1) failures.push('spell native input is visibly duplicated');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

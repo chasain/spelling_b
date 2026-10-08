@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Mastered profile fixture test</title>
+<pre id="result">Running…</pre>
+<script src="../static/sound-mastery.js"></script>
+<script src="../static/runtime.js"></script>
+<script>
+void (async () => {
+  const failures = [];
+  await window.SpellingRuntime.ready;
+  const response = await fetch('../test_data/mastered-spelling-b.spellingb-profile');
+  const profile = await response.json();
+  try {
+    window.SpellingRuntime.validateProfileData(profile.learnerData);
+  } catch (error) {
+    failures.push(`profile validator: ${error.message}`);
+  }
+  const sessions = profile.learnerData['spelling-b:session-metrics:v1'];
+  const aggregate = window.SpellingSoundMastery.aggregate(sessions);
+  const mastered = [...aggregate.values()].filter((pattern) => window.SpellingSoundMastery.scoreFor(pattern).mastered).length;
+  if (mastered !== 98) failures.push(`sound patterns ${mastered}/98`);
+  const frequency = profile.learnerData['spelling-b:high-frequency-progress:v1'];
+  if (frequency.completed.length !== 100 || Object.keys(frequency.mastery).length !== 100) failures.push('high-frequency mastery');
+  const stickers = profile.learnerData['spelling-b:stickers:v1'];
+  const stickerCount = Object.values(stickers.earned).reduce((total, pack) => total + pack.length, 0);
+  if (stickerCount !== 200) failures.push(`stickers ${stickerCount}/200`);
+  const typing = profile.learnerData['spelling-b:typing-progress:v2'];
+  if (typing.mastered.filter(Boolean).length !== 7 || typing.best.some((score) => score.cpm < 60)) failures.push('typing mastery');
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

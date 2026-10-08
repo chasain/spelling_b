@@ -1,5 +1,6 @@
 void (async () => {
   const runtime = window.SpellingRuntime;
+  const soundMastery = window.SpellingSoundMastery;
   await runtime.ready;
   const totalSessions = document.querySelector('#total-sessions');
   const overallAccuracy = document.querySelector('#overall-accuracy');
@@ -13,10 +14,21 @@ void (async () => {
   const typingChart = document.querySelector('#typing-chart');
   const typingChartLatest = document.querySelector('#typing-chart-latest');
   const needsPracticeSection = document.querySelector('#needs-practice-section');
+  const soundPatterns = document.querySelector('#sound-patterns');
+  const soundPatternSummary = document.querySelector('#sound-pattern-summary');
+  const showMoreSoundPatterns = document.querySelector('#show-more-sound-patterns');
+  const soundPatternInventory = document.querySelector('#sound-pattern-inventory');
+  const soundPatternInventoryHeading = document.querySelector('#sound-pattern-inventory-heading');
+  const createSoundFocusList = document.querySelector('#create-sound-focus-list');
+  const soundFocusStatus = document.querySelector('#sound-focus-status');
   const needsPractice = document.querySelector('#needs-practice');
   const empty = document.querySelector('#empty-metrics');
   const historyContainer = document.querySelector('#session-history');
-  const stageNames = { copy: 'Copy', letters: 'Builder', guided: 'Guided', spell: 'Spell' };
+  const exportProgress = document.querySelector('#export-progress');
+  const stageNames = { copy: 'Copy', letters: 'Builder', guided: 'Guided', spell: 'Spell', review: 'Review' };
+  const soundPatternDisplayLimit = 12;
+  let soundPatternExpanded = false;
+  let rankedSoundPatterns = [];
   const activityDetails = {
     'word-list': { label: 'Word Lists', className: '' },
     phonics: { label: 'Phonics', className: '' },
@@ -35,6 +47,64 @@ void (async () => {
       return [];
     }
   }
+  function csvCell(value) {
+    let text = String(value ?? '');
+    if (/^[=+\-@]/.test(text)) text = `'${text}`;
+    return `"${text.replaceAll('"', '""')}"`;
+  }
+
+  function exportTeacherProgress() {
+    const sessions = history().filter((session) => session?.startedAt && hasData(session));
+    if (!sessions.length) return;
+    const headers = ['date', 'activity', 'list', 'context', 'status', 'mode', 'day', 'stages', 'metric', 'word', 'attempts', 'correct', 'missed', 'accuracyPercent', 'averageSeconds', 'activeSeconds', 'copyCPM', 'typingCPM', 'sound', 'letters', 'masteryPoints', 'masteryScore', 'masteryWords', 'masteryWordDetails'];
+    const rows = [headers];
+    sessions.forEach((session) => {
+      const activity = activityOf(session);
+      const common = [
+        session.startedAt,
+        activityDetails[activity]?.label || activity,
+        session.listTitle || '',
+        sessionContext(session),
+        session.completed ? 'completed' : 'incomplete',
+        session.mode || '',
+        session.day || '',
+        (session.stages || []).map((stage) => stageNames[stage] || stage).join(' | '),
+      ];
+      const wordStats = Object.values(session.wordStats || {});
+      const copyCPM = copySpeedValue(session.wordTimings || []) ?? '';
+      if (wordStats.length) {
+        wordStats.forEach((stats) => {
+          const attempts = Number(stats.samples) || 0;
+          const correct = Number(stats.correct) || 0;
+          rows.push([...common, 'word', stats.word || '', attempts, correct, attempts - correct, attempts ? Math.round(correct / attempts * 100) : '', attempts ? (Number(stats.seconds) / attempts).toFixed(2) : '', activeSecondsFor(session).toFixed(2), copyCPM, session.cpm ? Math.round(session.cpm) : '', ...Array(6).fill('')]);
+        });
+      } else {
+        const accuracy = accuracyParts(session);
+        rows.push([...common, 'session', '', accuracy.attempts, accuracy.correct, accuracy.attempts - accuracy.correct, accuracy.attempts ? Math.round(accuracy.correct / accuracy.attempts * 100) : '', '', activeSecondsFor(session).toFixed(2), copyCPM, session.cpm ? Math.round(session.cpm) : '', ...Array(6).fill('')]);
+      }
+    });
+    const masteryPatterns = soundMastery?.aggregate(sessions) || new Map();
+    [...masteryPatterns.values()].forEach((pattern) => {
+      const result = soundMastery.scoreFor(pattern);
+      const totalPoints = result.words.reduce((sum, item) => sum + item.points, 0);
+      rows.push([
+        ...Array(8).fill(''), 'sound-mastery', '', ...Array(8).fill(''), pattern.sound, pattern.letters,
+        soundMastery.formatPoints(totalPoints), soundMastery.formatPoints(result.score), result.practicedWords,
+        result.words.map((item) => `${item.word} (${soundMastery.formatPoints(item.points)})`).join(' | '),
+      ]);
+    });
+    const csv = '\uFEFF' + rows.map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
+    const date = new Date().toISOString().slice(0, 10);
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `spelling-b-progress-${date}.csv`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
 
   function activityOf(session) {
     if (session.activity) return session.activity;
@@ -268,12 +338,156 @@ void (async () => {
       const word = document.createElement('strong');
       word.textContent = stats.word;
       const accuracy = document.createElement('span');
+
       accuracy.textContent = percent(stats.correct, stats.samples);
       const detail = document.createElement('small');
       detail.textContent = `${stats.samples - stats.correct} missed · ${stats.average.toFixed(1)}s average`;
       item.append(word, accuracy, detail);
       return item;
     }));
+  }
+
+  const aggregateSoundPatterns = (sessions) => soundMastery?.aggregate(sessions) || new Map();
+  const soundPatternKey = (sound, letters) => soundMastery?.keyFor(sound, letters);
+
+  function renderSoundPatternInventory(bank) {
+    if (!soundPatternInventory) return;
+    if (soundPatternInventoryHeading) soundPatternInventoryHeading.textContent = `The ${bank.length} patterns tracked by Spelling B`;
+    soundPatternInventory.replaceChildren(...bank.map((pattern) => {
+      const item = document.createElement('span');
+      item.textContent = `${pattern.grapheme} → ${pattern.sound}`;
+      item.title = `${pattern.label}; ${pattern.words.length} reviewed example words`;
+      return item;
+    }));
+  }
+
+  function renderSoundPatternCards() {
+    const visible = soundPatternExpanded ? rankedSoundPatterns : rankedSoundPatterns.slice(0, soundPatternDisplayLimit);
+    soundPatterns.replaceChildren(...visible.map(({ pattern, score, mastered: isMastered, practicedWords, completedWords, contributing }) => {
+      const card = document.createElement('article');
+      card.className = 'sound-pattern-card';
+      card.classList.toggle('mastered', isMastered);
+      const heading = document.createElement('div');
+      heading.className = 'sound-pattern-card-heading';
+      const mapping = document.createElement('strong');
+      mapping.textContent = `${pattern.sound} → ${pattern.letters}`;
+      const scoreLabel = document.createElement('span');
+      scoreLabel.textContent = `${soundMastery.formatPoints(score)}/100`;
+      heading.append(mapping, scoreLabel);
+      const track = document.createElement('div');
+      track.className = 'sound-pattern-track';
+      const fill = document.createElement('span');
+      fill.style.width = `${score}%`;
+      track.append(fill);
+      const detail = document.createElement('small');
+      detail.textContent = `${completedWords} words at 10 points · ${practicedWords} practiced`;
+      card.append(heading, track, detail);
+      if (contributing.length) {
+        const words = document.createElement('small');
+        words.className = 'sound-pattern-words';
+        words.textContent = contributing.slice(0, 4).map((item) => `${item.word} ${soundMastery.formatPoints(item.points)}`).join(' · ');
+        card.append(words);
+      }
+      return card;
+    }));
+    const hiddenCount = Math.max(0, rankedSoundPatterns.length - soundPatternDisplayLimit);
+    showMoreSoundPatterns.hidden = hiddenCount === 0;
+    showMoreSoundPatterns.textContent = soundPatternExpanded ? 'Show fewer patterns' : `Show ${hiddenCount} more patterns`;
+    showMoreSoundPatterns.setAttribute('aria-expanded', String(soundPatternExpanded));
+  }
+
+  function renderSoundPatterns(sessions) {
+    const aggregate = aggregateSoundPatterns(sessions);
+    const bank = window.SpellingSoundBank?.patterns || [];
+    renderSoundPatternInventory(bank);
+    const bankStats = bank.map((pattern) => {
+      const stats = aggregate.get(soundPatternKey(pattern.sound, pattern.grapheme));
+      return { pattern, stats, ...soundMastery.scoreFor(stats) };
+    });
+    const practiced = bankStats.filter((item) => item.score > 0).length;
+    const mastered = bankStats.filter((item) => item.mastered).length;
+    soundPatternSummary.textContent = `${mastered} of ${bank.length} patterns mastered · ${practiced} practiced.`;
+
+    rankedSoundPatterns = [...aggregate.values()].map((pattern) => ({ pattern, ...soundMastery.scoreFor(pattern) }))
+      .sort((left, right) => left.mastered - right.mastered || left.score - right.score || left.pattern.letters.localeCompare(right.pattern.letters));
+    renderSoundPatternCards();
+  }
+
+  function focusPatterns(sessions) {
+    const aggregate = aggregateSoundPatterns(sessions);
+    const bank = window.SpellingSoundBank?.patterns || [];
+    return bank.map((pattern, order) => {
+      const stats = aggregate.get(soundPatternKey(pattern.sound, pattern.grapheme));
+      const result = soundMastery.scoreFor(stats);
+      const priority = result.score > 0 && !result.mastered ? 0 : result.score === 0 ? 1 : 2;
+      return { pattern, stats, ...result, priority, order };
+    }).sort((left, right) => left.priority - right.priority
+      || left.score - right.score
+      || left.order - right.order).slice(0, 3);
+  }
+
+  async function loadWritableConfig() {
+    if (runtime.isExtension) return runtime.loadConfig();
+    const response = await fetch('/api/config', { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Could not load the saved word lists.');
+    return response.json();
+  }
+
+  async function saveWritableConfig(config) {
+    if (runtime.isExtension) return runtime.saveConfig(config);
+    const response = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error || 'Could not save the focus list.');
+    }
+  }
+
+  async function createFocusList() {
+    const sessions = history().filter((session) => session?.startedAt && hasData(session));
+    const selected = focusPatterns(sessions);
+    if (!selected.length) throw new Error('The sound-spelling word bank is unavailable.');
+    const words = [];
+    selected.forEach(({ pattern, stats }) => {
+      let added = 0;
+      const points = stats?.words || new Map();
+      const primary = pattern.words.slice(0, soundMastery.WORDS_FOR_MASTERY);
+      const reserve = pattern.words.slice(soundMastery.WORDS_FOR_MASTERY);
+      const wordPriority = (word) => {
+        const value = points.get(word.toLocaleLowerCase()) || 0;
+        if (value > 0 && value < soundMastery.MAX_WORD_POINTS) return 0;
+        if (value === 0) return 1;
+        return 2;
+      };
+      const sorter = (left, right) => wordPriority(left) - wordPriority(right)
+        || (points.get(right.toLocaleLowerCase()) || 0) - (points.get(left.toLocaleLowerCase()) || 0);
+      const ordered = [...primary.sort(sorter), ...reserve.sort(sorter)];
+      for (const word of ordered) {
+        if (!words.some((existing) => existing.toLocaleLowerCase() === word.toLocaleLowerCase())) {
+          words.push(word);
+          added++;
+        }
+        if (added >= 4 || words.length >= 12) break;
+      }
+    });
+    if (!words.length) throw new Error('No focus words were available.');
+
+    const config = await loadWritableConfig();
+    const focusID = 'sound-pattern-focus';
+    const focusList = { id: focusID, title: 'Sound Pattern Focus', words };
+    const index = config.lists.findIndex((list) => list.id === focusID);
+    if (index >= 0) config.lists[index] = focusList;
+    else config.lists.push(focusList);
+    await saveWritableConfig(config);
+    await runtime.persist(`spelling-b:list:${focusID}:progress:v1`, null);
+    const listIndex = index >= 0 ? index : config.lists.length - 1;
+    await runtime.persist('spelling-b:current-word-list:v1', { index: listIndex, signature: JSON.stringify([focusList.title, focusList.words]) });
+    soundFocusStatus.textContent = `Created “${focusList.title}” with ${words.length} words for ${selected.map(({ pattern }) => pattern.label).join(', ')}.`;
+    soundFocusStatus.className = 'sound-focus-status success';
+    setTimeout(() => { window.location.href = runtime.homeURL; }, 700);
   }
 
   function renderStageBreakdown(session, card) {
@@ -371,6 +585,7 @@ void (async () => {
 
   function render() {
     const sessions = history().filter((session) => session?.startedAt && hasData(session));
+    exportProgress.disabled = sessions.length === 0;
     totalSessions.textContent = String(sessions.length);
     const totals = sessions.reduce((result, session) => {
       if (!activityOf(session).startsWith('typing')) {
@@ -396,8 +611,26 @@ void (async () => {
       renderTypingTrend(sessions);
       renderNeedsPractice(sessions);
     }
+    renderSoundPatterns(sessions);
     historyContainer.replaceChildren(...sessions.slice(0, 50).map(renderSession));
   }
 
   render();
+  showMoreSoundPatterns.addEventListener('click', () => {
+    soundPatternExpanded = !soundPatternExpanded;
+    renderSoundPatternCards();
+  });
+  exportProgress.addEventListener('click', exportTeacherProgress);
+  createSoundFocusList.addEventListener('click', async () => {
+    createSoundFocusList.disabled = true;
+    soundFocusStatus.textContent = 'Building a focused word list…';
+    soundFocusStatus.className = 'sound-focus-status';
+    try {
+      await createFocusList();
+    } catch (error) {
+      soundFocusStatus.textContent = error.message || 'Could not create the sound-pattern focus list.';
+      soundFocusStatus.className = 'sound-focus-status error';
+      createSoundFocusList.disabled = false;
+    }
+  });
 })();

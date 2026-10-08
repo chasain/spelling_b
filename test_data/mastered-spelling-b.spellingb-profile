@@ -1,0 +1,5945 @@
+{
+  "format": "spelling-b-profile",
+  "version": 1,
+  "appVersion": "1.6.0",
+  "exportedAt": "2026-10-07T12:00:00Z",
+  "profile": {
+    "name": "Mastery Test Learner"
+  },
+  "learnerData": {
+    "spelling-b:session-metrics:v1": [
+      {
+        "id": "mastered-word-list-session",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "word-list",
+        "listTitle": "Mastered Profile Words",
+        "contextLabel": "Advanced · Day 5",
+        "day": 5,
+        "mode": "advanced",
+        "stages": [
+          "copy",
+          "guided",
+          "spell",
+          "review"
+        ],
+        "wordTimings": [
+          {
+            "word": "apple",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "because",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "friend",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "little",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "school",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "would",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "world",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "water",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "mother",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          },
+          {
+            "word": "through",
+            "stage": "spell",
+            "seconds": 1.5,
+            "correct": true
+          }
+        ],
+        "wordStats": {
+          "apple": {
+            "word": "apple",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "because": {
+            "word": "because",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "friend": {
+            "word": "friend",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "little": {
+            "word": "little",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "school": {
+            "word": "school",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "would": {
+            "word": "would",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "world": {
+            "word": "world",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "water": {
+            "word": "water",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "mother": {
+            "word": "mother",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          },
+          "through": {
+            "word": "through",
+            "samples": 1,
+            "seconds": 1.5,
+            "correct": 1
+          }
+        },
+        "wordSamples": 10,
+        "wordSeconds": 15.0,
+        "typedAttempts": 10,
+        "correctTypedAttempts": 10,
+        "typedCharacters": 58,
+        "correctPositionCharacters": 58,
+        "comparedCharacters": 58,
+        "typingSeconds": 15.0,
+        "corrections": 0,
+        "letterChoices": 30,
+        "correctLetterChoices": 30,
+        "builderWords": 10,
+        "soundMastery": {
+          "short-a": {
+            "sound": "/æ/",
+            "letters": "a",
+            "patternId": "short-a",
+            "words": {
+              "cat": 10,
+              "map": 10,
+              "hand": 10,
+              "black": 10,
+              "clap": 10,
+              "flag": 10,
+              "plant": 10,
+              "sand": 10,
+              "crab": 10,
+              "stamp": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "short-e": {
+            "sound": "/ɛ/",
+            "letters": "e",
+            "patternId": "short-e",
+            "words": {
+              "bed": 10,
+              "hen": 10,
+              "red": 10,
+              "step": 10,
+              "dress": 10,
+              "shell": 10,
+              "smell": 10,
+              "nest": 10,
+              "tent": 10,
+              "help": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "short-i": {
+            "sound": "/ɪ/",
+            "letters": "i",
+            "patternId": "short-i",
+            "words": {
+              "sit": 10,
+              "fish": 10,
+              "milk": 10,
+              "ring": 10,
+              "hill": 10,
+              "slip": 10,
+              "brick": 10,
+              "grin": 10,
+              "stick": 10,
+              "swim": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "short-o": {
+            "sound": "/ɑ/",
+            "letters": "o",
+            "patternId": "short-o",
+            "words": {
+              "hot": 10,
+              "dog": 10,
+              "top": 10,
+              "frog": 10,
+              "clock": 10,
+              "stop": 10,
+              "rock": 10,
+              "pond": 10,
+              "shop": 10,
+              "sock": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "short-u": {
+            "sound": "/ʌ/",
+            "letters": "u",
+            "patternId": "short-u",
+            "words": {
+              "sun": 10,
+              "cup": 10,
+              "mud": 10,
+              "jump": 10,
+              "duck": 10,
+              "run": 10,
+              "brush": 10,
+              "drum": 10,
+              "truck": 10,
+              "lunch": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "short-u-o": {
+            "sound": "/ʌ/",
+            "letters": "o",
+            "patternId": "short-u-o",
+            "words": {
+              "honey": 10,
+              "nothing": 10,
+              "dove": 10,
+              "shovel": 10,
+              "won": 10,
+              "month": 10,
+              "other": 10,
+              "glove": 10,
+              "mother": 10,
+              "cover": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-b": {
+            "sound": "/b/",
+            "letters": "b",
+            "patternId": "consonant-b",
+            "words": {
+              "bat": 10,
+              "bed": 10,
+              "big": 10,
+              "box": 10,
+              "bus": 10,
+              "back": 10,
+              "ball": 10,
+              "book": 10,
+              "boat": 10,
+              "blue": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "hard-c": {
+            "sound": "/k/",
+            "letters": "c",
+            "patternId": "hard-c",
+            "words": {
+              "cat": 10,
+              "cup": 10,
+              "cold": 10,
+              "can": 10,
+              "coat": 10,
+              "crab": 10,
+              "clap": 10,
+              "clock": 10,
+              "cake": 10,
+              "corn": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "soft-c": {
+            "sound": "/s/",
+            "letters": "c",
+            "patternId": "soft-c",
+            "words": {
+              "city": 10,
+              "cent": 10,
+              "cell": 10,
+              "face": 10,
+              "race": 10,
+              "ice": 10,
+              "pencil": 10,
+              "place": 10,
+              "dance": 10,
+              "fence": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-d": {
+            "sound": "/d/",
+            "letters": "d",
+            "patternId": "consonant-d",
+            "words": {
+              "dog": 10,
+              "day": 10,
+              "did": 10,
+              "door": 10,
+              "down": 10,
+              "desk": 10,
+              "duck": 10,
+              "dark": 10,
+              "drum": 10,
+              "dress": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-f": {
+            "sound": "/f/",
+            "letters": "f",
+            "patternId": "consonant-f",
+            "words": {
+              "fan": 10,
+              "fish": 10,
+              "fun": 10,
+              "fox": 10,
+              "farm": 10,
+              "food": 10,
+              "feet": 10,
+              "flag": 10,
+              "frog": 10,
+              "fresh": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "hard-g": {
+            "sound": "/ɡ/",
+            "letters": "g",
+            "patternId": "hard-g",
+            "words": {
+              "go": 10,
+              "get": 10,
+              "give": 10,
+              "girl": 10,
+              "gift": 10,
+              "goat": 10,
+              "gum": 10,
+              "garden": 10,
+              "game": 10,
+              "green": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "soft-g": {
+            "sound": "/dʒ/",
+            "letters": "g",
+            "patternId": "soft-g",
+            "words": {
+              "gem": 10,
+              "gentle": 10,
+              "giraffe": 10,
+              "giant": 10,
+              "gym": 10,
+              "magic": 10,
+              "page": 10,
+              "cage": 10,
+              "age": 10,
+              "huge": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-h": {
+            "sound": "/h/",
+            "letters": "h",
+            "patternId": "consonant-h",
+            "words": {
+              "hat": 10,
+              "hen": 10,
+              "hot": 10,
+              "home": 10,
+              "hand": 10,
+              "help": 10,
+              "hill": 10,
+              "hop": 10,
+              "house": 10,
+              "horse": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-j": {
+            "sound": "/dʒ/",
+            "letters": "j",
+            "patternId": "consonant-j",
+            "words": {
+              "jam": 10,
+              "jet": 10,
+              "job": 10,
+              "jump": 10,
+              "just": 10,
+              "jar": 10,
+              "joke": 10,
+              "jelly": 10,
+              "jeans": 10,
+              "juice": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-k": {
+            "sound": "/k/",
+            "letters": "k",
+            "patternId": "consonant-k",
+            "words": {
+              "kit": 10,
+              "kid": 10,
+              "king": 10,
+              "keep": 10,
+              "kite": 10,
+              "kind": 10,
+              "kitchen": 10,
+              "kitten": 10,
+              "skate": 10,
+              "skin": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-l": {
+            "sound": "/l/",
+            "letters": "l",
+            "patternId": "consonant-l",
+            "words": {
+              "leg": 10,
+              "lip": 10,
+              "log": 10,
+              "lamp": 10,
+              "long": 10,
+              "look": 10,
+              "love": 10,
+              "leaf": 10,
+              "lake": 10,
+              "line": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-m": {
+            "sound": "/m/",
+            "letters": "m",
+            "patternId": "consonant-m",
+            "words": {
+              "map": 10,
+              "man": 10,
+              "mud": 10,
+              "moon": 10,
+              "milk": 10,
+              "make": 10,
+              "mouse": 10,
+              "more": 10,
+              "much": 10,
+              "mother": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-n": {
+            "sound": "/n/",
+            "letters": "n",
+            "patternId": "consonant-n",
+            "words": {
+              "net": 10,
+              "nose": 10,
+              "name": 10,
+              "night": 10,
+              "nine": 10,
+              "nice": 10,
+              "nest": 10,
+              "new": 10,
+              "near": 10,
+              "never": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-p": {
+            "sound": "/p/",
+            "letters": "p",
+            "patternId": "consonant-p",
+            "words": {
+              "pan": 10,
+              "pen": 10,
+              "pig": 10,
+              "pot": 10,
+              "cup": 10,
+              "map": 10,
+              "hop": 10,
+              "open": 10,
+              "paper": 10,
+              "paint": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "qu": {
+            "sound": "/kw/",
+            "letters": "qu",
+            "patternId": "qu",
+            "words": {
+              "queen": 10,
+              "quick": 10,
+              "quiet": 10,
+              "quit": 10,
+              "quiz": 10,
+              "question": 10,
+              "quite": 10,
+              "quarter": 10,
+              "quote": 10,
+              "quilt": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-r": {
+            "sound": "/r/",
+            "letters": "r",
+            "patternId": "consonant-r",
+            "words": {
+              "run": 10,
+              "red": 10,
+              "rain": 10,
+              "road": 10,
+              "room": 10,
+              "rock": 10,
+              "rabbit": 10,
+              "right": 10,
+              "rope": 10,
+              "river": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-s": {
+            "sound": "/s/",
+            "letters": "s",
+            "patternId": "consonant-s",
+            "words": {
+              "sun": 10,
+              "sit": 10,
+              "see": 10,
+              "say": 10,
+              "sand": 10,
+              "sock": 10,
+              "soap": 10,
+              "song": 10,
+              "star": 10,
+              "stop": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "s-as-z": {
+            "sound": "/z/",
+            "letters": "s",
+            "patternId": "s-as-z",
+            "words": {
+              "is": 10,
+              "as": 10,
+              "has": 10,
+              "his": 10,
+              "was": 10,
+              "these": 10,
+              "those": 10,
+              "easy": 10,
+              "busy": 10,
+              "nose": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-t": {
+            "sound": "/t/",
+            "letters": "t",
+            "patternId": "consonant-t",
+            "words": {
+              "top": 10,
+              "ten": 10,
+              "time": 10,
+              "two": 10,
+              "take": 10,
+              "table": 10,
+              "tail": 10,
+              "town": 10,
+              "tree": 10,
+              "train": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-v": {
+            "sound": "/v/",
+            "letters": "v",
+            "patternId": "consonant-v",
+            "words": {
+              "van": 10,
+              "vet": 10,
+              "very": 10,
+              "voice": 10,
+              "visit": 10,
+              "vase": 10,
+              "vest": 10,
+              "vine": 10,
+              "vote": 10,
+              "vowel": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-w": {
+            "sound": "/w/",
+            "letters": "w",
+            "patternId": "consonant-w",
+            "words": {
+              "we": 10,
+              "wet": 10,
+              "win": 10,
+              "was": 10,
+              "way": 10,
+              "water": 10,
+              "wall": 10,
+              "wind": 10,
+              "wood": 10,
+              "word": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-x": {
+            "sound": "/ks/",
+            "letters": "x",
+            "patternId": "consonant-x",
+            "words": {
+              "box": 10,
+              "fox": 10,
+              "six": 10,
+              "mix": 10,
+              "fix": 10,
+              "wax": 10,
+              "tax": 10,
+              "next": 10,
+              "text": 10,
+              "extra": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-y": {
+            "sound": "/j/",
+            "letters": "y",
+            "patternId": "consonant-y",
+            "words": {
+              "yes": 10,
+              "you": 10,
+              "yet": 10,
+              "yellow": 10,
+              "yard": 10,
+              "yarn": 10,
+              "year": 10,
+              "yell": 10,
+              "yawn": 10,
+              "young": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "consonant-z": {
+            "sound": "/z/",
+            "letters": "z",
+            "patternId": "consonant-z",
+            "words": {
+              "zoo": 10,
+              "zip": 10,
+              "zap": 10,
+              "zero": 10,
+              "zebra": 10,
+              "zone": 10,
+              "zoom": 10,
+              "lazy": 10,
+              "crazy": 10,
+              "fuzzy": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "sh": {
+            "sound": "/ʃ/",
+            "letters": "sh",
+            "patternId": "sh",
+            "words": {
+              "ship": 10,
+              "shop": 10,
+              "shut": 10,
+              "shell": 10,
+              "fish": 10,
+              "dish": 10,
+              "wish": 10,
+              "brush": 10,
+              "crash": 10,
+              "fresh": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ch": {
+            "sound": "/tʃ/",
+            "letters": "ch",
+            "patternId": "ch",
+            "words": {
+              "chip": 10,
+              "chop": 10,
+              "chin": 10,
+              "chest": 10,
+              "lunch": 10,
+              "bench": 10,
+              "rich": 10,
+              "much": 10,
+              "teach": 10,
+              "chair": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ch-as-k": {
+            "sound": "/k/",
+            "letters": "ch",
+            "patternId": "ch-as-k",
+            "words": {
+              "chorus": 10,
+              "choir": 10,
+              "school": 10,
+              "ache": 10,
+              "stomach": 10,
+              "echo": 10,
+              "anchor": 10,
+              "chemist": 10,
+              "chemistry": 10,
+              "character": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "tch": {
+            "sound": "/tʃ/",
+            "letters": "tch",
+            "patternId": "tch",
+            "words": {
+              "match": 10,
+              "catch": 10,
+              "patch": 10,
+              "hatch": 10,
+              "batch": 10,
+              "watch": 10,
+              "fetch": 10,
+              "stretch": 10,
+              "itch": 10,
+              "witch": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ck": {
+            "sound": "/k/",
+            "letters": "ck",
+            "patternId": "ck",
+            "words": {
+              "back": 10,
+              "black": 10,
+              "duck": 10,
+              "rock": 10,
+              "clock": 10,
+              "stick": 10,
+              "snack": 10,
+              "truck": 10,
+              "neck": 10,
+              "sock": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "dge": {
+            "sound": "/dʒ/",
+            "letters": "dge",
+            "patternId": "dge",
+            "words": {
+              "bridge": 10,
+              "edge": 10,
+              "badge": 10,
+              "fudge": 10,
+              "judge": 10,
+              "ridge": 10,
+              "fridge": 10,
+              "pledge": 10,
+              "hedge": 10,
+              "wedge": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ff": {
+            "sound": "/f/",
+            "letters": "ff",
+            "patternId": "ff",
+            "words": {
+              "off": 10,
+              "coffee": 10,
+              "stuff": 10,
+              "cliff": 10,
+              "puff": 10,
+              "muffin": 10,
+              "different": 10,
+              "traffic": 10,
+              "office": 10,
+              "offer": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "kn": {
+            "sound": "/n/",
+            "letters": "kn",
+            "patternId": "kn",
+            "words": {
+              "know": 10,
+              "knee": 10,
+              "knife": 10,
+              "knight": 10,
+              "knit": 10,
+              "knock": 10,
+              "knot": 10,
+              "knob": 10,
+              "kneel": 10,
+              "knuckle": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "wr": {
+            "sound": "/r/",
+            "letters": "wr",
+            "patternId": "wr",
+            "words": {
+              "write": 10,
+              "wrist": 10,
+              "wrong": 10,
+              "wrap": 10,
+              "wreck": 10,
+              "wren": 10,
+              "wrench": 10,
+              "wring": 10,
+              "wrinkle": 10,
+              "wrote": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "nk": {
+            "sound": "/ŋk/",
+            "letters": "nk",
+            "patternId": "nk",
+            "words": {
+              "bank": 10,
+              "sink": 10,
+              "pink": 10,
+              "think": 10,
+              "thank": 10,
+              "trunk": 10,
+              "drink": 10,
+              "blank": 10,
+              "chunk": 10,
+              "monkey": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ll": {
+            "sound": "/l/",
+            "letters": "ll",
+            "patternId": "ll",
+            "words": {
+              "ball": 10,
+              "bell": 10,
+              "bill": 10,
+              "doll": 10,
+              "full": 10,
+              "hill": 10,
+              "will": 10,
+              "tell": 10,
+              "shell": 10,
+              "smell": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "mm": {
+            "sound": "/m/",
+            "letters": "mm",
+            "patternId": "mm",
+            "words": {
+              "summer": 10,
+              "hammer": 10,
+              "common": 10,
+              "swimming": 10,
+              "humming": 10,
+              "yummy": 10,
+              "mammal": 10,
+              "comma": 10,
+              "comment": 10,
+              "command": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "nn": {
+            "sound": "/n/",
+            "letters": "nn",
+            "patternId": "nn",
+            "words": {
+              "funny": 10,
+              "sunny": 10,
+              "running": 10,
+              "dinner": 10,
+              "winner": 10,
+              "bunny": 10,
+              "tennis": 10,
+              "cannot": 10,
+              "penny": 10,
+              "tunnel": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "pp": {
+            "sound": "/p/",
+            "letters": "pp",
+            "patternId": "pp",
+            "words": {
+              "happy": 10,
+              "apple": 10,
+              "puppy": 10,
+              "happen": 10,
+              "hopping": 10,
+              "shopping": 10,
+              "support": 10,
+              "suppose": 10,
+              "upper": 10,
+              "ripple": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "rr": {
+            "sound": "/r/",
+            "letters": "rr",
+            "patternId": "rr",
+            "words": {
+              "berry": 10,
+              "carry": 10,
+              "hurry": 10,
+              "mirror": 10,
+              "sorry": 10,
+              "parrot": 10,
+              "borrow": 10,
+              "arrow": 10,
+              "cherry": 10,
+              "carrot": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ss": {
+            "sound": "/s/",
+            "letters": "ss",
+            "patternId": "ss",
+            "words": {
+              "less": 10,
+              "press": 10,
+              "dress": 10,
+              "stress": 10,
+              "class": 10,
+              "glass": 10,
+              "grass": 10,
+              "cross": 10,
+              "miss": 10,
+              "kiss": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "tt": {
+            "sound": "/t/",
+            "letters": "tt",
+            "patternId": "tt",
+            "words": {
+              "little": 10,
+              "letter": 10,
+              "better": 10,
+              "butter": 10,
+              "kitten": 10,
+              "sitting": 10,
+              "bottle": 10,
+              "matter": 10,
+              "button": 10,
+              "pretty": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "wh": {
+            "sound": "/w/",
+            "letters": "wh",
+            "patternId": "wh",
+            "words": {
+              "what": 10,
+              "when": 10,
+              "where": 10,
+              "why": 10,
+              "which": 10,
+              "while": 10,
+              "whale": 10,
+              "wheat": 10,
+              "whisper": 10,
+              "whistle": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "tion": {
+            "sound": "/ʃən/",
+            "letters": "tion",
+            "patternId": "tion",
+            "words": {
+              "action": 10,
+              "station": 10,
+              "nation": 10,
+              "motion": 10,
+              "lotion": 10,
+              "option": 10,
+              "section": 10,
+              "portion": 10,
+              "mention": 10,
+              "fiction": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "sion-zh": {
+            "sound": "/ʒən/",
+            "letters": "sion",
+            "patternId": "sion-zh",
+            "words": {
+              "vision": 10,
+              "television": 10,
+              "decision": 10,
+              "division": 10,
+              "revision": 10,
+              "explosion": 10,
+              "confusion": 10,
+              "occasion": 10,
+              "conclusion": 10,
+              "inclusion": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "sion-sh": {
+            "sound": "/ʃən/",
+            "letters": "sion",
+            "patternId": "sion-sh",
+            "words": {
+              "mission": 10,
+              "passion": 10,
+              "session": 10,
+              "expression": 10,
+              "discussion": 10,
+              "permission": 10,
+              "admission": 10,
+              "profession": 10,
+              "impression": 10,
+              "possession": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ng": {
+            "sound": "/ŋ/",
+            "letters": "ng",
+            "patternId": "ng",
+            "words": {
+              "sing": 10,
+              "ring": 10,
+              "king": 10,
+              "wing": 10,
+              "song": 10,
+              "long": 10,
+              "strong": 10,
+              "thing": 10,
+              "bring": 10,
+              "spring": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "unvoiced-th": {
+            "sound": "/θ/",
+            "letters": "th",
+            "patternId": "unvoiced-th",
+            "words": {
+              "thin": 10,
+              "thick": 10,
+              "thumb": 10,
+              "bath": 10,
+              "math": 10,
+              "moth": 10,
+              "path": 10,
+              "teeth": 10,
+              "tooth": 10,
+              "three": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "voiced-th": {
+            "sound": "/ð/",
+            "letters": "th",
+            "patternId": "voiced-th",
+            "words": {
+              "this": 10,
+              "that": 10,
+              "these": 10,
+              "those": 10,
+              "them": 10,
+              "then": 10,
+              "there": 10,
+              "they": 10,
+              "their": 10,
+              "mother": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-a-ai": {
+            "sound": "/eɪ/",
+            "letters": "ai",
+            "patternId": "long-a-ai",
+            "words": {
+              "rain": 10,
+              "mail": 10,
+              "tail": 10,
+              "sail": 10,
+              "train": 10,
+              "paint": 10,
+              "chain": 10,
+              "brain": 10,
+              "grain": 10,
+              "snail": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-a-ay": {
+            "sound": "/eɪ/",
+            "letters": "ay",
+            "patternId": "long-a-ay",
+            "words": {
+              "day": 10,
+              "play": 10,
+              "say": 10,
+              "may": 10,
+              "way": 10,
+              "stay": 10,
+              "gray": 10,
+              "clay": 10,
+              "tray": 10,
+              "spray": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-e-ee": {
+            "sound": "/iː/",
+            "letters": "ee",
+            "patternId": "long-e-ee",
+            "words": {
+              "see": 10,
+              "tree": 10,
+              "green": 10,
+              "feet": 10,
+              "sheep": 10,
+              "sleep": 10,
+              "street": 10,
+              "seed": 10,
+              "need": 10,
+              "week": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-e-ea": {
+            "sound": "/iː/",
+            "letters": "ea",
+            "patternId": "long-e-ea",
+            "words": {
+              "eat": 10,
+              "sea": 10,
+              "read": 10,
+              "team": 10,
+              "clean": 10,
+              "dream": 10,
+              "beach": 10,
+              "peach": 10,
+              "teach": 10,
+              "leaf": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-i-igh": {
+            "sound": "/aɪ/",
+            "letters": "igh",
+            "patternId": "long-i-igh",
+            "words": {
+              "high": 10,
+              "night": 10,
+              "light": 10,
+              "right": 10,
+              "fight": 10,
+              "sight": 10,
+              "tight": 10,
+              "might": 10,
+              "bright": 10,
+              "flight": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-o-oa": {
+            "sound": "/oʊ/",
+            "letters": "oa",
+            "patternId": "long-o-oa",
+            "words": {
+              "boat": 10,
+              "coat": 10,
+              "road": 10,
+              "soap": 10,
+              "goat": 10,
+              "float": 10,
+              "throat": 10,
+              "toast": 10,
+              "coach": 10,
+              "loaf": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-a-open": {
+            "sound": "/eɪ/",
+            "letters": "a",
+            "patternId": "long-a-open",
+            "words": {
+              "acorn": 10,
+              "apron": 10,
+              "agent": 10,
+              "able": 10,
+              "table": 10,
+              "paper": 10,
+              "baby": 10,
+              "lady": 10,
+              "basic": 10,
+              "bacon": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "schwa-a": {
+            "sound": "/ə/",
+            "letters": "a",
+            "patternId": "schwa-a",
+            "words": {
+              "about": 10,
+              "ago": 10,
+              "away": 10,
+              "alone": 10,
+              "alive": 10,
+              "around": 10,
+              "above": 10,
+              "again": 10,
+              "along": 10,
+              "across": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-e-open": {
+            "sound": "/iː/",
+            "letters": "e",
+            "patternId": "long-e-open",
+            "words": {
+              "he": 10,
+              "she": 10,
+              "we": 10,
+              "me": 10,
+              "be": 10,
+              "even": 10,
+              "equal": 10,
+              "evil": 10,
+              "legal": 10,
+              "secret": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-i-open": {
+            "sound": "/aɪ/",
+            "letters": "i",
+            "patternId": "long-i-open",
+            "words": {
+              "find": 10,
+              "kind": 10,
+              "mind": 10,
+              "child": 10,
+              "wild": 10,
+              "blind": 10,
+              "behind": 10,
+              "climb": 10,
+              "sign": 10,
+              "title": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-o-open": {
+            "sound": "/oʊ/",
+            "letters": "o",
+            "patternId": "long-o-open",
+            "words": {
+              "no": 10,
+              "go": 10,
+              "so": 10,
+              "most": 10,
+              "both": 10,
+              "old": 10,
+              "cold": 10,
+              "told": 10,
+              "open": 10,
+              "over": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-u-yoo": {
+            "sound": "/juː/",
+            "letters": "u",
+            "patternId": "long-u-yoo",
+            "words": {
+              "use": 10,
+              "unit": 10,
+              "music": 10,
+              "human": 10,
+              "cute": 10,
+              "huge": 10,
+              "student": 10,
+              "future": 10,
+              "computer": 10,
+              "usual": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "u-as-book": {
+            "sound": "/ʊ/",
+            "letters": "u",
+            "patternId": "u-as-book",
+            "words": {
+              "put": 10,
+              "push": 10,
+              "pull": 10,
+              "full": 10,
+              "bush": 10,
+              "bull": 10,
+              "bullet": 10,
+              "butcher": 10,
+              "cushion": 10,
+              "pudding": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "y-long-e": {
+            "sound": "/iː/",
+            "letters": "y",
+            "patternId": "y-long-e",
+            "words": {
+              "happy": 10,
+              "sunny": 10,
+              "funny": 10,
+              "city": 10,
+              "baby": 10,
+              "lady": 10,
+              "candy": 10,
+              "story": 10,
+              "family": 10,
+              "money": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "y-short-i": {
+            "sound": "/ɪ/",
+            "letters": "y",
+            "patternId": "y-short-i",
+            "words": {
+              "gym": 10,
+              "system": 10,
+              "symbol": 10,
+              "mystery": 10,
+              "crystal": 10,
+              "typical": 10,
+              "syllable": 10,
+              "lyrics": 10,
+              "myth": 10,
+              "gymnast": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "y-long-i": {
+            "sound": "/aɪ/",
+            "letters": "y",
+            "patternId": "y-long-i",
+            "words": {
+              "my": 10,
+              "by": 10,
+              "try": 10,
+              "cry": 10,
+              "fly": 10,
+              "sky": 10,
+              "dry": 10,
+              "why": 10,
+              "shy": 10,
+              "spy": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-a-split": {
+            "sound": "/eɪ/",
+            "letters": "a_e",
+            "patternId": "long-a-split",
+            "words": {
+              "cake": 10,
+              "make": 10,
+              "name": 10,
+              "game": 10,
+              "same": 10,
+              "late": 10,
+              "gate": 10,
+              "plate": 10,
+              "shape": 10,
+              "brave": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-i-split": {
+            "sound": "/aɪ/",
+            "letters": "i_e",
+            "patternId": "long-i-split",
+            "words": {
+              "bike": 10,
+              "time": 10,
+              "five": 10,
+              "kite": 10,
+              "line": 10,
+              "ride": 10,
+              "smile": 10,
+              "white": 10,
+              "slide": 10,
+              "drive": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "long-o-split": {
+            "sound": "/oʊ/",
+            "letters": "o_e",
+            "patternId": "long-o-split",
+            "words": {
+              "home": 10,
+              "hope": 10,
+              "nose": 10,
+              "rose": 10,
+              "note": 10,
+              "rope": 10,
+              "stone": 10,
+              "phone": 10,
+              "those": 10,
+              "close": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "r-ar": {
+            "sound": "/ɑr/",
+            "letters": "ar",
+            "patternId": "r-ar",
+            "words": {
+              "car": 10,
+              "far": 10,
+              "star": 10,
+              "arm": 10,
+              "farm": 10,
+              "park": 10,
+              "dark": 10,
+              "hard": 10,
+              "card": 10,
+              "yard": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "r-or": {
+            "sound": "/ɔr/",
+            "letters": "or",
+            "patternId": "r-or",
+            "words": {
+              "for": 10,
+              "corn": 10,
+              "fork": 10,
+              "horse": 10,
+              "short": 10,
+              "storm": 10,
+              "born": 10,
+              "morning": 10,
+              "north": 10,
+              "sport": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "r-er": {
+            "sound": "/ɝ/",
+            "letters": "er",
+            "patternId": "r-er",
+            "words": {
+              "her": 10,
+              "term": 10,
+              "fern": 10,
+              "germ": 10,
+              "herd": 10,
+              "serve": 10,
+              "person": 10,
+              "perfect": 10,
+              "nervous": 10,
+              "certain": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "unstressed-er": {
+            "sound": "/ɚ/",
+            "letters": "er",
+            "patternId": "unstressed-er",
+            "words": {
+              "water": 10,
+              "mother": 10,
+              "father": 10,
+              "brother": 10,
+              "sister": 10,
+              "teacher": 10,
+              "better": 10,
+              "after": 10,
+              "under": 10,
+              "over": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "or-as-er": {
+            "sound": "/ɝ/",
+            "letters": "or",
+            "patternId": "or-as-er",
+            "words": {
+              "word": 10,
+              "work": 10,
+              "world": 10,
+              "worm": 10,
+              "worse": 10,
+              "worst": 10,
+              "worth": 10,
+              "worthy": 10,
+              "worker": 10,
+              "working": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "r-ir": {
+            "sound": "/ɝ/",
+            "letters": "ir",
+            "patternId": "r-ir",
+            "words": {
+              "bird": 10,
+              "girl": 10,
+              "shirt": 10,
+              "first": 10,
+              "third": 10,
+              "dirt": 10,
+              "stir": 10,
+              "skirt": 10,
+              "birth": 10,
+              "chirp": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "r-ur": {
+            "sound": "/ɝ/",
+            "letters": "ur",
+            "patternId": "r-ur",
+            "words": {
+              "turn": 10,
+              "burn": 10,
+              "hurt": 10,
+              "curl": 10,
+              "fur": 10,
+              "nurse": 10,
+              "purple": 10,
+              "turtle": 10,
+              "thursday": 10,
+              "burst": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "air": {
+            "sound": "/ɛr/",
+            "letters": "air",
+            "patternId": "air",
+            "words": {
+              "air": 10,
+              "hair": 10,
+              "fair": 10,
+              "pair": 10,
+              "chair": 10,
+              "stairs": 10,
+              "airport": 10,
+              "airplane": 10,
+              "fairy": 10,
+              "dairy": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "are-air": {
+            "sound": "/ɛr/",
+            "letters": "are",
+            "patternId": "are-air",
+            "words": {
+              "care": 10,
+              "share": 10,
+              "aware": 10,
+              "rare": 10,
+              "scared": 10,
+              "careful": 10,
+              "prepare": 10,
+              "compare": 10,
+              "dare": 10,
+              "spare": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ear-near": {
+            "sound": "/ɪr/",
+            "letters": "ear",
+            "patternId": "ear-near",
+            "words": {
+              "near": 10,
+              "clear": 10,
+              "fear": 10,
+              "dear": 10,
+              "gear": 10,
+              "rear": 10,
+              "ears": 10,
+              "beard": 10,
+              "spear": 10,
+              "weary": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "eer": {
+            "sound": "/ɪr/",
+            "letters": "eer",
+            "patternId": "eer",
+            "words": {
+              "deer": 10,
+              "cheer": 10,
+              "peer": 10,
+              "sheer": 10,
+              "steer": 10,
+              "career": 10,
+              "engineer": 10,
+              "volunteer": 10,
+              "pioneer": 10,
+              "reindeer": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "err-air": {
+            "sound": "/ɛr/",
+            "letters": "err",
+            "patternId": "err-air",
+            "words": {
+              "berry": 10,
+              "cherry": 10,
+              "ferry": 10,
+              "merry": 10,
+              "strawberry": 10,
+              "blackberry": 10,
+              "raspberry": 10,
+              "terrible": 10,
+              "territory": 10,
+              "terror": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ow-cow": {
+            "sound": "/aʊ/",
+            "letters": "ow",
+            "patternId": "ow-cow",
+            "words": {
+              "cow": 10,
+              "how": 10,
+              "now": 10,
+              "down": 10,
+              "town": 10,
+              "brown": 10,
+              "clown": 10,
+              "crown": 10,
+              "flower": 10,
+              "shower": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ow-snow": {
+            "sound": "/oʊ/",
+            "letters": "ow",
+            "patternId": "ow-snow",
+            "words": {
+              "own": 10,
+              "snow": 10,
+              "grow": 10,
+              "throw": 10,
+              "show": 10,
+              "know": 10,
+              "slow": 10,
+              "flow": 10,
+              "blow": 10,
+              "glow": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "aw": {
+            "sound": "/ɔ/",
+            "letters": "aw",
+            "patternId": "aw",
+            "words": {
+              "saw": 10,
+              "draw": 10,
+              "law": 10,
+              "paw": 10,
+              "raw": 10,
+              "straw": 10,
+              "claw": 10,
+              "yawn": 10,
+              "crawl": 10,
+              "hawk": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ou-cloud": {
+            "sound": "/aʊ/",
+            "letters": "ou",
+            "patternId": "ou-cloud",
+            "words": {
+              "out": 10,
+              "loud": 10,
+              "cloud": 10,
+              "house": 10,
+              "mouse": 10,
+              "round": 10,
+              "sound": 10,
+              "found": 10,
+              "ground": 10,
+              "count": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "oi": {
+            "sound": "/ɔɪ/",
+            "letters": "oi",
+            "patternId": "oi",
+            "words": {
+              "coin": 10,
+              "boil": 10,
+              "soil": 10,
+              "oil": 10,
+              "join": 10,
+              "point": 10,
+              "voice": 10,
+              "choice": 10,
+              "noise": 10,
+              "spoil": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "oy": {
+            "sound": "/ɔɪ/",
+            "letters": "oy",
+            "patternId": "oy",
+            "words": {
+              "boy": 10,
+              "toy": 10,
+              "joy": 10,
+              "soy": 10,
+              "annoy": 10,
+              "enjoy": 10,
+              "cowboy": 10,
+              "oyster": 10,
+              "royal": 10,
+              "loyal": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "au": {
+            "sound": "/ɔ/",
+            "letters": "au",
+            "patternId": "au",
+            "words": {
+              "author": 10,
+              "august": 10,
+              "autumn": 10,
+              "launch": 10,
+              "fault": 10,
+              "sauce": 10,
+              "pause": 10,
+              "cause": 10,
+              "haunt": 10,
+              "laundry": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ie-long-e": {
+            "sound": "/iː/",
+            "letters": "ie",
+            "patternId": "ie-long-e",
+            "words": {
+              "piece": 10,
+              "field": 10,
+              "chief": 10,
+              "brief": 10,
+              "grief": 10,
+              "thief": 10,
+              "niece": 10,
+              "priest": 10,
+              "believe": 10,
+              "relief": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ey-long-e": {
+            "sound": "/iː/",
+            "letters": "ey",
+            "patternId": "ey-long-e",
+            "words": {
+              "key": 10,
+              "honey": 10,
+              "money": 10,
+              "monkey": 10,
+              "donkey": 10,
+              "turkey": 10,
+              "chimney": 10,
+              "valley": 10,
+              "trolley": 10,
+              "journey": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "oo-moon": {
+            "sound": "/uː/",
+            "letters": "oo",
+            "patternId": "oo-moon",
+            "words": {
+              "moon": 10,
+              "food": 10,
+              "room": 10,
+              "school": 10,
+              "tooth": 10,
+              "spoon": 10,
+              "boot": 10,
+              "zoo": 10,
+              "cool": 10,
+              "pool": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "oo-book": {
+            "sound": "/ʊ/",
+            "letters": "oo",
+            "patternId": "oo-book",
+            "words": {
+              "book": 10,
+              "look": 10,
+              "cook": 10,
+              "foot": 10,
+              "good": 10,
+              "wood": 10,
+              "hook": 10,
+              "took": 10,
+              "shook": 10,
+              "stood": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ph": {
+            "sound": "/f/",
+            "letters": "ph",
+            "patternId": "ph",
+            "words": {
+              "phone": 10,
+              "photo": 10,
+              "graph": 10,
+              "dolphin": 10,
+              "elephant": 10,
+              "alphabet": 10,
+              "pharmacy": 10,
+              "phrase": 10,
+              "trophy": 10,
+              "nephew": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          },
+          "ture": {
+            "sound": "/tʃɚ/",
+            "letters": "ture",
+            "patternId": "ture",
+            "words": {
+              "future": 10,
+              "picture": 10,
+              "nature": 10,
+              "feature": 10,
+              "culture": 10,
+              "adventure": 10,
+              "furniture": 10,
+              "capture": 10,
+              "mixture": 10,
+              "lecture": 10
+            },
+            "stagePoints": {
+              "copy": 5,
+              "letters": 20,
+              "guided": 40,
+              "spell": 60
+            }
+          }
+        }
+      },
+      {
+        "id": "mastered-typing-1",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 1",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 1,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 91,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-2",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 2",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 2,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 92,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-3",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 3",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 3,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 93,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-4",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 4",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 4,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 94,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-5",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 5",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 5,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 95,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-6",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 6",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 6,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 96,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-typing-7",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "typing-test",
+        "listTitle": "Typing · Level 7",
+        "contextLabel": "Lightning Bee",
+        "mode": "test",
+        "level": 7,
+        "stages": [
+          "test"
+        ],
+        "characterAttempts": 300,
+        "correctCharacters": 300,
+        "activeSeconds": 120,
+        "cpm": 97,
+        "accuracy": 100
+      },
+      {
+        "id": "mastered-spelling-test",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "spelling-test",
+        "listTitle": "All lists test",
+        "contextLabel": "Perfect score",
+        "mode": "test",
+        "stages": [
+          "spell"
+        ],
+        "wordTimings": [
+          {
+            "word": "apple",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "because",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "friend",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "little",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "school",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "would",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "world",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "water",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "mother",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          },
+          {
+            "word": "through",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          }
+        ],
+        "wordStats": {
+          "apple": {
+            "word": "apple",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "because": {
+            "word": "because",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "friend": {
+            "word": "friend",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "little": {
+            "word": "little",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "school": {
+            "word": "school",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "would": {
+            "word": "would",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "world": {
+            "word": "world",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "water": {
+            "word": "water",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "mother": {
+            "word": "mother",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          },
+          "through": {
+            "word": "through",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          }
+        },
+        "wordSamples": 10,
+        "wordSeconds": 10,
+        "typedAttempts": 10,
+        "correctTypedAttempts": 10,
+        "typedCharacters": 58,
+        "correctPositionCharacters": 58,
+        "comparedCharacters": 58,
+        "typingSeconds": 10,
+        "corrections": 0,
+        "letterChoices": 0,
+        "correctLetterChoices": 0,
+        "builderWords": 0
+      },
+      {
+        "id": "mastered-high-frequency-session",
+        "startedAt": "2026-10-07T12:00:00Z",
+        "lastActiveAt": "2026-10-07T12:00:00Z",
+        "endedAt": "2026-10-07T12:00:00Z",
+        "completed": true,
+        "activity": "high-frequency",
+        "listTitle": "High Frequency · Level 100",
+        "contextLabel": "Words 991–1000",
+        "mode": "practice",
+        "stages": [
+          "copy",
+          "guided",
+          "spell"
+        ],
+        "wordTimings": [
+          {
+            "word": "command",
+            "stage": "spell",
+            "seconds": 1,
+            "correct": true
+          }
+        ],
+        "wordStats": {
+          "command": {
+            "word": "command",
+            "samples": 1,
+            "seconds": 1,
+            "correct": 1
+          }
+        },
+        "wordSamples": 1,
+        "wordSeconds": 1,
+        "typedAttempts": 1,
+        "correctTypedAttempts": 1,
+        "typedCharacters": 7,
+        "correctPositionCharacters": 7,
+        "comparedCharacters": 7,
+        "typingSeconds": 1,
+        "corrections": 0,
+        "letterChoices": 0,
+        "correctLetterChoices": 0,
+        "builderWords": 0,
+        "soundMastery": {},
+        "soundMasteryBackfillVersion": 1
+      }
+    ],
+    "spelling-b:stickers:v1": {
+      "selectedPack": "random",
+      "earned": {
+        "animals": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "space": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "dinosaurs": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "ocean": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "sports": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "fantasy": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "farm": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "bugs": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "birds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "fruit": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "treats": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "weather": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "garden": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "vehicles": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "music": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "art": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "school": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "celebration": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "adventure": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "robots": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      "awards": {
+        "fixture:animals:1": {
+          "packID": "animals",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:animals:2": {
+          "packID": "animals",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:animals:3": {
+          "packID": "animals",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:animals:4": {
+          "packID": "animals",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:animals:5": {
+          "packID": "animals",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:animals:6": {
+          "packID": "animals",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:animals:7": {
+          "packID": "animals",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:animals:8": {
+          "packID": "animals",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:animals:9": {
+          "packID": "animals",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:animals:10": {
+          "packID": "animals",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:space:1": {
+          "packID": "space",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:space:2": {
+          "packID": "space",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:space:3": {
+          "packID": "space",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:space:4": {
+          "packID": "space",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:space:5": {
+          "packID": "space",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:space:6": {
+          "packID": "space",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:space:7": {
+          "packID": "space",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:space:8": {
+          "packID": "space",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:space:9": {
+          "packID": "space",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:space:10": {
+          "packID": "space",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:1": {
+          "packID": "dinosaurs",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:2": {
+          "packID": "dinosaurs",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:3": {
+          "packID": "dinosaurs",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:4": {
+          "packID": "dinosaurs",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:5": {
+          "packID": "dinosaurs",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:6": {
+          "packID": "dinosaurs",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:7": {
+          "packID": "dinosaurs",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:8": {
+          "packID": "dinosaurs",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:9": {
+          "packID": "dinosaurs",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:dinosaurs:10": {
+          "packID": "dinosaurs",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:1": {
+          "packID": "ocean",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:2": {
+          "packID": "ocean",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:3": {
+          "packID": "ocean",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:4": {
+          "packID": "ocean",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:5": {
+          "packID": "ocean",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:6": {
+          "packID": "ocean",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:7": {
+          "packID": "ocean",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:8": {
+          "packID": "ocean",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:9": {
+          "packID": "ocean",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:ocean:10": {
+          "packID": "ocean",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:sports:1": {
+          "packID": "sports",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:sports:2": {
+          "packID": "sports",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:sports:3": {
+          "packID": "sports",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:sports:4": {
+          "packID": "sports",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:sports:5": {
+          "packID": "sports",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:sports:6": {
+          "packID": "sports",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:sports:7": {
+          "packID": "sports",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:sports:8": {
+          "packID": "sports",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:sports:9": {
+          "packID": "sports",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:sports:10": {
+          "packID": "sports",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:1": {
+          "packID": "fantasy",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:2": {
+          "packID": "fantasy",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:3": {
+          "packID": "fantasy",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:4": {
+          "packID": "fantasy",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:5": {
+          "packID": "fantasy",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:6": {
+          "packID": "fantasy",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:7": {
+          "packID": "fantasy",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:8": {
+          "packID": "fantasy",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:9": {
+          "packID": "fantasy",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:fantasy:10": {
+          "packID": "fantasy",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:farm:1": {
+          "packID": "farm",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:farm:2": {
+          "packID": "farm",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:farm:3": {
+          "packID": "farm",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:farm:4": {
+          "packID": "farm",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:farm:5": {
+          "packID": "farm",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:farm:6": {
+          "packID": "farm",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:farm:7": {
+          "packID": "farm",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:farm:8": {
+          "packID": "farm",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:farm:9": {
+          "packID": "farm",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:farm:10": {
+          "packID": "farm",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:1": {
+          "packID": "bugs",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:2": {
+          "packID": "bugs",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:3": {
+          "packID": "bugs",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:4": {
+          "packID": "bugs",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:5": {
+          "packID": "bugs",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:6": {
+          "packID": "bugs",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:7": {
+          "packID": "bugs",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:8": {
+          "packID": "bugs",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:9": {
+          "packID": "bugs",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:bugs:10": {
+          "packID": "bugs",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:birds:1": {
+          "packID": "birds",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:birds:2": {
+          "packID": "birds",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:birds:3": {
+          "packID": "birds",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:birds:4": {
+          "packID": "birds",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:birds:5": {
+          "packID": "birds",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:birds:6": {
+          "packID": "birds",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:birds:7": {
+          "packID": "birds",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:birds:8": {
+          "packID": "birds",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:birds:9": {
+          "packID": "birds",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:birds:10": {
+          "packID": "birds",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:1": {
+          "packID": "fruit",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:2": {
+          "packID": "fruit",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:3": {
+          "packID": "fruit",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:4": {
+          "packID": "fruit",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:5": {
+          "packID": "fruit",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:6": {
+          "packID": "fruit",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:7": {
+          "packID": "fruit",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:8": {
+          "packID": "fruit",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:9": {
+          "packID": "fruit",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:fruit:10": {
+          "packID": "fruit",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:treats:1": {
+          "packID": "treats",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:treats:2": {
+          "packID": "treats",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:treats:3": {
+          "packID": "treats",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:treats:4": {
+          "packID": "treats",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:treats:5": {
+          "packID": "treats",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:treats:6": {
+          "packID": "treats",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:treats:7": {
+          "packID": "treats",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:treats:8": {
+          "packID": "treats",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:treats:9": {
+          "packID": "treats",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:treats:10": {
+          "packID": "treats",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:weather:1": {
+          "packID": "weather",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:weather:2": {
+          "packID": "weather",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:weather:3": {
+          "packID": "weather",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:weather:4": {
+          "packID": "weather",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:weather:5": {
+          "packID": "weather",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:weather:6": {
+          "packID": "weather",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:weather:7": {
+          "packID": "weather",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:weather:8": {
+          "packID": "weather",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:weather:9": {
+          "packID": "weather",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:weather:10": {
+          "packID": "weather",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:garden:1": {
+          "packID": "garden",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:garden:2": {
+          "packID": "garden",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:garden:3": {
+          "packID": "garden",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:garden:4": {
+          "packID": "garden",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:garden:5": {
+          "packID": "garden",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:garden:6": {
+          "packID": "garden",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:garden:7": {
+          "packID": "garden",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:garden:8": {
+          "packID": "garden",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:garden:9": {
+          "packID": "garden",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:garden:10": {
+          "packID": "garden",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:1": {
+          "packID": "vehicles",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:2": {
+          "packID": "vehicles",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:3": {
+          "packID": "vehicles",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:4": {
+          "packID": "vehicles",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:5": {
+          "packID": "vehicles",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:6": {
+          "packID": "vehicles",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:7": {
+          "packID": "vehicles",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:8": {
+          "packID": "vehicles",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:9": {
+          "packID": "vehicles",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:vehicles:10": {
+          "packID": "vehicles",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:music:1": {
+          "packID": "music",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:music:2": {
+          "packID": "music",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:music:3": {
+          "packID": "music",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:music:4": {
+          "packID": "music",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:music:5": {
+          "packID": "music",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:music:6": {
+          "packID": "music",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:music:7": {
+          "packID": "music",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:music:8": {
+          "packID": "music",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:music:9": {
+          "packID": "music",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:music:10": {
+          "packID": "music",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:art:1": {
+          "packID": "art",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:art:2": {
+          "packID": "art",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:art:3": {
+          "packID": "art",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:art:4": {
+          "packID": "art",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:art:5": {
+          "packID": "art",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:art:6": {
+          "packID": "art",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:art:7": {
+          "packID": "art",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:art:8": {
+          "packID": "art",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:art:9": {
+          "packID": "art",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:art:10": {
+          "packID": "art",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:school:1": {
+          "packID": "school",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:school:2": {
+          "packID": "school",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:school:3": {
+          "packID": "school",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:school:4": {
+          "packID": "school",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:school:5": {
+          "packID": "school",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:school:6": {
+          "packID": "school",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:school:7": {
+          "packID": "school",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:school:8": {
+          "packID": "school",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:school:9": {
+          "packID": "school",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:school:10": {
+          "packID": "school",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:1": {
+          "packID": "celebration",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:2": {
+          "packID": "celebration",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:3": {
+          "packID": "celebration",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:4": {
+          "packID": "celebration",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:5": {
+          "packID": "celebration",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:6": {
+          "packID": "celebration",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:7": {
+          "packID": "celebration",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:8": {
+          "packID": "celebration",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:9": {
+          "packID": "celebration",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:celebration:10": {
+          "packID": "celebration",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:1": {
+          "packID": "adventure",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:2": {
+          "packID": "adventure",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:3": {
+          "packID": "adventure",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:4": {
+          "packID": "adventure",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:5": {
+          "packID": "adventure",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:6": {
+          "packID": "adventure",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:7": {
+          "packID": "adventure",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:8": {
+          "packID": "adventure",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:9": {
+          "packID": "adventure",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:adventure:10": {
+          "packID": "adventure",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        },
+        "fixture:robots:1": {
+          "packID": "robots",
+          "stickerIndex": 0,
+          "sticker": "⭐"
+        },
+        "fixture:robots:2": {
+          "packID": "robots",
+          "stickerIndex": 1,
+          "sticker": "⭐"
+        },
+        "fixture:robots:3": {
+          "packID": "robots",
+          "stickerIndex": 2,
+          "sticker": "⭐"
+        },
+        "fixture:robots:4": {
+          "packID": "robots",
+          "stickerIndex": 3,
+          "sticker": "⭐"
+        },
+        "fixture:robots:5": {
+          "packID": "robots",
+          "stickerIndex": 4,
+          "sticker": "⭐"
+        },
+        "fixture:robots:6": {
+          "packID": "robots",
+          "stickerIndex": 5,
+          "sticker": "⭐"
+        },
+        "fixture:robots:7": {
+          "packID": "robots",
+          "stickerIndex": 6,
+          "sticker": "⭐"
+        },
+        "fixture:robots:8": {
+          "packID": "robots",
+          "stickerIndex": 7,
+          "sticker": "⭐"
+        },
+        "fixture:robots:9": {
+          "packID": "robots",
+          "stickerIndex": 8,
+          "sticker": "⭐"
+        },
+        "fixture:robots:10": {
+          "packID": "robots",
+          "stickerIndex": 9,
+          "sticker": "⭐"
+        }
+      }
+    },
+    "spelling-b:current-word-list:v1": {
+      "index": 0,
+      "signature": "[\"Mastered Profile Words\",[\"apple\",\"because\",\"friend\",\"little\",\"school\",\"would\",\"world\",\"water\",\"mother\",\"through\"]]"
+    },
+    "spelling-b:high-frequency-progress:v1": {
+      "current": 99,
+      "completed": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "practice": {},
+      "mastery": {
+        "1": {
+          "signature": "[\"the\",\"of\",\"and\",\"a\",\"is\",\"in\",\"he\",\"to\",\"have\",\"it\"]",
+          "words": {
+            "the": 10,
+            "of": 10,
+            "and": 10,
+            "a": 10,
+            "is": 10,
+            "in": 10,
+            "he": 10,
+            "to": 10,
+            "have": 10,
+            "it": 10
+          }
+        },
+        "2": {
+          "signature": "[\"be\",\"for\",\"i\",\"they\",\"with\",\"not\",\"that\",\"on\",\"she\",\"as\"]",
+          "words": {
+            "be": 10,
+            "for": 10,
+            "i": 10,
+            "they": 10,
+            "with": 10,
+            "not": 10,
+            "that": 10,
+            "on": 10,
+            "she": 10,
+            "as": 10
+          }
+        },
+        "3": {
+          "signature": "[\"at\",\"by\",\"this\",\"we\",\"you\",\"do\",\"from\",\"or\",\"an\",\"but\"]",
+          "words": {
+            "at": 10,
+            "by": 10,
+            "this": 10,
+            "we": 10,
+            "you": 10,
+            "do": 10,
+            "from": 10,
+            "or": 10,
+            "an": 10,
+            "but": 10
+          }
+        },
+        "4": {
+          "signature": "[\"which\",\"would\",\"say\",\"all\",\"one\",\"will\",\"there\",\"who\",\"make\",\"when\"]",
+          "words": {
+            "which": 10,
+            "would": 10,
+            "say": 10,
+            "all": 10,
+            "one": 10,
+            "will": 10,
+            "there": 10,
+            "who": 10,
+            "make": 10,
+            "when": 10
+          }
+        },
+        "5": {
+          "signature": "[\"if\",\"man\",\"can\",\"what\",\"no\",\"go\",\"time\",\"up\",\"into\",\"year\"]",
+          "words": {
+            "if": 10,
+            "man": 10,
+            "can": 10,
+            "what": 10,
+            "no": 10,
+            "go": 10,
+            "time": 10,
+            "up": 10,
+            "into": 10,
+            "year": 10
+          }
+        },
+        "6": {
+          "signature": "[\"other\",\"out\",\"could\",\"some\",\"new\",\"know\",\"these\",\"take\",\"see\",\"get\"]",
+          "words": {
+            "other": 10,
+            "out": 10,
+            "could": 10,
+            "some": 10,
+            "new": 10,
+            "know": 10,
+            "these": 10,
+            "take": 10,
+            "see": 10,
+            "get": 10
+          }
+        },
+        "7": {
+          "signature": "[\"come\",\"only\",\"two\",\"any\",\"state\",\"give\",\"now\",\"may\",\"than\",\"then\"]",
+          "words": {
+            "come": 10,
+            "only": 10,
+            "two": 10,
+            "any": 10,
+            "state": 10,
+            "give": 10,
+            "now": 10,
+            "may": 10,
+            "than": 10,
+            "then": 10
+          }
+        },
+        "8": {
+          "signature": "[\"also\",\"find\",\"way\",\"day\",\"first\",\"even\",\"use\",\"more\",\"many\",\"must\"]",
+          "words": {
+            "also": 10,
+            "find": 10,
+            "way": 10,
+            "day": 10,
+            "first": 10,
+            "even": 10,
+            "use": 10,
+            "more": 10,
+            "many": 10,
+            "must": 10
+          }
+        },
+        "9": {
+          "signature": "[\"think\",\"such\",\"like\",\"should\",\"so\",\"through\",\"people\",\"those\",\"over\",\"where\"]",
+          "words": {
+            "think": 10,
+            "such": 10,
+            "like": 10,
+            "should": 10,
+            "so": 10,
+            "through": 10,
+            "people": 10,
+            "those": 10,
+            "over": 10,
+            "where": 10
+          }
+        },
+        "10": {
+          "signature": "[\"just\",\"seem\",\"life\",\"good\",\"each\",\"become\",\"back\",\"world\",\"here\",\"between\"]",
+          "words": {
+            "just": 10,
+            "seem": 10,
+            "life": 10,
+            "good": 10,
+            "each": 10,
+            "become": 10,
+            "back": 10,
+            "world": 10,
+            "here": 10,
+            "between": 10
+          }
+        },
+        "11": {
+          "signature": "[\"both\",\"thing\",\"hand\",\"own\",\"very\",\"tell\",\"how\",\"down\",\"work\",\"because\"]",
+          "words": {
+            "both": 10,
+            "thing": 10,
+            "hand": 10,
+            "own": 10,
+            "very": 10,
+            "tell": 10,
+            "how": 10,
+            "down": 10,
+            "work": 10,
+            "because": 10
+          }
+        },
+        "12": {
+          "signature": "[\"school\",\"same\",\"under\",\"never\",\"house\",\"after\",\"great\",\"old\",\"still\",\"leave\"]",
+          "words": {
+            "school": 10,
+            "same": 10,
+            "under": 10,
+            "never": 10,
+            "house": 10,
+            "after": 10,
+            "great": 10,
+            "old": 10,
+            "still": 10,
+            "leave": 10
+          }
+        },
+        "13": {
+          "signature": "[\"well\",\"want\",\"three\",\"another\",\"call\",\"against\",\"last\",\"number\",\"show\",\"most\"]",
+          "words": {
+            "well": 10,
+            "want": 10,
+            "three": 10,
+            "another": 10,
+            "call": 10,
+            "against": 10,
+            "last": 10,
+            "number": 10,
+            "show": 10,
+            "most": 10
+          }
+        },
+        "14": {
+          "signature": "[\"child\",\"feel\",\"part\",\"ask\",\"place\",\"few\",\"about\",\"might\",\"turn\",\"long\"]",
+          "words": {
+            "child": 10,
+            "feel": 10,
+            "part": 10,
+            "ask": 10,
+            "place": 10,
+            "few": 10,
+            "about": 10,
+            "might": 10,
+            "turn": 10,
+            "long": 10
+          }
+        },
+        "15": {
+          "signature": "[\"while\",\"small\",\"problem\",\"during\",\"word\",\"live\",\"system\",\"area\",\"write\",\"again\"]",
+          "words": {
+            "while": 10,
+            "small": 10,
+            "problem": 10,
+            "during": 10,
+            "word": 10,
+            "live": 10,
+            "system": 10,
+            "area": 10,
+            "write": 10,
+            "again": 10
+          }
+        },
+        "16": {
+          "signature": "[\"follow\",\"begin\",\"mister\",\"fact\",\"without\",\"program\",\"eye\",\"country\",\"himself\",\"city\"]",
+          "words": {
+            "follow": 10,
+            "begin": 10,
+            "mister": 10,
+            "fact": 10,
+            "without": 10,
+            "program": 10,
+            "eye": 10,
+            "country": 10,
+            "himself": 10,
+            "city": 10
+          }
+        },
+        "17": {
+          "signature": "[\"stand\",\"provide\",\"much\",\"group\",\"hold\",\"too\",\"case\",\"off\",\"line\",\"night\"]",
+          "words": {
+            "stand": 10,
+            "provide": 10,
+            "much": 10,
+            "group": 10,
+            "hold": 10,
+            "too": 10,
+            "case": 10,
+            "off": 10,
+            "line": 10,
+            "night": 10
+          }
+        },
+        "18": {
+          "signature": "[\"course\",\"put\",\"point\",\"government\",\"something\",\"head\",\"american\",\"let\",\"away\",\"always\"]",
+          "words": {
+            "course": 10,
+            "put": 10,
+            "point": 10,
+            "government": 10,
+            "something": 10,
+            "head": 10,
+            "american": 10,
+            "let": 10,
+            "away": 10,
+            "always": 10
+          }
+        },
+        "19": {
+          "signature": "[\"church\",\"bring\",\"high\",\"since\",\"every\",\"unite\",\"room\",\"class\",\"keep\",\"before\"]",
+          "words": {
+            "church": 10,
+            "bring": 10,
+            "high": 10,
+            "since": 10,
+            "every": 10,
+            "unite": 10,
+            "room": 10,
+            "class": 10,
+            "keep": 10,
+            "before": 10
+          }
+        },
+        "20": {
+          "signature": "[\"need\",\"however\",\"try\",\"though\",\"little\",\"woman\",\"end\",\"boy\",\"hear\",\"upon\"]",
+          "words": {
+            "need": 10,
+            "however": 10,
+            "try": 10,
+            "though": 10,
+            "little": 10,
+            "woman": 10,
+            "end": 10,
+            "boy": 10,
+            "hear": 10,
+            "upon": 10
+          }
+        },
+        "21": {
+          "signature": "[\"company\",\"service\",\"large\",\"side\",\"order\",\"run\",\"car\",\"week\",\"why\",\"water\"]",
+          "words": {
+            "company": 10,
+            "service": 10,
+            "large": 10,
+            "side": 10,
+            "order": 10,
+            "run": 10,
+            "car": 10,
+            "week": 10,
+            "why": 10,
+            "water": 10
+          }
+        },
+        "22": {
+          "signature": "[\"social\",\"move\",\"president\",\"business\",\"figure\",\"start\",\"face\",\"several\",\"mean\",\"set\"]",
+          "words": {
+            "social": 10,
+            "move": 10,
+            "president": 10,
+            "business": 10,
+            "figure": 10,
+            "start": 10,
+            "face": 10,
+            "several": 10,
+            "mean": 10,
+            "set": 10
+          }
+        },
+        "23": {
+          "signature": "[\"toward\",\"appear\",\"question\",\"among\",\"value\",\"young\",\"nothing\",\"family\",\"within\",\"serve\"]",
+          "words": {
+            "toward": 10,
+            "appear": 10,
+            "question": 10,
+            "among": 10,
+            "value": 10,
+            "young": 10,
+            "nothing": 10,
+            "family": 10,
+            "within": 10,
+            "serve": 10
+          }
+        },
+        "24": {
+          "signature": "[\"member\",\"once\",\"form\",\"law\",\"matter\",\"often\",\"help\",\"continue\",\"john\",\"name\"]",
+          "words": {
+            "member": 10,
+            "once": 10,
+            "form": 10,
+            "law": 10,
+            "matter": 10,
+            "often": 10,
+            "help": 10,
+            "continue": 10,
+            "john": 10,
+            "name": 10
+          }
+        },
+        "25": {
+          "signature": "[\"four\",\"power\",\"general\",\"per\",\"believe\",\"possible\",\"body\",\"development\",\"foot\",\"force\"]",
+          "words": {
+            "four": 10,
+            "power": 10,
+            "general": 10,
+            "per": 10,
+            "believe": 10,
+            "possible": 10,
+            "body": 10,
+            "development": 10,
+            "foot": 10,
+            "force": 10
+          }
+        },
+        "26": {
+          "signature": "[\"increase\",\"pay\",\"important\",\"type\",\"meet\",\"nation\",\"play\",\"cost\",\"today\",\"expect\"]",
+          "words": {
+            "increase": 10,
+            "pay": 10,
+            "important": 10,
+            "type": 10,
+            "meet": 10,
+            "nation": 10,
+            "play": 10,
+            "cost": 10,
+            "today": 10,
+            "expect": 10
+          }
+        },
+        "27": {
+          "signature": "[\"kind\",\"door\",\"street\",\"home\",\"big\",\"reach\",\"girl\",\"require\",\"result\",\"month\"]",
+          "words": {
+            "kind": 10,
+            "door": 10,
+            "street": 10,
+            "home": 10,
+            "big": 10,
+            "reach": 10,
+            "girl": 10,
+            "require": 10,
+            "result": 10,
+            "month": 10
+          }
+        },
+        "28": {
+          "signature": "[\"hour\",\"lead\",\"period\",\"office\",\"later\",\"white\",\"reason\",\"field\",\"sit\",\"example\"]",
+          "words": {
+            "hour": 10,
+            "lead": 10,
+            "period": 10,
+            "office": 10,
+            "later": 10,
+            "white": 10,
+            "reason": 10,
+            "field": 10,
+            "sit": 10,
+            "example": 10
+          }
+        },
+        "29": {
+          "signature": "[\"job\",\"action\",\"consider\",\"develop\",\"college\",\"rate\",\"around\",\"history\",\"national\",\"pass\"]",
+          "words": {
+            "job": 10,
+            "action": 10,
+            "consider": 10,
+            "develop": 10,
+            "college": 10,
+            "rate": 10,
+            "around": 10,
+            "history": 10,
+            "national": 10,
+            "pass": 10
+          }
+        },
+        "30": {
+          "signature": "[\"next\",\"experience\",\"position\",\"moment\",\"mind\",\"public\",\"best\",\"study\",\"happen\",\"sense\"]",
+          "words": {
+            "next": 10,
+            "experience": 10,
+            "position": 10,
+            "moment": 10,
+            "mind": 10,
+            "public": 10,
+            "best": 10,
+            "study": 10,
+            "happen": 10,
+            "sense": 10
+          }
+        },
+        "31": {
+          "signature": "[\"local\",\"interest\",\"walk\",\"perhaps\",\"method\",\"idea\",\"grow\",\"town\",\"money\",\"until\"]",
+          "words": {
+            "local": 10,
+            "interest": 10,
+            "walk": 10,
+            "perhaps": 10,
+            "method": 10,
+            "idea": 10,
+            "grow": 10,
+            "town": 10,
+            "money": 10,
+            "until": 10
+          }
+        },
+        "32": {
+          "signature": "[\"read\",\"book\",\"policy\",\"effort\",\"person\",\"add\",\"ever\",\"remain\",\"themselves\",\"although\"]",
+          "words": {
+            "read": 10,
+            "book": 10,
+            "policy": 10,
+            "effort": 10,
+            "person": 10,
+            "add": 10,
+            "ever": 10,
+            "remain": 10,
+            "themselves": 10,
+            "although": 10
+          }
+        },
+        "33": {
+          "signature": "[\"talk\",\"five\",\"speak\",\"probably\",\"almost\",\"effect\",\"society\",\"whole\",\"condition\",\"second\"]",
+          "words": {
+            "talk": 10,
+            "five": 10,
+            "speak": 10,
+            "probably": 10,
+            "almost": 10,
+            "effect": 10,
+            "society": 10,
+            "whole": 10,
+            "condition": 10,
+            "second": 10
+          }
+        },
+        "34": {
+          "signature": "[\"across\",\"level\",\"center\",\"student\",\"light\",\"art\",\"shall\",\"send\",\"determine\",\"wife\"]",
+          "words": {
+            "across": 10,
+            "level": 10,
+            "center": 10,
+            "student": 10,
+            "light": 10,
+            "art": 10,
+            "shall": 10,
+            "send": 10,
+            "determine": 10,
+            "wife": 10
+          }
+        },
+        "35": {
+          "signature": "[\"material\",\"least\",\"yet\",\"voice\",\"community\",\"party\",\"ago\",\"air\",\"carry\",\"wait\"]",
+          "words": {
+            "material": 10,
+            "least": 10,
+            "yet": 10,
+            "voice": 10,
+            "community": 10,
+            "party": 10,
+            "ago": 10,
+            "air": 10,
+            "carry": 10,
+            "wait": 10
+          }
+        },
+        "36": {
+          "signature": "[\"mother\",\"tax\",\"build\",\"board\",\"lose\",\"already\",\"involve\",\"doctor\",\"human\",\"fall\"]",
+          "words": {
+            "mother": 10,
+            "tax": 10,
+            "build": 10,
+            "board": 10,
+            "lose": 10,
+            "already": 10,
+            "involve": 10,
+            "doctor": 10,
+            "human": 10,
+            "fall": 10
+          }
+        },
+        "37": {
+          "signature": "[\"available\",\"thus\",\"learn\",\"draw\",\"anything\",\"process\",\"minute\",\"understand\",\"table\",\"special\"]",
+          "words": {
+            "available": 10,
+            "thus": 10,
+            "learn": 10,
+            "draw": 10,
+            "anything": 10,
+            "process": 10,
+            "minute": 10,
+            "understand": 10,
+            "table": 10,
+            "special": 10
+          }
+        },
+        "38": {
+          "signature": "[\"federal\",\"section\",\"death\",\"difference\",\"break\",\"remember\",\"century\",\"control\",\"far\",\"economic\"]",
+          "words": {
+            "federal": 10,
+            "section": 10,
+            "death": 10,
+            "difference": 10,
+            "break": 10,
+            "remember": 10,
+            "century": 10,
+            "control": 10,
+            "far": 10,
+            "economic": 10
+          }
+        },
+        "39": {
+          "signature": "[\"open\",\"ground\",\"stop\",\"stage\",\"full\",\"certain\",\"department\",\"whether\",\"change\",\"father\"]",
+          "words": {
+            "open": 10,
+            "ground": 10,
+            "stop": 10,
+            "stage": 10,
+            "full": 10,
+            "certain": 10,
+            "department": 10,
+            "whether": 10,
+            "change": 10,
+            "father": 10
+          }
+        },
+        "40": {
+          "signature": "[\"better\",\"different\",\"piece\",\"indicate\",\"picture\",\"really\",\"quite\",\"receive\",\"music\",\"itself\"]",
+          "words": {
+            "better": 10,
+            "different": 10,
+            "piece": 10,
+            "indicate": 10,
+            "picture": 10,
+            "really": 10,
+            "quite": 10,
+            "receive": 10,
+            "music": 10,
+            "itself": 10
+          }
+        },
+        "41": {
+          "signature": "[\"road\",\"university\",\"information\",\"behind\",\"enough\",\"situation\",\"common\",\"purpose\",\"include\",\"free\"]",
+          "words": {
+            "road": 10,
+            "university": 10,
+            "information": 10,
+            "behind": 10,
+            "enough": 10,
+            "situation": 10,
+            "common": 10,
+            "purpose": 10,
+            "include": 10,
+            "free": 10
+          }
+        },
+        "42": {
+          "signature": "[\"letter\",\"produce\",\"paper\",\"apply\",\"true\",\"together\",\"mile\",\"arm\",\"report\",\"cut\"]",
+          "words": {
+            "letter": 10,
+            "produce": 10,
+            "paper": 10,
+            "apply": 10,
+            "true": 10,
+            "together": 10,
+            "mile": 10,
+            "arm": 10,
+            "report": 10,
+            "cut": 10
+          }
+        },
+        "43": {
+          "signature": "[\"land\",\"early\",\"evidence\",\"usually\",\"issue\",\"present\",\"real\",\"age\",\"plan\",\"peace\"]",
+          "words": {
+            "land": 10,
+            "early": 10,
+            "evidence": 10,
+            "usually": 10,
+            "issue": 10,
+            "present": 10,
+            "real": 10,
+            "age": 10,
+            "plan": 10,
+            "peace": 10
+          }
+        },
+        "44": {
+          "signature": "[\"bear\",\"necessary\",\"strong\",\"drive\",\"step\",\"record\",\"less\",\"horse\",\"spend\",\"friend\"]",
+          "words": {
+            "bear": 10,
+            "necessary": 10,
+            "strong": 10,
+            "drive": 10,
+            "step": 10,
+            "record": 10,
+            "less": 10,
+            "horse": 10,
+            "spend": 10,
+            "friend": 10
+          }
+        },
+        "45": {
+          "signature": "[\"right\",\"enter\",\"six\",\"wall\",\"short\",\"watch\",\"officer\",\"son\",\"statement\",\"morning\"]",
+          "words": {
+            "right": 10,
+            "enter": 10,
+            "six": 10,
+            "wall": 10,
+            "short": 10,
+            "watch": 10,
+            "officer": 10,
+            "son": 10,
+            "statement": 10,
+            "morning": 10
+          }
+        },
+        "46": {
+          "signature": "[\"unit\",\"heart\",\"modern\",\"therefore\",\"space\",\"greater\",\"fire\",\"along\",\"court\",\"above\"]",
+          "words": {
+            "unit": 10,
+            "heart": 10,
+            "modern": 10,
+            "therefore": 10,
+            "space": 10,
+            "greater": 10,
+            "fire": 10,
+            "along": 10,
+            "court": 10,
+            "above": 10
+          }
+        },
+        "47": {
+          "signature": "[\"story\",\"alone\",\"personal\",\"suggest\",\"river\",\"able\",\"nor\",\"secretary\",\"operation\",\"allow\"]",
+          "words": {
+            "story": 10,
+            "alone": 10,
+            "personal": 10,
+            "suggest": 10,
+            "river": 10,
+            "able": 10,
+            "nor": 10,
+            "secretary": 10,
+            "operation": 10,
+            "allow": 10
+          }
+        },
+        "48": {
+          "signature": "[\"sometimes\",\"organization\",\"major\",\"clear\",\"everything\",\"sure\",\"half\",\"plant\",\"reduce\",\"county\"]",
+          "words": {
+            "sometimes": 10,
+            "organization": 10,
+            "major": 10,
+            "clear": 10,
+            "everything": 10,
+            "sure": 10,
+            "half": 10,
+            "plant": 10,
+            "reduce": 10,
+            "county": 10
+          }
+        },
+        "49": {
+          "signature": "[\"describe\",\"wear\",\"subject\",\"cent\",\"seek\",\"datum\",\"decide\",\"source\",\"food\",\"else\"]",
+          "words": {
+            "describe": 10,
+            "wear": 10,
+            "subject": 10,
+            "cent": 10,
+            "seek": 10,
+            "datum": 10,
+            "decide": 10,
+            "source": 10,
+            "food": 10,
+            "else": 10
+          }
+        },
+        "50": {
+          "signature": "[\"nature\",\"committee\",\"accept\",\"stay\",\"event\",\"district\",\"volume\",\"opportunity\",\"station\",\"close\"]",
+          "words": {
+            "nature": 10,
+            "committee": 10,
+            "accept": 10,
+            "stay": 10,
+            "event": 10,
+            "district": 10,
+            "volume": 10,
+            "opportunity": 10,
+            "station": 10,
+            "close": 10
+          }
+        },
+        "51": {
+          "signature": "[\"equipment\",\"basic\",\"including\",\"explain\",\"third\",\"trial\",\"rise\",\"die\",\"offer\",\"except\"]",
+          "words": {
+            "equipment": 10,
+            "basic": 10,
+            "including": 10,
+            "explain": 10,
+            "third": 10,
+            "trial": 10,
+            "rise": 10,
+            "die": 10,
+            "offer": 10,
+            "except": 10
+          }
+        },
+        "52": {
+          "signature": "[\"research\",\"note\",\"defense\",\"cover\",\"contain\",\"private\",\"black\",\"feeling\",\"south\",\"love\"]",
+          "words": {
+            "research": 10,
+            "note": 10,
+            "defense": 10,
+            "cover": 10,
+            "contain": 10,
+            "private": 10,
+            "black": 10,
+            "feeling": 10,
+            "south": 10,
+            "love": 10
+          }
+        },
+        "53": {
+          "signature": "[\"cause\",\"raise\",\"represent\",\"suppose\",\"buy\",\"movement\",\"finally\",\"factor\",\"act\",\"amount\"]",
+          "words": {
+            "cause": 10,
+            "raise": 10,
+            "represent": 10,
+            "suppose": 10,
+            "buy": 10,
+            "movement": 10,
+            "finally": 10,
+            "factor": 10,
+            "act": 10,
+            "amount": 10
+          }
+        },
+        "54": {
+          "signature": "[\"product\",\"hope\",\"military\",\"club\",\"science\",\"prepare\",\"leader\",\"million\",\"difficult\",\"reaction\"]",
+          "words": {
+            "product": 10,
+            "hope": 10,
+            "military": 10,
+            "club": 10,
+            "science": 10,
+            "prepare": 10,
+            "leader": 10,
+            "million": 10,
+            "difficult": 10,
+            "reaction": 10
+          }
+        },
+        "55": {
+          "signature": "[\"test\",\"temperature\",\"complete\",\"decision\",\"drop\",\"fund\",\"market\",\"assume\",\"dead\",\"attention\"]",
+          "words": {
+            "test": 10,
+            "temperature": 10,
+            "complete": 10,
+            "decision": 10,
+            "drop": 10,
+            "fund": 10,
+            "market": 10,
+            "assume": 10,
+            "dead": 10,
+            "attention": 10
+          }
+        },
+        "56": {
+          "signature": "[\"price\",\"quality\",\"game\",\"sort\",\"dark\",\"color\",\"lie\",\"simply\",\"political\",\"fight\"]",
+          "words": {
+            "price": 10,
+            "quality": 10,
+            "game": 10,
+            "sort": 10,
+            "dark": 10,
+            "color": 10,
+            "lie": 10,
+            "simply": 10,
+            "political": 10,
+            "fight": 10
+          }
+        },
+        "57": {
+          "signature": "[\"building\",\"pressure\",\"husband\",\"realize\",\"establish\",\"medical\",\"recent\",\"obtain\",\"choose\",\"recognize\"]",
+          "words": {
+            "building": 10,
+            "pressure": 10,
+            "husband": 10,
+            "realize": 10,
+            "establish": 10,
+            "medical": 10,
+            "recent": 10,
+            "obtain": 10,
+            "choose": 10,
+            "recognize": 10
+          }
+        },
+        "58": {
+          "signature": "[\"window\",\"front\",\"growth\",\"permit\",\"image\",\"soon\",\"exist\",\"direction\",\"basis\",\"concern\"]",
+          "words": {
+            "window": 10,
+            "front": 10,
+            "growth": 10,
+            "permit": 10,
+            "image": 10,
+            "soon": 10,
+            "exist": 10,
+            "direction": 10,
+            "basis": 10,
+            "concern": 10
+          }
+        },
+        "59": {
+          "signature": "[\"simple\",\"win\",\"character\",\"administration\",\"machine\",\"ten\",\"earth\",\"either\",\"term\",\"technique\"]",
+          "words": {
+            "simple": 10,
+            "win": 10,
+            "character": 10,
+            "administration": 10,
+            "machine": 10,
+            "ten": 10,
+            "earth": 10,
+            "either": 10,
+            "term": 10,
+            "technique": 10
+          }
+        },
+        "60": {
+          "signature": "[\"teacher\",\"principle\",\"production\",\"sale\",\"anyone\",\"evening\",\"association\",\"size\",\"actually\",\"disagree\"]",
+          "words": {
+            "teacher": 10,
+            "principle": 10,
+            "production": 10,
+            "sale": 10,
+            "anyone": 10,
+            "evening": 10,
+            "association": 10,
+            "size": 10,
+            "actually": 10,
+            "disagree": 10
+          }
+        },
+        "61": {
+          "signature": "[\"meeting\",\"instead\",\"range\",\"fill\",\"army\",\"labor\",\"hair\",\"floor\",\"cell\",\"rule\"]",
+          "words": {
+            "meeting": 10,
+            "instead": 10,
+            "range": 10,
+            "fill": 10,
+            "army": 10,
+            "labor": 10,
+            "hair": 10,
+            "floor": 10,
+            "cell": 10,
+            "rule": 10
+          }
+        },
+        "62": {
+          "signature": "[\"international\",\"wish\",\"relation\",\"trouble\",\"thought\",\"writer\",\"performance\",\"population\",\"create\",\"congress\"]",
+          "words": {
+            "international": 10,
+            "wish": 10,
+            "relation": 10,
+            "trouble": 10,
+            "thought": 10,
+            "writer": 10,
+            "performance": 10,
+            "population": 10,
+            "create": 10,
+            "congress": 10
+          }
+        },
+        "63": {
+          "signature": "[\"lot\",\"pull\",\"stock\",\"especially\",\"yes\",\"leach\",\"language\",\"maintain\",\"foreign\",\"plane\"]",
+          "words": {
+            "lot": 10,
+            "pull": 10,
+            "stock": 10,
+            "especially": 10,
+            "yes": 10,
+            "leach": 10,
+            "language": 10,
+            "maintain": 10,
+            "foreign": 10,
+            "plane": 10
+          }
+        },
+        "64": {
+          "signature": "[\"pattern\",\"agree\",\"dollar\",\"meaning\",\"element\",\"view\",\"fine\",\"list\",\"beyond\",\"opinion\"]",
+          "words": {
+            "pattern": 10,
+            "agree": 10,
+            "dollar": 10,
+            "meaning": 10,
+            "element": 10,
+            "view": 10,
+            "fine": 10,
+            "list": 10,
+            "beyond": 10,
+            "opinion": 10
+          }
+        },
+        "65": {
+          "signature": "[\"design\",\"rather\",\"natural\",\"procedure\",\"central\",\"west\",\"occur\",\"tree\",\"certainly\",\"various\"]",
+          "words": {
+            "design": 10,
+            "rather": 10,
+            "natural": 10,
+            "procedure": 10,
+            "central": 10,
+            "west": 10,
+            "occur": 10,
+            "tree": 10,
+            "certainly": 10,
+            "various": 10
+          }
+        },
+        "66": {
+          "signature": "[\"individual\",\"low\",\"summer\",\"support\",\"near\",\"operate\",\"literature\",\"sound\",\"project\",\"southern\"]",
+          "words": {
+            "individual": 10,
+            "low": 10,
+            "summer": 10,
+            "support": 10,
+            "near": 10,
+            "operate": 10,
+            "literature": 10,
+            "sound": 10,
+            "project": 10,
+            "southern": 10
+          }
+        },
+        "67": {
+          "signature": "[\"answer\",\"normal\",\"patient\",\"late\",\"industrial\",\"return\",\"attitude\",\"knowledge\",\"catch\",\"poet\"]",
+          "words": {
+            "answer": 10,
+            "normal": 10,
+            "patient": 10,
+            "late": 10,
+            "industrial": 10,
+            "return": 10,
+            "attitude": 10,
+            "knowledge": 10,
+            "catch": 10,
+            "poet": 10
+          }
+        },
+        "68": {
+          "signature": "[\"role\",\"achieve\",\"length\",\"similar\",\"limit\",\"england\",\"fail\",\"hard\",\"hospital\",\"red\"]",
+          "words": {
+            "role": 10,
+            "achieve": 10,
+            "length": 10,
+            "similar": 10,
+            "limit": 10,
+            "england": 10,
+            "fail": 10,
+            "hard": 10,
+            "hospital": 10,
+            "red": 10
+          }
+        },
+        "69": {
+          "signature": "[\"throw\",\"relate\",\"addition\",\"western\",\"manner\",\"inch\",\"single\",\"throughout\",\"hundred\",\"hot\"]",
+          "words": {
+            "throw": 10,
+            "relate": 10,
+            "addition": 10,
+            "western": 10,
+            "manner": 10,
+            "inch": 10,
+            "single": 10,
+            "throughout": 10,
+            "hundred": 10,
+            "hot": 10
+          }
+        },
+        "70": {
+          "signature": "[\"prove\",\"join\",\"higher\",\"ready\",\"train\",\"distance\",\"spring\",\"hit\",\"bad\",\"function\"]",
+          "words": {
+            "prove": 10,
+            "join": 10,
+            "higher": 10,
+            "ready": 10,
+            "train": 10,
+            "distance": 10,
+            "spring": 10,
+            "hit": 10,
+            "bad": 10,
+            "function": 10
+          }
+        },
+        "71": {
+          "signature": "[\"hotel\",\"police\",\"maybe\",\"former\",\"physical\",\"farm\",\"prevent\",\"charge\",\"detail\",\"moral\"]",
+          "words": {
+            "hotel": 10,
+            "police": 10,
+            "maybe": 10,
+            "former": 10,
+            "physical": 10,
+            "farm": 10,
+            "prevent": 10,
+            "charge": 10,
+            "detail": 10,
+            "moral": 10
+          }
+        },
+        "72": {
+          "signature": "[\"directly\",\"treatment\",\"remove\",\"entire\",\"possibility\",\"radio\",\"loss\",\"sign\",\"lay\",\"merely\"]",
+          "words": {
+            "directly": 10,
+            "treatment": 10,
+            "remove": 10,
+            "entire": 10,
+            "possibility": 10,
+            "radio": 10,
+            "loss": 10,
+            "sign": 10,
+            "lay": 10,
+            "merely": 10
+          }
+        },
+        "73": {
+          "signature": "[\"scene\",\"corner\",\"responsibility\",\"apparently\",\"measure\",\"likely\",\"indeed\",\"eat\",\"couple\",\"ride\"]",
+          "words": {
+            "scene": 10,
+            "corner": 10,
+            "responsibility": 10,
+            "apparently": 10,
+            "measure": 10,
+            "likely": 10,
+            "indeed": 10,
+            "eat": 10,
+            "couple": 10,
+            "ride": 10
+          }
+        },
+        "74": {
+          "signature": "[\"larger\",\"truth\",\"practice\",\"suddenly\",\"fear\",\"lady\",\"season\",\"cold\",\"pick\",\"chance\"]",
+          "words": {
+            "larger": 10,
+            "truth": 10,
+            "practice": 10,
+            "suddenly": 10,
+            "fear": 10,
+            "lady": 10,
+            "season": 10,
+            "cold": 10,
+            "pick": 10,
+            "chance": 10
+          }
+        },
+        "75": {
+          "signature": "[\"express\",\"base\",\"institution\",\"hang\",\"theory\",\"worker\",\"mention\",\"beautiful\",\"agreement\",\"extend\"]",
+          "words": {
+            "express": 10,
+            "base": 10,
+            "institution": 10,
+            "hang": 10,
+            "theory": 10,
+            "worker": 10,
+            "mention": 10,
+            "beautiful": 10,
+            "agreement": 10,
+            "extend": 10
+          }
+        },
+        "76": {
+          "signature": "[\"leg\",\"rest\",\"vary\",\"brown\",\"smile\",\"respect\",\"brother\",\"analysis\",\"future\",\"feed\"]",
+          "words": {
+            "leg": 10,
+            "rest": 10,
+            "vary": 10,
+            "brown": 10,
+            "smile": 10,
+            "respect": 10,
+            "brother": 10,
+            "analysis": 10,
+            "future": 10,
+            "feed": 10
+          }
+        },
+        "77": {
+          "signature": "[\"discussion\",\"total\",\"item\",\"influence\",\"freedom\",\"conference\",\"bill\",\"commission\",\"claim\",\"final\"]",
+          "words": {
+            "discussion": 10,
+            "total": 10,
+            "item": 10,
+            "influence": 10,
+            "freedom": 10,
+            "conference": 10,
+            "bill": 10,
+            "commission": 10,
+            "claim": 10,
+            "final": 10
+          }
+        },
+        "78": {
+          "signature": "[\"strength\",\"shoot\",\"difficulty\",\"success\",\"region\",\"structure\",\"discuss\",\"effective\",\"mark\",\"hall\"]",
+          "words": {
+            "strength": 10,
+            "shoot": 10,
+            "difficulty": 10,
+            "success": 10,
+            "region": 10,
+            "structure": 10,
+            "discuss": 10,
+            "effective": 10,
+            "mark": 10,
+            "hall": 10
+          }
+        },
+        "79": {
+          "signature": "[\"dog\",\"glass\",\"relationship\",\"choice\",\"hill\",\"discover\",\"recently\",\"model\",\"date\",\"ship\"]",
+          "words": {
+            "dog": 10,
+            "glass": 10,
+            "relationship": 10,
+            "choice": 10,
+            "hill": 10,
+            "discover": 10,
+            "recently": 10,
+            "model": 10,
+            "date": 10,
+            "ship": 10
+          }
+        },
+        "80": {
+          "signature": "[\"easy\",\"listen\",\"particular\",\"enjoy\",\"ball\",\"technical\",\"governor\",\"announce\",\"nearly\",\"firm\"]",
+          "words": {
+            "easy": 10,
+            "listen": 10,
+            "particular": 10,
+            "enjoy": 10,
+            "ball": 10,
+            "technical": 10,
+            "governor": 10,
+            "announce": 10,
+            "nearly": 10,
+            "firm": 10
+          }
+        },
+        "81": {
+          "signature": "[\"experiment\",\"pool\",\"serious\",\"aid\",\"longer\",\"visit\",\"strike\",\"square\",\"trip\",\"wonder\"]",
+          "words": {
+            "experiment": 10,
+            "pool": 10,
+            "serious": 10,
+            "aid": 10,
+            "longer": 10,
+            "visit": 10,
+            "strike": 10,
+            "square": 10,
+            "trip": 10,
+            "wonder": 10
+          }
+        },
+        "82": {
+          "signature": "[\"director\",\"latter\",\"improve\",\"europe\",\"enemy\",\"according\",\"care\",\"mouth\",\"deal\",\"edge\"]",
+          "words": {
+            "director": 10,
+            "latter": 10,
+            "improve": 10,
+            "europe": 10,
+            "enemy": 10,
+            "according": 10,
+            "care": 10,
+            "mouth": 10,
+            "deal": 10,
+            "edge": 10
+          }
+        },
+        "83": {
+          "signature": "[\"object\",\"account\",\"slowly\",\"demand\",\"sell\",\"afternoon\",\"suffer\",\"oil\",\"press\",\"wide\"]",
+          "words": {
+            "object": 10,
+            "account": 10,
+            "slowly": 10,
+            "demand": 10,
+            "sell": 10,
+            "afternoon": 10,
+            "suffer": 10,
+            "oil": 10,
+            "press": 10,
+            "wide": 10
+          }
+        },
+        "84": {
+          "signature": "[\"contribute\",\"instance\",\"compare\",\"poem\",\"direct\",\"citizen\",\"herself\",\"audience\",\"election\",\"fix\"]",
+          "words": {
+            "contribute": 10,
+            "instance": 10,
+            "compare": 10,
+            "poem": 10,
+            "direct": 10,
+            "citizen": 10,
+            "herself": 10,
+            "audience": 10,
+            "election": 10,
+            "fix": 10
+          }
+        },
+        "85": {
+          "signature": "[\"park\",\"bar\",\"immediately\",\"division\",\"english\",\"agency\",\"french\",\"boat\",\"faith\",\"top\"]",
+          "words": {
+            "park": 10,
+            "bar": 10,
+            "immediately": 10,
+            "division": 10,
+            "english": 10,
+            "agency": 10,
+            "french": 10,
+            "boat": 10,
+            "faith": 10,
+            "top": 10
+          }
+        },
+        "86": {
+          "signature": "[\"artist\",\"page\",\"saint\",\"facility\",\"finger\",\"manager\",\"gas\",\"series\",\"supply\",\"tooth\"]",
+          "words": {
+            "artist": 10,
+            "page": 10,
+            "saint": 10,
+            "facility": 10,
+            "finger": 10,
+            "manager": 10,
+            "gas": 10,
+            "series": 10,
+            "supply": 10,
+            "tooth": 10
+          }
+        },
+        "87": {
+          "signature": "[\"approach\",\"bed\",\"specific\",\"save\",\"marry\",\"none\",\"parent\",\"myself\",\"attend\",\"employee\"]",
+          "words": {
+            "approach": 10,
+            "bed": 10,
+            "specific": 10,
+            "save": 10,
+            "marry": 10,
+            "none": 10,
+            "parent": 10,
+            "myself": 10,
+            "attend": 10,
+            "employee": 10
+          }
+        },
+        "88": {
+          "signature": "[\"authority\",\"publish\",\"settle\",\"marriage\",\"fiscal\",\"look\",\"interact\",\"democratic\",\"generally\",\"select\"]",
+          "words": {
+            "authority": 10,
+            "publish": 10,
+            "settle": 10,
+            "marriage": 10,
+            "fiscal": 10,
+            "look": 10,
+            "interact": 10,
+            "democratic": 10,
+            "generally": 10,
+            "select": 10
+          }
+        },
+        "89": {
+          "signature": "[\"kid\",\"captain\",\"importance\",\"march\",\"forget\",\"bank\",\"finish\",\"affair\",\"oh\",\"animal\"]",
+          "words": {
+            "kid": 10,
+            "captain": 10,
+            "importance": 10,
+            "march": 10,
+            "forget": 10,
+            "bank": 10,
+            "finish": 10,
+            "affair": 10,
+            "oh": 10,
+            "animal": 10
+          }
+        },
+        "90": {
+          "signature": "[\"are\",\"was\",\"my\",\"article\",\"has\",\"me\",\"writes\",\"your\",\"am\",\"their\"]",
+          "words": {
+            "are": 10,
+            "was": 10,
+            "my": 10,
+            "article": 10,
+            "has": 10,
+            "me": 10,
+            "writes": 10,
+            "your": 10,
+            "am": 10,
+            "their": 10
+          }
+        },
+        "91": {
+          "signature": "[\"them\",\"been\",\"had\",\"were\",\"his\",\"does\",\"response\",\"our\",\"being\",\"used\"]",
+          "words": {
+            "them": 10,
+            "been": 10,
+            "had": 10,
+            "were": 10,
+            "his": 10,
+            "does": 10,
+            "response": 10,
+            "our": 10,
+            "being": 10,
+            "used": 10
+          }
+        },
+        "92": {
+          "signature": "[\"did\",\"its\",\"her\",\"file\",\"said\",\"years\",\"things\",\"him\",\"us\",\"going\"]",
+          "words": {
+            "did": 10,
+            "its": 10,
+            "her": 10,
+            "file": 10,
+            "said": 10,
+            "years": 10,
+            "things": 10,
+            "him": 10,
+            "us": 10,
+            "going": 10
+          }
+        },
+        "93": {
+          "signature": "[\"mail\",\"got\",\"someone\",\"using\",\"made\",\"net\",\"seems\",\"called\",\"done\",\"news\"]",
+          "words": {
+            "mail": 10,
+            "got": 10,
+            "someone": 10,
+            "using": 10,
+            "made": 10,
+            "net": 10,
+            "seems": 10,
+            "called": 10,
+            "done": 10,
+            "news": 10
+          }
+        },
+        "94": {
+          "signature": "[\"seen\",\"problems\",\"software\",\"found\",\"women\",\"code\",\"bit\",\"version\",\"data\",\"apple\"]",
+          "words": {
+            "seen": 10,
+            "problems": 10,
+            "software": 10,
+            "found": 10,
+            "women": 10,
+            "code": 10,
+            "bit": 10,
+            "version": 10,
+            "data": 10,
+            "apple": 10
+          }
+        },
+        "95": {
+          "signature": "[\"having\",\"heard\",\"thanks\",\"doing\",\"please\",\"following\",\"computer\",\"trying\",\"getting\",\"wrong\"]",
+          "words": {
+            "having": 10,
+            "heard": 10,
+            "thanks": 10,
+            "doing": 10,
+            "please": 10,
+            "following": 10,
+            "computer": 10,
+            "trying": 10,
+            "getting": 10,
+            "wrong": 10
+          }
+        },
+        "96": {
+          "signature": "[\"stuff\",\"left\",\"post\",\"says\",\"looking\",\"others\",\"posting\",\"message\",\"makes\",\"interested\"]",
+          "words": {
+            "stuff": 10,
+            "left": 10,
+            "post": 10,
+            "says": 10,
+            "looking": 10,
+            "others": 10,
+            "posting": 10,
+            "message": 10,
+            "makes": 10,
+            "interested": 10
+          }
+        },
+        "97": {
+          "signature": "[\"files\",\"sun\",\"current\",\"means\",\"times\",\"systems\",\"running\",\"men\",\"given\",\"user\"]",
+          "words": {
+            "files": 10,
+            "sun": 10,
+            "current": 10,
+            "means": 10,
+            "times": 10,
+            "systems": 10,
+            "running": 10,
+            "men": 10,
+            "given": 10,
+            "user": 10
+          }
+        },
+        "98": {
+          "signature": "[\"pretty\",\"based\",\"address\",\"memory\",\"original\",\"daily\",\"standard\",\"making\",\"days\",\"copy\"]",
+          "words": {
+            "pretty": 10,
+            "based": 10,
+            "address": 10,
+            "memory": 10,
+            "original": 10,
+            "daily": 10,
+            "standard": 10,
+            "making": 10,
+            "days": 10,
+            "copy": 10
+          }
+        },
+        "99": {
+          "signature": "[\"works\",\"interesting\",\"cannot\",\"disk\",\"nice\",\"came\",\"guess\",\"hourly\",\"went\",\"told\"]",
+          "words": {
+            "works": 10,
+            "interesting": 10,
+            "cannot": 10,
+            "disk": 10,
+            "nice": 10,
+            "came": 10,
+            "guess": 10,
+            "hourly": 10,
+            "went": 10,
+            "told": 10
+          }
+        },
+        "100": {
+          "signature": "[\"tried\",\"wanted\",\"saying\",\"gets\",\"comes\",\"working\",\"goes\",\"everyone\",\"bell\",\"command\"]",
+          "words": {
+            "tried": 10,
+            "wanted": 10,
+            "saying": 10,
+            "gets": 10,
+            "comes": 10,
+            "working": 10,
+            "goes": 10,
+            "everyone": 10,
+            "bell": 10,
+            "command": 10
+          }
+        }
+      },
+      "masteryVersion": 1
+    },
+    "spelling-b:phonics-progress:v3": {
+      "current": 119,
+      "group": 0,
+      "completed": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4",
+        "1.5",
+        "2.1",
+        "2.2",
+        "3.1",
+        "3.2",
+        "4.1",
+        "5.1",
+        "5.2",
+        "5.3",
+        "6.1",
+        "6.2",
+        "7.1",
+        "7.2",
+        "8.1",
+        "8.2",
+        "9.1",
+        "9.2",
+        "10.1",
+        "11.1",
+        "11.2",
+        "12.1",
+        "12.2",
+        "13.1",
+        "13.2",
+        "14.1",
+        "15.1",
+        "15.2",
+        "16.1",
+        "17.1",
+        "18.1",
+        "18.2",
+        "19.1",
+        "20.1",
+        "21.1",
+        "22.1",
+        "23.1",
+        "24.1",
+        "24.2",
+        "25.1",
+        "26.1",
+        "27.1",
+        "27.2",
+        "28.1",
+        "28.2",
+        "29.1",
+        "29.2",
+        "30.1",
+        "31.1",
+        "32.1",
+        "33.1",
+        "33.2",
+        "33.3",
+        "33.4",
+        "33.5",
+        "33.6",
+        "34.1",
+        "35.1",
+        "36.1",
+        "37.1",
+        "38.1",
+        "39.1",
+        "40.1",
+        "41.1",
+        "42.1",
+        "43.1",
+        "44.1",
+        "45.1",
+        "46.1",
+        "47.1",
+        "48.1",
+        "49.1",
+        "49.2",
+        "50.1",
+        "51.1",
+        "52.1",
+        "53.1",
+        "54.1",
+        "54.2",
+        "54.3",
+        "54.4",
+        "55.1",
+        "55.2",
+        "56.1",
+        "57.1",
+        "57.2",
+        "57.3",
+        "58.1",
+        "59.1",
+        "60.1",
+        "61.1",
+        "62.1",
+        "63.1",
+        "64.1",
+        "65.1",
+        "66.1",
+        "67.1",
+        "68.1",
+        "69.1",
+        "70.1",
+        "71.1",
+        "72.1",
+        "73.1",
+        "74.1",
+        "75.1",
+        "76.1",
+        "77.1",
+        "78.1",
+        "79.1",
+        "79.2",
+        "80.1",
+        "81.1",
+        "82.1",
+        "83.1",
+        "84.1",
+        "85.1",
+        "86.1",
+        "87.1",
+        "87.2",
+        "88.1",
+        "89.1",
+        "90.1",
+        "91.1",
+        "92.1",
+        "93.1",
+        "94.1",
+        "95.1",
+        "96.1",
+        "97.1",
+        "98.1",
+        "99.1",
+        "100.1",
+        "101.1",
+        "102.1",
+        "103.1",
+        "104.1",
+        "105.1",
+        "105.2",
+        "106.1",
+        "107.1",
+        "107.2",
+        "107.3",
+        "108.1",
+        "109.1",
+        "110.1",
+        "111.1",
+        "112.1",
+        "113.1",
+        "114.1",
+        "115.1",
+        "116.1",
+        "117.1",
+        "117.2",
+        "117.3",
+        "118.1",
+        "119.1",
+        "120.1"
+      ],
+      "view": "student",
+      "practice": {}
+    },
+    "spelling-b:typing-progress:v2": {
+      "level": 6,
+      "unlocked": 6,
+      "mastered": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "best": [
+        {
+          "cpm": 97,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 98,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 99,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 100,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 101,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 102,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        },
+        {
+          "cpm": 103,
+          "accuracy": 100,
+          "rank": "Lightning Bee",
+          "at": "2026-10-07T12:00:00Z"
+        }
+      ],
+      "days": [
+        "2026-09-08",
+        "2026-09-09",
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-13",
+        "2026-09-14",
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-17",
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21",
+        "2026-09-22",
+        "2026-09-23",
+        "2026-09-24",
+        "2026-09-25",
+        "2026-09-26",
+        "2026-09-27",
+        "2026-09-28",
+        "2026-09-29",
+        "2026-09-30",
+        "2026-10-01",
+        "2026-10-02",
+        "2026-10-03",
+        "2026-10-04",
+        "2026-10-05",
+        "2026-10-06",
+        "2026-10-07"
+      ],
+      "daily": {
+        "date": "2026-10-07",
+        "levels": {
+          "0": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "1": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "2": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "3": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "4": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "5": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          },
+          "6": {
+            "correct": 999,
+            "tested": true,
+            "practiceCPM": 95
+          }
+        }
+      }
+    },
+    "spelling-b:list:mastered-profile-test-words:progress:v1": {
+      "version": 4,
+      "planSignature": "{\"beginnerDays\":2,\"beginner\":{\"copy\":2,\"letterBuilder\":3,\"guided\":1,\"spell\":0},\"advanced\":{\"copy\":1,\"letterBuilder\":0,\"guided\":2,\"spell\":2},\"advancedReview\":{\"enabled\":true,\"repetitions\":1,\"maxWords\":5}}",
+      "day": 5,
+      "stageIndex": 3,
+      "counts": {},
+      "missedSpellWords": {},
+      "reviewActive": false,
+      "reviewWords": [],
+      "completed": true
+    }
+  },
+  "wordLists": [
+    {
+      "id": "mastered-profile-test-words",
+      "title": "Mastered Profile Words",
+      "words": [
+        "apple",
+        "because",
+        "friend",
+        "little",
+        "school",
+        "would",
+        "world",
+        "water",
+        "mother",
+        "through"
+      ]
+    }
+  ]
+}

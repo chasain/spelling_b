@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
-    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a aria-current="page" href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a aria-current="page" href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
   <main class="phonics-shell frequency-shell">
@@ -33,12 +33,15 @@
     <article class="phonics-card" aria-labelledby="frequency-title">
       <div class="phonics-card-heading">
         <div><p id="frequency-number" class="eyebrow">Level 1 of 100</p><h2 id="frequency-title">Loading words…</h2></div>
-        <div id="frequency-level-status" class="complete-lesson" aria-live="polite">☆ Ready to learn</div>
+        <div class="frequency-level-mastery">
+          <div id="frequency-level-status" class="complete-lesson" aria-live="polite">0 / 100 mastery</div>
+          <div id="frequency-level-mastery-track" class="sound-pattern-track" role="progressbar" aria-label="Current high-frequency level mastery" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="frequency-level-mastery-fill"></span></div>
+        </div>
       </div>
 
       <section class="phonics-practice" aria-live="polite">
         <div class="phonics-word-list-heading">
-          <div><p class="eyebrow">Your ten words</p><h3 id="frequency-word-count">Practice all three stages to master this level.</h3></div>
+          <div><p class="eyebrow">Your ten words</p><h3 id="frequency-word-count">Repeat Copy, Guided, and Spell practice to build 100 mastery points.</h3></div>
           <button id="frequency-start" class="primary" type="button">Start level</button>
         </div>
         <section id="frequency-activity" class="phonics-activity" hidden>
@@ -50,9 +53,12 @@
           <p id="frequency-instruction" class="hint"></p>
           <div id="frequency-shown-word" class="shown-word"></div>
           <button id="frequency-speak" class="speaker phonics-speaker" type="button" aria-label="Hear the word"><span aria-hidden="true">🔊</span></button>
-          <div id="frequency-typed" class="typed-display" aria-live="polite"></div>
           <form id="frequency-answer-form" class="answer-form">
-            <input id="frequency-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Type the word">
+            <label class="sr-only" for="frequency-answer">Enter the spelling</label>
+            <div id="frequency-answer-field" class="answer-field">
+              <div id="frequency-typed" class="typed-display" aria-hidden="true"></div>
+              <input id="frequency-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="frequency-feedback">
+            </div>
             <button id="frequency-submit" class="primary" type="submit" disabled>Check</button>
           </form>
           <button id="frequency-review" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
@@ -67,6 +73,9 @@
     </aside>
   </main>
 
+  <script src="/static/sound-spelling-lookup.js" defer></script>
+  <script src="/static/sound-spelling-bank.js" defer></script>
+  <script src="/static/sound-mastery.js" defer></script>
   <script src="/static/runtime.js" defer></script>
   <script src="/static/high-frequency.js" defer></script>
 </body>

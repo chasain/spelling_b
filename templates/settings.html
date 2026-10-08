@@ -9,20 +9,21 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
-    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a></nav>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a></nav>
   </header>
 
   <main class="settings-shell">
     <header class="settings-page-heading">
       <p class="eyebrow">Parent &amp; teacher controls</p>
       <h1>Settings</h1>
-      <p>Manage practice words, lesson pacing, classroom sharing, and speech.</p>
+      <p>Manage learner profiles, practice words, lesson pacing, classroom sharing, and speech.</p>
     </header>
 
     <nav class="settings-tabs" role="tablist" aria-label="Settings sections">
       <button id="settings-tab-word-lists" type="button" role="tab" aria-controls="settings-panel-word-lists" data-settings-tab="word-lists">📝 Word Lists</button>
       <button id="settings-tab-practice" type="button" role="tab" aria-controls="settings-panel-practice" data-settings-tab="practice">🌱 Practice Plan</button>
       <button id="settings-tab-classroom" type="button" role="tab" aria-controls="settings-panel-classroom" data-settings-tab="classroom">🎒 Classroom</button>
+      <button id="settings-tab-profiles" type="button" role="tab" aria-controls="settings-panel-profiles" data-settings-tab="profiles">👤 Profiles &amp; Data</button>
       <button id="settings-tab-appearance" type="button" role="tab" aria-controls="settings-panel-appearance" data-settings-tab="appearance">🎨 Appearance &amp; Voice</button>
       <button id="settings-tab-guides" type="button" role="tab" aria-controls="settings-panel-guides" data-settings-tab="guides">📖 Guides</button>
     </nav>
@@ -55,7 +56,7 @@
 
       <section id="settings-panel-classroom" class="classroom-card" data-settings-panel="classroom" role="tabpanel" aria-labelledby="settings-tab-classroom classroom-title">
         <div class="classroom-heading">
-          <div><p class="eyebrow">Classroom sharing</p><h2 id="classroom-title">Share a classroom setup</h2><p>Export these word lists and lesson settings once, then import the same offline file on every student's device.</p></div>
+          <div><p class="eyebrow">Classroom sharing</p><h2 id="classroom-title">Share and update a classroom setup</h2><p>Export once for the class, then distribute later exports from the same setup to update matching lists without resetting local progress.</p></div>
           <span class="classroom-file-badge">.spellingb · CSV · XLSX</span>
         </div>
         <ol class="teacher-quick-start" aria-label="Teacher quick start">
@@ -78,6 +79,36 @@
         </button>
         <input id="classroom-file" class="sr-only" type="file" accept=".spellingb,.csv,.tsv,.xlsx,application/json,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
         <p id="classroom-status" class="classroom-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="settings-panel-profiles" class="settings-section profile-settings" data-settings-panel="profiles" data-profile-controls role="tabpanel" aria-labelledby="settings-tab-profiles profiles-title">
+        <div class="settings-section-heading">
+          <div>
+            <p class="eyebrow">Learner data</p>
+            <h2 id="profiles-title">Profiles and device transfer</h2>
+            <p>Each learner keeps separate practice progress, results, typing levels, and stickers while sharing this device’s word lists and lesson settings.</p>
+          </div>
+          <span class="profile-file-badge">.spellingb-profile</span>
+        </div>
+        <div class="profile-active-card">
+          <div><span aria-hidden="true">👤</span><div><small>Active learner</small><strong id="profile-active-name">Learner</strong></div></div>
+          <button id="export-profile" class="primary" type="button">Export active profile</button>
+        </div>
+        <div id="profile-list" class="profile-list" aria-label="Learner profiles"></div>
+        <div class="profile-create-card">
+          <label for="new-profile-name">Add a learner
+            <input id="new-profile-name" type="text" maxlength="40" placeholder="Learner name" autocomplete="off">
+          </label>
+          <button id="create-profile" class="secondary" type="button">+ Create profile</button>
+        </div>
+        <div class="profile-transfer-card">
+          <div><h3>Move a learner to another device</h3><p>Export creates one offline file containing this learner’s progress, metrics, typing and phonics progress, stickers, and a snapshot of the word lists needed to continue.</p></div>
+          <button id="import-profile" class="secondary" type="button">Import profile file</button>
+          <input id="profile-file" class="sr-only" type="file" accept=".spellingb-profile,application/json">
+        </div>
+        <p class="profile-transfer-note">Import always creates a new profile. Missing word lists from the file are added to this device; existing lists and lesson settings are not replaced.</p>
+        <p class="profile-transfer-note"><strong>Profile actions save immediately.</strong> You do not need to use the Settings save button on this tab.</p>
+        <p id="profile-status" class="classroom-status" role="status" aria-live="polite"></p>
       </section>
 
       <section id="settings-panel-practice" class="lesson-settings" data-settings-panel="practice" role="tabpanel" aria-labelledby="settings-tab-practice practice-plan-title">
@@ -109,6 +140,22 @@
             </div>
           </fieldset>
         </div>
+        <fieldset class="adaptive-review-card">
+          <legend>🎯 Missed-word review</legend>
+          <label class="adaptive-review-toggle">
+            <input id="advanced-review-enabled" type="checkbox" checked>
+            <span><strong>Review misspelled words after Advanced practice</strong><small>Only incorrect answers submitted during Spell are included. Timing, typing speed, Guided answers, and Letter Builder choices are ignored.</small></span>
+          </label>
+          <div class="adaptive-review-options">
+            <label for="advanced-review-repetitions">Correct repetitions per word
+              <input id="advanced-review-repetitions" type="number" min="1" max="10" value="1" required>
+            </label>
+            <label for="advanced-review-max-words">Maximum review words
+              <input id="advanced-review-max-words" type="number" min="1" max="50" value="5" required>
+            </label>
+          </div>
+          <p>Review runs once, after the normal daily stages. Advanced Spell must be at least 1 when this option is enabled.</p>
+        </fieldset>
         <div class="test-setting-card">
           <div>
             <h3>Spelling test</h3>
@@ -198,8 +245,8 @@
             <summary><span aria-hidden="true">🌟</span><span><strong>Student guide</strong><small>Practice independently and know what comes next.</small></span></summary>
             <div class="persona-guide-body">
               <h3>Daily routine</h3>
-              <ol><li>Open Word Lists and choose the list your adult assigned.</li><li>Finish each practice stage. Use the speaker whenever you need to hear a word.</li><li>When the stars are full, start a new day next time.</li></ol>
-              <h3>Other practice</h3><p>Use Phonics and High Frequency for focused word practice. Typing unlocks harder key groups as accuracy and speed improve.</p>
+              <ol><li>Check that your name is selected in the profile menu at the top.</li><li>Open Word Lists and choose the list your adult assigned.</li><li>Finish each practice stage. Use the speaker whenever you need to hear a word.</li><li>When the stars are full, start a new day next time.</li></ol>
+              <h3>Other practice</h3><p>Use Sound Patterns to revisit letter patterns found in Word Lists, and use High Frequency for common words. Typing unlocks harder key groups as accuracy and speed improve.</p>
               <h3>When stuck</h3><p>Slow down, listen again, and read the correction before retrying. Ask an adult if speech is silent or a word looks wrong.</p>
             </div>
           </details>
@@ -207,9 +254,10 @@
             <summary><span aria-hidden="true">🏠</span><span><strong>Parent guide</strong><small>Set up useful practice and understand progress.</small></span></summary>
             <div class="persona-guide-body">
               <h3>Set up a list</h3>
-              <ol><li>Open the Word Lists tab.</li><li>Add a list, give it a clear title, and enter one word per line.</li><li>Optionally add short examples for words that sound alike.</li><li>Save, return to Word Lists, and select it.</li></ol>
-              <h3>Tune practice</h3><p>Practice Plan controls beginner days, lesson repetitions, test size, and typing-practice length. Appearance &amp; Voice controls keyboard guidance and speech.</p>
-              <h3>Review progress</h3><p>Use Progress to look for patterns over several sessions. Accuracy and word-level timing matter more than one unusually fast or slow attempt.</p>
+              <ol><li>Open the Word Lists tab.</li><li>Add a list, give it a clear title, and enter one word per line.</li><li>Optionally generate examples and review the sound-to-spelling mappings.</li><li>Save, return to Word Lists, and select it.</li></ol>
+              <h3>Tune practice</h3><p>Practice Plan controls beginner days, lesson repetitions, optional missed-word review, test size, and typing-practice length. Appearance &amp; Voice controls keyboard guidance and speech.</p>
+              <h3>Review progress</h3><p>Use Progress to follow 0–100 sound-to-spelling mastery built through successful practice across ten words, or export a teacher CSV. Mistakes do not lower mastery. Children choose their next reward pack from the separate Sticker Book page.</p>
+              <h3>Profiles and device changes</h3><p>Create one profile per learner under Profiles &amp; Data. Before changing devices, export the learner profile and keep the file private; importing it creates a separate learner and restores progress, metrics, typing levels, and stickers.</p>
             </div>
           </details>
           <details class="persona-guide">
@@ -217,7 +265,8 @@
             <div class="persona-guide-body">
               <h3>Build, review, and share</h3>
               <ol><li>Create lists, or use Classroom to import CSV, TSV, or XLSX.</li><li>Review words, examples, and the Practice Plan, then try one lesson.</li><li>Export one named <code>.spellingb</code> file and copy it to each device.</li><li>Import it on each device and choose Replace for identical class setups.</li></ol>
-              <h3>Updating a class</h3><p>Export a newly dated package. Importing preserves student progress and creates a recoverable pre-import backup. Choose Merge only when learners should retain additional personal lists.</p>
+              <h3>Updating a class</h3><p>Export a newly dated package from the same teacher setup. Stable list IDs preserve matching student progress when words, titles, or examples change, and every import creates a recoverable pre-import backup. Choose Merge only when learners should retain additional personal lists.</p>
+              <h3>Shared devices</h3><p>Create one local profile per learner. Profiles share the classroom lists and practice plan while keeping progress, typing levels, metrics, and stickers separate. Use a profile export when a learner changes devices, and handle that file as a private student record.</p>
               <h3>Quick check</h3><ul><li>The same lists and plan appear on a sample device.</li><li>Speech works with the selected English voice.</li><li>The assigned list remains selected after navigating away and back.</li><li>The package contains setup only, never student results.</li></ul>
             </div>
           </details>
@@ -250,7 +299,7 @@
       <label><input type="radio" name="classroom-import-mode" value="merge"> <span><strong>Merge with my word lists</strong><small>Lists with the same title are combined without duplicate words.</small></span></label>
     </fieldset>
     <label id="classroom-apply-settings-row" class="classroom-settings-option"><input id="classroom-apply-settings" type="checkbox" checked> Apply the imported lesson plan and test length</label>
-    <p class="classroom-backup-note">Your currently saved setup will be kept as a recoverable pre-import backup. Student progress and results are not changed.</p>
+    <p class="classroom-backup-note">Your currently saved setup will be kept as a recoverable pre-import backup. Matching stable list IDs retain local progress; results and metrics are not changed.</p>
     <p id="classroom-dialog-status" class="classroom-status" role="status" aria-live="polite"></p>
     <div class="classroom-dialog-actions">
       <button id="cancel-classroom-import" class="secondary" type="button">Cancel</button>
@@ -312,7 +361,7 @@
       <div><p class="eyebrow">Optional Chrome AI</p><h2 id="ai-model-title">Download the language model?</h2></div>
       <button id="cancel-ai-model-x" class="dialog-close" type="button" aria-label="Cancel model download">×</button>
     </div>
-    <p>Chrome needs to download and install its on-device language model before Spelling B can generate sentences. This can be a large download and may take several minutes.</p>
+    <p>Chrome needs to download and install its on-device language model before Spelling B can generate examples and sound mappings. This can be a large download and may take several minutes.</p>
     <div class="ai-requirements">
       <strong>Chrome system requirements</strong>
       <ul>
@@ -341,8 +390,8 @@
       <label>Words<textarea class="words-input" rows="7" required placeholder="apple&#10;friend&#10;school"></textarea></label>
       <div class="sentence-tools">
         <div>
-          <strong>Example sentences</strong>
-          <small>Generate locally with Chrome AI, or import and export word/sentence files.</small>
+          <strong>Examples and sound mappings</strong>
+          <small>Generate both locally with Chrome AI, copy an examples-only prompt for an online model, or import a file.</small>
         </div>
         <div class="sentence-actions">
           <button class="secondary generate-sentences" type="button">✨ Generate</button>
@@ -350,17 +399,18 @@
           <button class="secondary import-sentences" type="button">Import file</button>
           <button class="secondary export-sentences" type="button">Export file</button>
         </div>
+        <p class="mapping-provenance-note"><strong>Teacher reference:</strong> locally generated or imported mappings stay editable and travel with classroom exports. They do not feed student Progress metrics; Progress uses 98 reviewed patterns, a deterministic lookup covering 116,563 CMUdict headwords, and a separate set of 1,960 curated focus-list associations.</p>
         <input class="sentence-file sr-only" type="file" accept=".json,.csv,.tsv,application/json,text/csv,text/tab-separated-values">
         <p class="sentence-status" role="status" aria-live="polite"></p>
         <details class="external-model-workflow">
           <summary>Paste a response from an online model</summary>
-          <p>After using Copy AI prompt, paste the returned JSON here. Spelling B validates it before filling the sentence fields.</p>
-          <textarea class="external-model-response" rows="5" placeholder='{"apple":"red apple"}'></textarea>
+          <p>After using Copy AI prompt, paste the returned examples here. The copied prompt no longer asks online models for sound mappings, though Spelling B still accepts mappings from older or custom JSON.</p>
+          <textarea class="external-model-response" rows="7" placeholder='{"apple":{"sentence":"red apple"},"friend":{"sentence":"my kind friend"}}'></textarea>
           <button class="secondary load-model-response" type="button">Load pasted response</button>
         </details>
       </div>
       <details class="sentence-editor" hidden>
-        <summary>Review example sentences</summary>
+        <summary>Review examples and sound mappings</summary>
         <div class="sentence-rows"></div>
       </details>
     </details>

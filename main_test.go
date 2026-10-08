@@ -89,7 +89,7 @@ func TestPagesRender(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, path := range []string{"/", "/settings", "/test", "/progress", "/high-frequency", "/phonics", "/typing"} {
+	for _, path := range []string{"/", "/settings", "/test", "/progress", "/stickers", "/high-frequency", "/phonics", "/typing"} {
 		rec := httptest.NewRecorder()
 		app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
 		if rec.Code != http.StatusOK {
@@ -98,6 +98,29 @@ func TestPagesRender(t *testing.T) {
 		if !strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
 			t.Fatalf("%s content type = %q", path, rec.Header().Get("Content-Type"))
 		}
+	}
+}
+
+func TestCopiedAIPromptIsExampleOnly(t *testing.T) {
+	script, err := os.ReadFile("static/settings.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(script)
+	start := strings.Index(source, "function externalSentencePrompt(words)")
+	if start < 0 {
+		t.Fatal("could not locate externalSentencePrompt")
+	}
+	end := strings.Index(source[start:], "function generationRecordsFromParsed")
+	if end < 0 {
+		t.Fatal("could not locate the end of externalSentencePrompt")
+	}
+	promptSource := source[start : start+end]
+	if strings.Contains(promptSource, "Each mapping needs") || strings.Contains(promptSource, `"mappings"`) {
+		t.Fatal("copied AI prompt still requests sound mappings")
+	}
+	if !strings.Contains(promptSource, `"sentence":"green swamp plants"`) || !strings.Contains(promptSource, "Do not add pronunciation or sound mappings") {
+		t.Fatal("copied AI prompt does not clearly request sentence-only JSON")
 	}
 }
 
@@ -117,7 +140,9 @@ func TestOldConfigGetsDefaultTestLimit(t *testing.T) {
 	if got := store.Get().TestWordsPerList; got != 5 {
 		t.Fatalf("default test words per list = %d", got)
 	}
-	if got := store.Get().LessonPlan; got != defaultConfig.LessonPlan {
+	wantPlan := defaultConfig.LessonPlan
+	wantPlan.AdvancedReview.Enabled = false
+	if got := store.Get().LessonPlan; got != wantPlan {
 		t.Fatalf("default lesson plan = %#v", got)
 	}
 	if got := store.Get().SentencePrompt; got != defaultSentencePrompt {
@@ -224,6 +249,12 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/static/app.css", contentType: "text/css", contains: ".practice-card"},
 		{path: "/static/practice.js", contentType: "text/javascript", contains: "planForDay"},
 		{path: "/progress", contentType: "text/html", contains: "Session stars"},
+		{path: "/stickers", contentType: "text/html", contains: "My Sticker Book"},
+		{path: "/progress", contentType: "text/html", contains: "Export teacher CSV"},
+		{path: "/static/stickers.js", contentType: "text/javascript", contains: "renderStickerBook"},
+		{path: "/settings", contentType: "text/html", contains: "advanced-review-enabled"},
+		{path: "/static/practice.js", contentType: "text/javascript", contains: "missedSpellWords"},
+		{path: "/static/settings.js", contentType: "text/javascript", contains: "migrateListProgress"},
 		{path: "/settings", contentType: "text/html", contains: "Export classroom setup"},
 		{path: "/settings", contentType: "text/html", contains: "Download the language model?"},
 		{path: "/settings", contentType: "text/html", contains: "export-sentences"},
@@ -237,8 +268,11 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/static/settings.js", contentType: "text/javascript", contains: "spelling-b-classroom"},
 		{path: "/static/import-data.js", contentType: "text/javascript", contains: "readXlsx"},
 		{path: "/static/metrics.js", contentType: "text/javascript", contains: "copySpeed"},
+		{path: "/static/sound-spelling-lookup.js", contentType: "text/javascript", contains: "SpellingSoundLookup"},
+		{path: "/static/sound-mastery.js", contentType: "text/javascript", contains: "WORDS_FOR_MASTERY"},
 		{path: "/high-frequency", contentType: "text/html", contains: "High Frequency Words"},
-		{path: "/phonics", contentType: "text/html", contains: "Phonics lessons"},
+		{path: "/high-frequency", contentType: "text/html", contains: "frequency-answer-field"},
+		{path: "/phonics", contentType: "text/html", contains: "Sound Patterns"},
 		{path: "/typing", contentType: "text/html", contains: "Typing trail"},
 		{path: "/static/high-frequency-words.json", contentType: "application/json", contains: "\"levels\":"},
 		{path: "/static/phonics-lessons.json", contentType: "application/json", contains: "\"lessons\":"},
@@ -264,6 +298,10 @@ func TestLessonPlanValidation(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "defaults", plan: defaultConfig.LessonPlan},
+		{name: "review enabled with spell", plan: LessonPlan{Advanced: LessonRepetitions{Spell: 1}, AdvancedReview: ReviewSettings{Enabled: true, Repetitions: 2, MaxWords: 4}}},
+		{name: "review requires spell", plan: LessonPlan{Advanced: LessonRepetitions{Guided: 1}, AdvancedReview: ReviewSettings{Enabled: true, Repetitions: 1, MaxWords: 5}}, wantErr: true},
+		{name: "review repetitions capped", plan: LessonPlan{Advanced: LessonRepetitions{Spell: 1}, AdvancedReview: ReviewSettings{Enabled: true, Repetitions: 11, MaxWords: 5}}, wantErr: true},
+		{name: "review words capped", plan: LessonPlan{Advanced: LessonRepetitions{Spell: 1}, AdvancedReview: ReviewSettings{Enabled: true, Repetitions: 1, MaxWords: 51}}, wantErr: true},
 		{name: "zero disables individual lessons", plan: LessonPlan{BeginnerDays: 1, Beginner: LessonRepetitions{LetterBuilder: 2}, Advanced: LessonRepetitions{Spell: 1}}},
 		{name: "zero beginner days allows empty beginner mode", plan: LessonPlan{Advanced: LessonRepetitions{Guided: 1}}},
 		{name: "active beginner mode cannot be empty", plan: LessonPlan{BeginnerDays: 1, Advanced: LessonRepetitions{Spell: 1}}, wantErr: true},
@@ -287,9 +325,10 @@ func TestCustomLessonPlanPersists(t *testing.T) {
 		t.Fatal(err)
 	}
 	plan := LessonPlan{
-		BeginnerDays: 7,
-		Beginner:     LessonRepetitions{Copy: 0, LetterBuilder: 4, Guided: 2, Spell: 0},
-		Advanced:     LessonRepetitions{Copy: 0, LetterBuilder: 0, Guided: 1, Spell: 5},
+		BeginnerDays:   7,
+		Beginner:       LessonRepetitions{Copy: 0, LetterBuilder: 4, Guided: 2, Spell: 0},
+		Advanced:       LessonRepetitions{Copy: 0, LetterBuilder: 0, Guided: 1, Spell: 5},
+		AdvancedReview: ReviewSettings{Repetitions: 1, MaxWords: 5},
 	}
 	config := Config{Lists: []WordList{{Title: "Custom", Words: []string{"word"}}}, TestWordsPerList: 1, LessonPlan: plan}
 	if err := store.Save(config); err != nil {
@@ -301,6 +340,54 @@ func TestCustomLessonPlanPersists(t *testing.T) {
 	}
 	if got := reloaded.Get().LessonPlan; got != plan {
 		t.Fatalf("lesson plan = %#v, want %#v", got, plan)
+	}
+}
+
+func TestLegacySettingsGainStableListIDsAndDisabledReview(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	legacy := `{"testWordsPerList":2,"lessonPlan":{"beginnerDays":0,"beginner":{"copy":0,"letterBuilder":0,"guided":0,"spell":0},"advanced":{"copy":0,"letterBuilder":0,"guided":1,"spell":0}},"lists":[{"title":"Legacy","words":["word"]}]}`
+	if err := os.WriteFile(path, []byte(legacy), 0644); err != nil {
+		t.Fatal(err)
+	}
+	store, err := NewStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := store.Get()
+	if config.Lists[0].ID == "" {
+		t.Fatal("legacy list did not receive an ID")
+	}
+	if config.LessonPlan.AdvancedReview.Enabled || config.LessonPlan.AdvancedReview.Repetitions != 1 || config.LessonPlan.AdvancedReview.MaxWords != 5 {
+		t.Fatalf("legacy review settings = %#v", config.LessonPlan.AdvancedReview)
+	}
+	reloaded, err := NewStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reloaded.Get().Lists[0].ID != config.Lists[0].ID {
+		t.Fatal("migrated list ID changed after reload")
+	}
+}
+
+func TestDuplicateListIDsAreReplaced(t *testing.T) {
+	store, err := NewStore(filepath.Join(t.TempDir(), "settings.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := Config{
+		Lists: []WordList{
+			{ID: "shared", Title: "One", Words: []string{"one"}},
+			{ID: "shared", Title: "Two", Words: []string{"two"}},
+		},
+		TestWordsPerList: 1,
+		LessonPlan:       defaultConfig.LessonPlan,
+	}
+	if err := store.Save(config); err != nil {
+		t.Fatal(err)
+	}
+	lists := store.Get().Lists
+	if lists[0].ID == "" || lists[1].ID == "" || lists[0].ID == lists[1].ID {
+		t.Fatalf("list IDs were not normalized: %#v", lists)
 	}
 }
 
@@ -351,21 +438,47 @@ func TestPhonicsDataHasAllLessons(t *testing.T) {
 	}
 }
 
-func TestPhonicsTutorRegularExpressionsStayEscaped(t *testing.T) {
+func TestSoundPatternsPageKeepsCuratedPracticeGuardrails(t *testing.T) {
 	script, err := os.ReadFile("static/phonics.js")
 	if err != nil {
 		t.Fatal(err)
 	}
 	source := string(script)
 	for _, expression := range []string{
-		`block.replace(/([A-Za-z])-\n([a-z])/g`,
-		`replace(/\n+/g`,
-		`block.split(/\n(?=\s*•)/)`,
-		`replace(/^\s*•\s*/, '')`,
-		`text.split(/\n\s*\n/)`,
+		`pattern.words.slice(0, mastery.WORDS_FOR_MASTERY)`,
+		`words.length >= 12`,
+		`id: focusID`,
+		`runtime.metricSessions()`,
 	} {
 		if !strings.Contains(source, expression) {
-			t.Errorf("phonics.js is missing escaped expression %q", expression)
+			t.Errorf("phonics.js is missing sound-pattern behavior %q", expression)
+		}
+	}
+}
+
+func TestProgressLimitsVisibleSoundPatterns(t *testing.T) {
+	script, err := os.ReadFile("static/metrics.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(script)
+	for _, expression := range []string{
+		`const soundPatternDisplayLimit = 12`,
+		`rankedSoundPatterns.slice(0, soundPatternDisplayLimit)`,
+		`Show fewer patterns`,
+	} {
+		if !strings.Contains(source, expression) {
+			t.Errorf("metrics.js is missing collapsed sound-pattern behavior %q", expression)
+		}
+	}
+
+	runtimeScript, err := os.ReadFile("static/runtime.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, label := range []string{"Prehistoric World", "Tech & Games"} {
+		if !strings.Contains(string(runtimeScript), label) {
+			t.Errorf("runtime.js is missing sticker pack label %q", label)
 		}
 	}
 }
@@ -411,6 +524,167 @@ func TestHighFrequencyDataHasOneHundredLevels(t *testing.T) {
 	if len(seen) != 1000 {
 		t.Fatalf("unique word count = %d, want 1000", len(seen))
 	}
+	lookup, err := os.ReadFile("static/sound-spelling-lookup.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bank, err := os.ReadFile("static/sound-spelling-bank.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	covered := 0
+	var unmapped []string
+	lookupSource := string(lookup)
+	bankSource := string(bank)
+	for word := range seen {
+		if strings.Contains(lookupSource, `"`+word+`"`) || strings.Contains(bankSource, `'`+word+`'`) {
+			covered++
+		} else {
+			unmapped = append(unmapped, word)
+		}
+	}
+	if covered < 990 {
+		t.Fatalf("only %d of 1000 high-frequency words have reviewed sound mappings; unmapped includes %v", covered, unmapped[:min(10, len(unmapped))])
+	}
+}
+
+func TestHighFrequencyUsesCumulativeAndSoundMastery(t *testing.T) {
+	script, err := os.ReadFile("static/high-frequency.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := string(script)
+	for _, behavior := range []string{
+		`mastery: saved.mastery`,
+		`soundMastery.weightFor(stage)`,
+		`phonetics: phoneticsForWord(currentWord())`,
+		`soundMasteryBackfillVersion`,
+		`score >= 100`,
+	} {
+		if !strings.Contains(source, behavior) {
+			t.Errorf("high-frequency.js is missing mastery behavior %q", behavior)
+		}
+	}
+}
+
+func TestMasteredProfileFixtureIsCompleteAndNotPackaged(t *testing.T) {
+	data, err := os.ReadFile("test_data/mastered-spelling-b.spellingb-profile")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) > 8*1024*1024 {
+		t.Fatalf("mastered profile is %d bytes; profile imports are limited to 8 MB", len(data))
+	}
+	var profile struct {
+		Format      string                     `json:"format"`
+		Version     int                        `json:"version"`
+		Profile     struct{ Name string }      `json:"profile"`
+		LearnerData map[string]json.RawMessage `json:"learnerData"`
+		WordLists   []WordList                 `json:"wordLists"`
+	}
+	if err := json.Unmarshal(data, &profile); err != nil {
+		t.Fatal(err)
+	}
+	if profile.Format != "spelling-b-profile" || profile.Version != 1 || profile.Profile.Name == "" || len(profile.WordLists) != 1 {
+		t.Fatalf("invalid mastered profile envelope: format=%q version=%d name=%q lists=%d", profile.Format, profile.Version, profile.Profile.Name, len(profile.WordLists))
+	}
+	allowedKeys := map[string]bool{
+		"spelling-b:session-metrics:v1": true, "spelling-b:stickers:v1": true,
+		"spelling-b:current-word-list:v1": true, "spelling-b:high-frequency-progress:v1": true,
+		"spelling-b:phonics-progress:v3": true, "spelling-b:typing-progress:v2": true,
+		"spelling-b:list:mastered-profile-test-words:progress:v1": true,
+	}
+	for key := range profile.LearnerData {
+		if !allowedKeys[key] {
+			t.Fatalf("fixture contains unsupported learner-data key %q", key)
+		}
+	}
+
+	var sessions []struct {
+		SoundMastery map[string]json.RawMessage `json:"soundMastery"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:session-metrics:v1"], &sessions); err != nil {
+		t.Fatal(err)
+	}
+	trackedPatterns := 0
+	for _, session := range sessions {
+		trackedPatterns += len(session.SoundMastery)
+	}
+	if len(sessions) > 250 || trackedPatterns != 98 {
+		t.Fatalf("fixture sessions=%d tracked sound patterns=%d", len(sessions), trackedPatterns)
+	}
+
+	var stickers struct {
+		Earned map[string][]int `json:"earned"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:stickers:v1"], &stickers); err != nil {
+		t.Fatal(err)
+	}
+	totalStickers := 0
+	for _, earned := range stickers.Earned {
+		totalStickers += len(earned)
+	}
+	if len(stickers.Earned) != 20 || totalStickers != 200 {
+		t.Fatalf("fixture sticker packs=%d stickers=%d", len(stickers.Earned), totalStickers)
+	}
+
+	var frequency struct {
+		Completed []int                      `json:"completed"`
+		Mastery   map[string]json.RawMessage `json:"mastery"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:high-frequency-progress:v1"], &frequency); err != nil {
+		t.Fatal(err)
+	}
+	if len(frequency.Completed) != 100 || len(frequency.Mastery) != 100 {
+		t.Fatalf("fixture high-frequency completed=%d mastery records=%d", len(frequency.Completed), len(frequency.Mastery))
+	}
+
+	var typing struct {
+		Unlocked int    `json:"unlocked"`
+		Mastered []bool `json:"mastered"`
+		Best     []struct {
+			CPM float64 `json:"cpm"`
+		} `json:"best"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:typing-progress:v2"], &typing); err != nil {
+		t.Fatal(err)
+	}
+	if typing.Unlocked != 6 || len(typing.Mastered) != 7 || len(typing.Best) != 7 {
+		t.Fatalf("fixture typing unlocked=%d mastered=%d best=%d", typing.Unlocked, len(typing.Mastered), len(typing.Best))
+	}
+	for index := range typing.Mastered {
+		if !typing.Mastered[index] || typing.Best[index].CPM < 60 {
+			t.Fatalf("typing level %d is not mastered with a passing score", index+1)
+		}
+	}
+
+	var phonics struct {
+		Completed []string `json:"completed"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:phonics-progress:v3"], &phonics); err != nil {
+		t.Fatal(err)
+	}
+	if len(phonics.Completed) != 160 {
+		t.Fatalf("fixture legacy phonics completed=%d, want 160", len(phonics.Completed))
+	}
+
+	var wordProgress struct {
+		Completed bool `json:"completed"`
+	}
+	if err := json.Unmarshal(profile.LearnerData["spelling-b:list:mastered-profile-test-words:progress:v1"], &wordProgress); err != nil {
+		t.Fatal(err)
+	}
+	if !wordProgress.Completed {
+		t.Fatal("fixture Word List day is not complete")
+	}
+
+	buildScript, err := os.ReadFile("scripts/build-extension.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(buildScript), "test_data") {
+		t.Fatal("extension build script references test_data")
+	}
 }
 
 func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
@@ -426,7 +700,7 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.VersionName != "1.5.0" {
+	if manifest.VersionName != "1.6.0" {
 		t.Fatalf("version_name = %q", manifest.VersionName)
 	}
 	if len(manifest.Extra) != 0 {
@@ -452,6 +726,17 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 				"PEAR":   "I ate a pear.",
 				"unused": "This should be removed.",
 			},
+			Phonetics: map[string]WordPhonetics{
+				"apple": {
+					Pronunciation: " /ˈæpəl/ ",
+					Mappings: []SoundMapping{
+						{Sound: " /æ/ ", Letters: "a", Start: 0, End: 1},
+						{Sound: "/p/", Letters: "pp", Start: 1, End: 3},
+						{Sound: "/əl/", Letters: "le", Start: 3, End: 5},
+					},
+				},
+				"unused": {Pronunciation: "/x/", Mappings: []SoundMapping{{Sound: "/x/", Letters: "unused", Start: 0, End: 6}}},
+			},
 		}},
 		TestWordsPerList:     2,
 		LessonPlan:           defaultConfig.LessonPlan,
@@ -467,6 +752,10 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 	got.Lists[0].Sentences["Apple"] = "Changed outside the store."
 	if sentence := store.Get().Lists[0].Sentences["Apple"]; sentence != "The apple is red." {
 		t.Fatalf("stored sentence changed through Get(): %q", sentence)
+	}
+	got.Lists[0].Phonetics["Apple"] = WordPhonetics{Pronunciation: "changed"}
+	if pronunciation := store.Get().Lists[0].Phonetics["Apple"].Pronunciation; pronunciation != "/ˈæpəl/" {
+		t.Fatalf("stored phonetics changed through Get(): %q", pronunciation)
 	}
 
 	reloaded, err := NewStore(path)
@@ -488,6 +777,20 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 	}
 	if _, exists := sentences["unused"]; exists {
 		t.Fatalf("sentence for removed word was persisted: %#v", sentences)
+	}
+	phonetics := reloaded.Get().Lists[0].Phonetics
+	if len(phonetics) != 1 {
+		t.Fatalf("phonetics = %#v", phonetics)
+	}
+	if phonetics["Apple"].Pronunciation != "/ˈæpəl/" || len(phonetics["Apple"].Mappings) != 3 {
+		t.Fatalf("phonetics = %#v", phonetics)
+	}
+	firstMapping := phonetics["Apple"].Mappings[0]
+	if firstMapping.Sound != "" || len(firstMapping.Phonemes) != 1 || firstMapping.Phonemes[0] != "/æ/" {
+		t.Fatalf("legacy sound mapping was not migrated to phonemes: %#v", firstMapping)
+	}
+	if _, exists := phonetics["unused"]; exists {
+		t.Fatalf("phonetics for removed word were persisted: %#v", phonetics)
 	}
 }
 
@@ -515,6 +818,25 @@ func TestConfigRejectsOverlongSentencePrompt(t *testing.T) {
 	}
 	if err := validateConfig(config); err == nil {
 		t.Fatal("validateConfig() accepted an overlong sentence-generation prompt")
+	}
+}
+func TestConfigRejectsInvalidSoundMapping(t *testing.T) {
+	config := Config{
+		Lists: []WordList{{
+			Title: "Examples",
+			Words: []string{"school"},
+			Phonetics: map[string]WordPhonetics{
+				"school": {
+					Pronunciation: "/skuːl/",
+					Mappings:      []SoundMapping{{Sound: "/s/", Letters: "x", Start: 0, End: 1}},
+				},
+			},
+		}},
+		TestWordsPerList: 1,
+		LessonPlan:       defaultConfig.LessonPlan,
+	}
+	if err := validateConfig(config); err == nil {
+		t.Fatal("validateConfig() accepted an invalid sound mapping")
 	}
 }
 

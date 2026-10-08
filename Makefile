@@ -6,6 +6,8 @@ LDFLAGS := -s -w
 
 test:
 	$(GO) test ./...
+	python3 scripts/validate-sound-spelling-bank.py
+	python3 scripts/validate-sound-spelling-lookup.py
 
 artifacts:
 	mkdir -p $(DIST)

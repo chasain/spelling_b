@@ -220,8 +220,8 @@ void (async () => {
   }
 
   function practicePools() {
-    const newKeys = Array.from(levels[state.level].newKeys);
-    const available = Array.from(availableKeys());
+    const newKeys = [...new Set(Array.from(levels[state.level].newKeys))];
+    const available = [...new Set(Array.from(availableKeys()))];
     return [newKeys, available, available];
   }
 
@@ -333,19 +333,23 @@ void (async () => {
     return keys;
   }
 
+  function practiceSequence() {
+    const sequence = [];
+    practicePools().forEach((characters, round) => {
+      const pool = [...new Set(Array.from(characters))];
+      for (let cycle = 0; cycle < typingDisplay.repetitionsPerKey; cycle++) {
+        const order = seededKeyOrder(pool, `${today}:${state.level}:${round}:${cycle}`);
+        if (order.length > 1 && order[0] === sequence.at(-1)) {
+          [order[0], order[1]] = [order[1], order[0]];
+        }
+        sequence.push(...order);
+      }
+    });
+    return sequence;
+  }
+
   function choosePracticeTarget() {
-    const daily = dailyLevel();
-    const round = currentRound(daily.correct);
-    const pool = practicePools()[round] || [];
-    const starts = roundStarts();
-    const position = Math.max(0, daily.correct - (starts[round] || 0));
-    const cycle = Math.floor(position / pool.length);
-    const cyclePosition = position % pool.length;
-    const order = seededKeyOrder(pool, `${today}:${state.level}:${round}:${cycle}`);
-    if (cyclePosition === 0 && order.length > 1 && order[0] === state.practiceTarget) {
-      [order[0], order[1]] = [order[1], order[0]];
-    }
-    state.practiceTarget = order[cyclePosition];
+    state.practiceTarget = practiceSequence()[dailyLevel().correct] || '';
   }
 
   function showKeyboard(character = '', blank = false, guideCharacter = character) {

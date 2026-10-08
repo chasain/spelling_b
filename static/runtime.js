@@ -1,7 +1,7 @@
 (() => {
   const defaults = {
     lists: [
-      { title: 'Starter words', words: ['apple', 'because', 'friend', 'little', 'school', 'would'] },
+      { id: 'starter-words', title: 'Starter words', words: ['apple', 'because', 'friend', 'little', 'school', 'would'] },
     ],
     testWordsPerList: 5,
     sentencePrompt: 'Write exactly three words. Use a short phrase, not a complete sentence. Pair nouns with a simple adjective. Do not add unnecessary articles or clauses.',
@@ -10,17 +10,28 @@
       beginnerDays: 2,
       beginner: { copy: 2, letterBuilder: 3, guided: 1, spell: 0 },
       advanced: { copy: 1, letterBuilder: 0, guided: 2, spell: 2 },
+      advancedReview: { enabled: true, repetitions: 1, maxWords: 5 },
     },
   };
   const isExtension = location.protocol === 'chrome-extension:' && Boolean(globalThis.chrome?.storage?.local);
   let cache = {};
-  const ready = isExtension
-    ? chrome.storage.local.get(null).then((values) => { cache = values; })
-    : Promise.resolve();
-
   const clone = (value) => JSON.parse(JSON.stringify(value));
+  const profileRegistryKey = 'spelling-b:profiles:v1';
+  const profilePrefix = 'spelling-b:profile:';
+  const profileDataKeys = new Set([
+    'spelling-b:session-metrics:v1',
+    'spelling-b:stickers:v1',
+    'spelling-b:current-word-list:v1',
+    'spelling-b:high-frequency-progress:v1',
+    'spelling-b:phonics-progress:v1',
+    'spelling-b:phonics-progress:v2',
+    'spelling-b:phonics-progress:v3',
+    'spelling-b:typing-progress:v1',
+    'spelling-b:typing-progress:v2',
+  ]);
+  let profileRegistry = null;
 
-  function read(key, fallback = null) {
+  function rawRead(key, fallback = null) {
     if (isExtension) return Object.hasOwn(cache, key) ? clone(cache[key]) : fallback;
     try {
       const value = localStorage.getItem(key);
@@ -30,8 +41,17 @@
     }
   }
 
-  async function persist(key, value) {
-    await ready;
+  function rawKeys() {
+    if (isExtension) return Object.keys(cache);
+    const keys = [];
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index);
+      if (key) keys.push(key);
+    }
+    return keys;
+  }
+
+  async function rawPersist(key, value) {
     const copied = clone(value);
     if (isExtension) {
       await chrome.storage.local.set({ [key]: copied });
@@ -41,19 +61,283 @@
     localStorage.setItem(key, JSON.stringify(copied));
   }
 
-  function write(key, value) {
+  function rawWrite(key, value) {
+    const copied = clone(value);
     if (isExtension) {
-      cache[key] = clone(value);
-      return chrome.storage.local.set({ [key]: value }).catch(() => {});
+      cache[key] = copied;
+      return chrome.storage.local.set({ [key]: copied }).catch(() => {});
     }
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, JSON.stringify(copied));
     } catch (_) {}
+  }
+
+  async function rawRemove(keys) {
+    const values = Array.isArray(keys) ? keys : [keys];
+    if (isExtension) {
+      await chrome.storage.local.remove(values);
+      values.forEach((key) => { delete cache[key]; });
+      return;
+    }
+    values.forEach((key) => localStorage.removeItem(key));
+  }
+
+  function isProfileDataKey(key) {
+    return profileDataKeys.has(key)
+      || /^spelling-b:list:[^:]+:progress:v1$/.test(key)
+      || key.startsWith('spelling-b:[');
+  }
+
+  function validateProfileData(data) {
+    const keys = data && typeof data === 'object' && !Array.isArray(data) ? Object.keys(data) : [];
+    if (!data || typeof data !== 'object' || Array.isArray(data) || keys.length > 1000 || keys.some((key) => !isProfileDataKey(key))) {
+      throw new Error('The profile file contains unsupported data.');
+    }
+    for (const [key, value] of Object.entries(data)) {
+      if (key === 'spelling-b:session-metrics:v1') {
+        if (!Array.isArray(value) || value.length > 250) throw new Error('The profile file contains invalid session history.');
+      } else if (/^spelling-b:list:[^:]+:progress:v1$/.test(key) && value === null) {
+        continue;
+      } else if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error('The profile file contains an invalid progress record.');
+      }
+    }
+    return clone(data);
+  }
+
+  function profileKey(key, profileID = profileRegistry?.activeId || 'default') {
+    return `${profilePrefix}${encodeURIComponent(profileID)}:${key}`;
+  }
+
+  function cleanProfileName(value, fallback = 'Learner') {
+    const cleaned = String(value || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    return cleaned || fallback;
+  }
+
+  function normalizeProfileRegistry(candidate) {
+    const source = candidate && typeof candidate === 'object' && !Array.isArray(candidate) ? candidate : {};
+    const seen = new Set();
+    const profiles = (Array.isArray(source.profiles) ? source.profiles : []).map((profile) => {
+      const id = String(profile?.id || '').trim();
+      if (!id || seen.has(id) || !/^[a-zA-Z0-9-]{1,80}$/.test(id)) return null;
+      seen.add(id);
+      return {
+        id,
+        name: cleanProfileName(profile.name),
+        createdAt: typeof profile.createdAt === 'string' ? profile.createdAt : new Date().toISOString(),
+      };
+    }).filter(Boolean).slice(0, 50);
+    if (!profiles.length) profiles.push({ id: 'default', name: 'Learner', createdAt: new Date().toISOString() });
+    const activeId = profiles.some((profile) => profile.id === source.activeId) ? source.activeId : profiles[0].id;
+    return { version: 1, activeId, profiles, migratedLegacy: source.migratedLegacy === true };
+  }
+
+  async function initializeProfiles() {
+    const registry = normalizeProfileRegistry(rawRead(profileRegistryKey, null));
+    if (!registry.migratedLegacy) {
+      const writes = {};
+      rawKeys().filter(isProfileDataKey).forEach((key) => {
+        const destination = profileKey(key, registry.activeId);
+        if (rawRead(destination, null) === null) writes[destination] = rawRead(key);
+      });
+      if (isExtension && Object.keys(writes).length) {
+        await chrome.storage.local.set(writes);
+        Object.assign(cache, clone(writes));
+      } else {
+        for (const [key, value] of Object.entries(writes)) await rawPersist(key, value);
+      }
+      registry.migratedLegacy = true;
+    }
+    profileRegistry = registry;
+    await rawPersist(profileRegistryKey, registry);
+  }
+
+  const ready = (isExtension
+    ? chrome.storage.local.get(null).then((values) => { cache = values; })
+    : Promise.resolve())
+    .then(initializeProfiles)
+    .then(() => { queueMicrotask(mountProfileSwitcher); });
+
+  function newListID() {
+    if (globalThis.crypto?.randomUUID) return `list-${crypto.randomUUID()}`;
+    return `list-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  function normalizeConfig(candidate) {
+    const source = candidate && typeof candidate === 'object' && !Array.isArray(candidate) ? clone(candidate) : clone(defaults);
+    const sourcePlan = source.lessonPlan && typeof source.lessonPlan === 'object' ? source.lessonPlan : {};
+    const hasReview = sourcePlan.advancedReview && typeof sourcePlan.advancedReview === 'object';
+    const advancedReview = hasReview
+      ? { ...defaults.lessonPlan.advancedReview, ...sourcePlan.advancedReview }
+      : { ...defaults.lessonPlan.advancedReview, enabled: false };
+    const lists = (Array.isArray(source.lists) && source.lists.length ? source.lists : clone(defaults.lists)).map((list) => ({
+      ...list,
+      id: typeof list?.id === 'string' && list.id.trim() ? list.id.trim() : newListID(),
+    }));
+    const config = {
+      ...clone(defaults),
+      ...source,
+      lists,
+      lessonPlan: {
+        ...clone(defaults.lessonPlan),
+        ...sourcePlan,
+        beginner: { ...defaults.lessonPlan.beginner, ...(sourcePlan.beginner || {}) },
+        advanced: { ...defaults.lessonPlan.advanced, ...(sourcePlan.advanced || {}) },
+        advancedReview,
+      },
+    };
+    return { config, changed: JSON.stringify(config) !== JSON.stringify(source) };
+  }
+
+  function read(key, fallback = null) {
+    return rawRead(isProfileDataKey(key) ? profileKey(key) : key, fallback);
+  }
+
+  async function persist(key, value) {
+    await ready;
+    await rawPersist(isProfileDataKey(key) ? profileKey(key) : key, value);
+  }
+
+  function write(key, value) {
+    return rawWrite(isProfileDataKey(key) ? profileKey(key) : key, value);
+  }
+
+  function profiles() {
+    return clone(profileRegistry?.profiles || []);
+  }
+
+  function activeProfile() {
+    const active = profileRegistry?.profiles.find((profile) => profile.id === profileRegistry.activeId);
+    return clone(active || profileRegistry?.profiles[0] || { id: 'default', name: 'Learner' });
+  }
+
+  function uniqueProfileName(value) {
+    const base = cleanProfileName(value);
+    const names = new Set(profileRegistry.profiles.map((profile) => profile.name.toLocaleLowerCase()));
+    if (!names.has(base.toLocaleLowerCase())) return base;
+    for (let suffix = 2; suffix < 100; suffix++) {
+      const candidate = `${base.slice(0, Math.max(1, 37 - String(suffix).length))} (${suffix})`;
+      if (!names.has(candidate.toLocaleLowerCase())) return candidate;
+    }
+    return `${base.slice(0, 30)} ${Date.now()}`;
+  }
+
+  async function createProfile(name, data = {}) {
+    await ready;
+    if (profileRegistry.profiles.length >= 50) throw new Error('This device already has the maximum of 50 profiles.');
+    const checkedData = validateProfileData(data);
+    const id = globalThis.crypto?.randomUUID ? `profile-${crypto.randomUUID()}` : `profile-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const profile = { id, name: uniqueProfileName(name), createdAt: new Date().toISOString() };
+    profileRegistry.profiles.push(profile);
+    await rawPersist(profileRegistryKey, profileRegistry);
+    try {
+      await replaceProfileData(id, checkedData);
+    } catch (error) {
+      profileRegistry.profiles = profileRegistry.profiles.filter((item) => item.id !== id);
+      await rawPersist(profileRegistryKey, profileRegistry);
+      const prefix = profileKey('', id);
+      await rawRemove(rawKeys().filter((key) => key.startsWith(prefix)));
+      throw error;
+    }
+    return clone(profile);
+  }
+
+  async function renameProfile(id, name) {
+    await ready;
+    const profile = profileRegistry.profiles.find((item) => item.id === id);
+    if (!profile) throw new Error('Profile not found.');
+    const requested = cleanProfileName(name);
+    const duplicate = profileRegistry.profiles.some((item) => item.id !== id && item.name.toLocaleLowerCase() === requested.toLocaleLowerCase());
+    profile.name = duplicate ? uniqueProfileName(requested) : requested;
+    await rawPersist(profileRegistryKey, profileRegistry);
+    return clone(profile);
+  }
+
+  async function switchProfile(id) {
+    await ready;
+    if (!profileRegistry.profiles.some((profile) => profile.id === id)) throw new Error('Profile not found.');
+    profileRegistry.activeId = id;
+    await rawPersist(profileRegistryKey, profileRegistry);
+    return activeProfile();
+  }
+
+  async function deleteProfile(id) {
+    await ready;
+    if (profileRegistry.profiles.length <= 1) throw new Error('Keep at least one profile on this device.');
+    const index = profileRegistry.profiles.findIndex((profile) => profile.id === id);
+    if (index < 0) throw new Error('Profile not found.');
+    profileRegistry.profiles.splice(index, 1);
+    if (profileRegistry.activeId === id) profileRegistry.activeId = profileRegistry.profiles[0].id;
+    await rawPersist(profileRegistryKey, profileRegistry);
+    const prefix = profileKey('', id);
+    await rawRemove(rawKeys().filter((key) => key.startsWith(prefix)));
+    return activeProfile();
+  }
+
+  function profileData(id = profileRegistry.activeId) {
+    const prefix = profileKey('', id);
+    return Object.fromEntries(rawKeys().filter((key) => key.startsWith(prefix)).map((key) => [key.slice(prefix.length), rawRead(key)]));
+  }
+
+  async function replaceProfileData(id, data) {
+    const profile = profileRegistry?.profiles.find((item) => item.id === id);
+    if (!profile) throw new Error('Profile not found.');
+    const source = validateProfileData(data);
+    const prefix = profileKey('', id);
+    await rawRemove(rawKeys().filter((key) => key.startsWith(prefix)));
+    for (const [key, value] of Object.entries(source)) await rawPersist(profileKey(key, id), value);
+  }
+
+  function mountProfileSwitcher() {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar || topbar.querySelector('.profile-switcher')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'profile-switcher';
+    const label = document.createElement('label');
+    label.className = 'sr-only';
+    label.htmlFor = 'active-profile-switcher';
+    label.textContent = 'Active learner profile';
+    const select = document.createElement('select');
+    select.id = 'active-profile-switcher';
+    select.setAttribute('aria-label', 'Active learner profile');
+    select.replaceChildren(...profiles().map((profile) => {
+      const option = document.createElement('option');
+      option.value = profile.id;
+      option.textContent = `👤 ${profile.name}`;
+      return option;
+    }));
+    select.value = activeProfile().id;
+    select.addEventListener('change', async () => {
+      const request = new CustomEvent('spelling-b:before-profile-switch', { cancelable: true, detail: { profileId: select.value } });
+      if (!window.dispatchEvent(request)) {
+        select.value = activeProfile().id;
+        return;
+      }
+      select.disabled = true;
+      try {
+        await switchProfile(select.value);
+        window.location.reload();
+      } catch (_) {
+        select.disabled = false;
+        select.value = activeProfile().id;
+      }
+    });
+    const manage = document.createElement('a');
+    manage.className = 'profile-manage-link';
+    manage.href = isExtension ? 'settings.html?tab=profiles' : '/settings?tab=profiles';
+    manage.textContent = 'Manage';
+    wrapper.append(label, select, manage);
+    const nav = topbar.querySelector('.topnav');
+    topbar.insertBefore(wrapper, nav || null);
   }
 
   async function loadConfig() {
     await ready;
-    return read('spelling-b:config:v1', clone(defaults));
+    const normalized = normalizeConfig(read('spelling-b:config:v1', clone(defaults)));
+    if (normalized.changed) {
+      await persist('spelling-b:config:v1', normalized.config);
+    }
+    return normalized.config;
   }
 
   async function saveConfig(config) {
@@ -63,6 +347,84 @@
   const metricsStorageKey = 'spelling-b:session-metrics:v1';
   const speechSettingsKey = 'spelling-b:speech-emphasis:v1';
   const speechSettingsDefaults = { normalRate: 0.82, emphasisRate: 0.66, emphasisPitch: 1.12 };
+  const stickerStorageKey = 'spelling-b:stickers:v1';
+  const stickerPacks = {
+    animals: { label: 'Animals', icon: '🐾', stickers: ['🐶', '🐱', '🐰', '🦊', '🐼', '🐨', '🦁', '🐯', '🐸', '🦉'] },
+    space: { label: 'Space', icon: '🚀', stickers: ['🚀', '🌍', '🌙', '⭐', '🪐', '☄️', '👩‍🚀', '🛰️', '🌌', '👽'] },
+    dinosaurs: { label: 'Prehistoric World', icon: '🦕', stickers: ['🦕', '🦖', '🥚', '🌋', '🦴', '🌿', '🐾', '🪨', '🌴', '☄️'] },
+    ocean: { label: 'Ocean', icon: '🐳', stickers: ['🐳', '🐬', '🐠', '🐙', '🦀', '🦈', '🐢', '🪸', '🐚', '⭐'] },
+    sports: { label: 'Sports', icon: '🏆', stickers: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏒', '🥅', '🏅', '🏆'] },
+    fantasy: { label: 'Fantasy', icon: '🦄', stickers: ['🦄', '🐉', '🏰', '🧚', '🪄', '🔮', '👑', '🧜', '🌈', '✨'] },
+    farm: { label: 'Farm', icon: '🚜', stickers: ['🐮', '🐷', '🐔', '🐴', '🐑', '🐐', '🐓', '🌾', '🚜', '🧺'] },
+    bugs: { label: 'Bugs', icon: '🐝', stickers: ['🐝', '🐞', '🦋', '🐛', '🐜', '🪲', '🦗', '🦟', '🪰', '🕷️'] },
+    birds: { label: 'Birds', icon: '🦜', stickers: ['🐦', '🦅', '🦆', '🦢', '🦜', '🦚', '🦩', '🐧', '🐥', '🪶'] },
+    fruit: { label: 'Fruit', icon: '🍓', stickers: ['🍎', '🍌', '🍓', '🍊', '🍇', '🍉', '🍒', '🍑', '🍍', '🥝'] },
+    treats: { label: 'Treats', icon: '🧁', stickers: ['🍪', '🍩', '🧁', '🍰', '🍫', '🍬', '🍭', '🍦', '🥧', '🍿'] },
+    weather: { label: 'Weather', icon: '☀️', stickers: ['☀️', '🌤️', '🌧️', '⛈️', '❄️', '🌪️', '🌦️', '☂️', '💧', '⚡'] },
+    garden: { label: 'Garden', icon: '🌻', stickers: ['🌻', '🌷', '🌹', '🌺', '🌸', '🌼', '🪻', '🌱', '🌵', '🍀'] },
+    vehicles: { label: 'Vehicles', icon: '🚗', stickers: ['🚗', '🚕', '🚌', '🚓', '🚑', '🚒', '🏎️', '🚲', '🛴', '🚂'] },
+    music: { label: 'Music', icon: '🎵', stickers: ['🎵', '🎶', '🎤', '🎧', '🎹', '🥁', '🎷', '🎺', '🎸', '🪕'] },
+    art: { label: 'Art', icon: '🎨', stickers: ['🎨', '🖌️', '🖍️', '✏️', '✂️', '🧵', '🧶', '📸', '🖼️', '🗿'] },
+    school: { label: 'School', icon: '🎒', stickers: ['🎒', '📘', '📏', '🧮', '🔬', '🔭', '🧪', '🗺️', '🏫', '💡'] },
+    celebration: { label: 'Celebration', icon: '🎉', stickers: ['🎉', '🎊', '🎈', '🎁', '🎂', '🥳', '🪅', '🎆', '🎇', '🏵️'] },
+    adventure: { label: 'Adventure', icon: '🧭', stickers: ['🧭', '⛺', '🥾', '🏔️', '🏕️', '🔥', '🔦', '🛶', '🧗', '🌲'] },
+    robots: { label: 'Tech & Games', icon: '🤖', stickers: ['🤖', '💻', '⌨️', '🖱️', '🎮', '🕹️', '📱', '⚙️', '🔋', '🛸'] },
+  };
+  const randomStickerMode = Object.freeze({ id: 'random', label: 'Surprise Me', icon: '🎲' });
+
+  function stickerCollection() {
+    const saved = read(stickerStorageKey, {});
+    const selectedPack = saved?.selectedPack === randomStickerMode.id || Object.hasOwn(stickerPacks, saved?.selectedPack)
+      ? saved.selectedPack
+      : randomStickerMode.id;
+    const earned = saved?.earned && typeof saved.earned === 'object' ? saved.earned : {};
+    const awards = saved?.awards && typeof saved.awards === 'object' ? saved.awards : {};
+    return { selectedPack, earned, awards };
+  }
+
+  function selectStickerPack(packID) {
+    if (packID !== randomStickerMode.id && !Object.hasOwn(stickerPacks, packID)) return stickerCollection();
+    const collection = stickerCollection();
+    collection.selectedPack = packID;
+    write(stickerStorageKey, collection);
+    return collection;
+  }
+
+  function awardSticker(completionID) {
+    if (!completionID) return null;
+    const collection = stickerCollection();
+    if (Object.hasOwn(collection.awards, completionID)) {
+      const existing = collection.awards[completionID];
+      return existing ? { ...existing, newlyAwarded: false } : null;
+    }
+    let packID = collection.selectedPack;
+    let pack = stickerPacks[packID];
+    let earned = new Set(Array.isArray(collection.earned[packID]) ? collection.earned[packID] : []);
+    let stickerIndex = pack?.stickers.findIndex((_, index) => !earned.has(index)) ?? -1;
+    if (!pack || stickerIndex < 0) {
+      collection.selectedPack = randomStickerMode.id;
+      const remaining = Object.entries(stickerPacks).flatMap(([id, details]) => {
+        const packEarned = new Set(Array.isArray(collection.earned[id]) ? collection.earned[id] : []);
+        return details.stickers.flatMap((sticker, index) => packEarned.has(index) ? [] : [{ packID: id, stickerIndex: index, sticker }]);
+      });
+      const picked = remaining.length ? remaining[Math.floor(Math.random() * remaining.length)] : null;
+      packID = picked?.packID;
+      pack = packID ? stickerPacks[packID] : null;
+      stickerIndex = picked?.stickerIndex ?? -1;
+      earned = new Set(Array.isArray(collection.earned[packID]) ? collection.earned[packID] : []);
+    }
+    const award = pack && stickerIndex >= 0 ? { packID, stickerIndex, sticker: pack.stickers[stickerIndex] } : null;
+    if (award) {
+      collection.earned[packID] = [...earned, stickerIndex].sort((left, right) => left - right);
+      if (collection.selectedPack === packID && collection.earned[packID].length >= pack.stickers.length) {
+        collection.selectedPack = randomStickerMode.id;
+      }
+    }
+    collection.awards[completionID] = award;
+    write(stickerStorageKey, collection);
+    return award ? { ...award, newlyAwarded: true } : null;
+  }
+
 
   function metricSessions() {
     const sessions = read(metricsStorageKey, []);
@@ -106,10 +468,11 @@
       letterChoices: 0,
       correctLetterChoices: 0,
       builderWords: 0,
+      soundMastery: {},
     };
   }
 
-  function recordWordMetricAttempt(session, { word, stage, entered, correct, seconds, corrections = 0 }) {
+  function recordWordMetricAttempt(session, { word, stage, entered, correct, seconds, corrections = 0, phonetics = null }) {
     if (!session) return;
     const typed = Array.from(entered);
     const expected = Array.from(word);
@@ -135,6 +498,7 @@
     stats.seconds += elapsed;
     if (correct) stats.correct++;
     session.wordStats[key] = stats;
+    window.SpellingSoundMastery?.recordPractice(session, { word, stage, correct, phonetics });
     saveMetricSession(session);
   }
 
@@ -317,8 +681,23 @@
     read,
     write,
     persist,
+    profiles,
+    activeProfile,
+    createProfile,
+    renameProfile,
+    switchProfile,
+    deleteProfile,
+    profileData,
+    replaceProfileData,
+    validateProfileData,
     loadConfig,
+    newListID,
     saveConfig,
+    stickerPacks,
+    randomStickerMode,
+    stickerCollection,
+    selectStickerPack,
+    awardSticker,
     metricSessions,
     saveMetricSession,
     createWordMetricSession,

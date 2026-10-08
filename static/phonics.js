@@ -1,478 +1,201 @@
 void (async () => {
   const runtime = window.SpellingRuntime;
+  const bank = window.SpellingSoundBank?.patterns || [];
+  const mastery = window.SpellingSoundMastery;
   await runtime.ready;
-  const dataURL = runtime.isExtension ? 'phonics-lessons.json' : '/static/phonics-lessons.json';
-  const response = await fetch(dataURL);
-  if (!response.ok) throw new Error('Could not load the phonics lessons.');
-  const course = await response.json();
-  const storageKey = 'spelling-b:phonics-progress:v3';
-  const older = runtime.read('spelling-b:phonics-progress:v2', runtime.read('spelling-b:phonics-progress:v1', {}));
-  const saved = runtime.read(storageKey, older);
 
-  const select = document.querySelector('#phonics-select');
-  const groupSelect = document.querySelector('#phonics-group-select');
-  const previous = document.querySelector('#phonics-previous');
-  const next = document.querySelector('#phonics-next');
-  const number = document.querySelector('#phonics-number');
-  const title = document.querySelector('#phonics-title');
-  const complete = document.querySelector('#phonics-complete');
-  const completedLabel = document.querySelector('#phonics-completed');
-  const progressTrack = document.querySelector('.phonics-progress-track');
-  const progressFill = document.querySelector('#phonics-progress-fill');
-  const tutorTab = document.querySelector('#tutor-tab');
-  const studentTab = document.querySelector('#student-tab');
-  const tutorContent = document.querySelector('#phonics-content');
-  const practicePanel = document.querySelector('#phonics-practice');
-  const wordCount = document.querySelector('#phonics-word-count');
-  const startButton = document.querySelector('#phonics-start');
-  const activity = document.querySelector('#phonics-activity');
-  const stageLabel = document.querySelector('#phonics-stage');
-  const questionProgress = document.querySelector('#phonics-question-progress');
-  const activityFill = document.querySelector('#phonics-activity-fill');
-  const instruction = document.querySelector('#phonics-instruction');
-  const shownWord = document.querySelector('#phonics-shown-word');
-  const speakButton = document.querySelector('#phonics-speak');
-  const typed = document.querySelector('#phonics-typed');
-  const form = document.querySelector('#phonics-answer-form');
-  const answer = document.querySelector('#phonics-answer');
-  const submit = document.querySelector('#phonics-submit');
-  const review = document.querySelector('#phonics-review');
-  const feedback = document.querySelector('#phonics-feedback');
+  const masteredCount = document.querySelector('#pattern-mastered-count');
+  const practicedCount = document.querySelector('#pattern-practiced-count');
+  const overallTrack = document.querySelector('#pattern-overall-track');
+  const overallFill = document.querySelector('#pattern-overall-fill');
+  const practiceButton = document.querySelector('#practice-patterns');
+  const status = document.querySelector('#pattern-status');
+  const practicingContainer = document.querySelector('#practicing-patterns');
+  const practicingEmpty = document.querySelector('#practicing-patterns-empty');
+  const practicingSectionCount = document.querySelector('#practicing-patterns-count');
+  const newContainer = document.querySelector('#new-patterns');
+  const newSectionCount = document.querySelector('#new-patterns-count');
+  const showMoreButton = document.querySelector('#show-more-patterns');
+  const masteredContainer = document.querySelector('#mastered-patterns');
+  const masteredEmpty = document.querySelector('#mastered-patterns-empty');
+  const masteredSectionCount = document.querySelector('#mastered-patterns-section-count');
+  const aggregate = mastery?.aggregate(runtime.metricSessions()) || new Map();
+  let newPatternLimit = 12;
 
-  const stages = [
-    { id: 'copy', name: 'Copy', icon: '👀', instruction: 'Look at the word and type it.' },
-    { id: 'guided', name: 'Guided', icon: '🌈', instruction: 'Listen and spell. The colors will help.' },
-    { id: 'spell', name: 'Spell', icon: '🎯', instruction: 'Listen and spell without hints.' },
-  ];
-  const masteryRounds = 3;
-  const allGroups = course.lessons.flatMap((lesson, lessonIndex) => {
-    return lesson.practiceGroups.map((group, groupIndex) => ({ lessonIndex, groupIndex, id: group.id }));
+  const details = bank.map((pattern, order) => {
+    const stats = aggregate.get(mastery.keyFor(pattern.sound, pattern.grapheme));
+    return { pattern, stats, order, ...mastery.scoreFor(stats) };
   });
-  const savedCompleted = Array.isArray(saved.completed) ? saved.completed : [];
-  const completed = new Set();
-  savedCompleted.forEach((value) => {
-    if (typeof value === 'string' && value.includes('.')) {
-      completed.add(value);
-      return;
-    }
-    const lesson = course.lessons.find((item) => item.number === Number(value));
-    if (lesson) lesson.practiceGroups.forEach((group) => completed.add(group.id));
-  });
-  const state = {
-    current: Math.min(course.lessons.length - 1, Math.max(0, Number(saved.current) || 0)),
-    group: Math.max(0, Number(saved.group) || 0),
-    completed,
-    view: 'student',
-    practice: saved.practice && typeof saved.practice === 'object' ? saved.practice : {},
-  };
-  if (state.group >= course.lessons[state.current].practiceGroups.length) state.group = 0;
-  let reviewMode = false;
-  let transitionTimer = 0;
-  let metricSession = null;
-  let attemptStartedAt = 0;
-  let corrections = 0;
 
-  function save() {
-    runtime.write(storageKey, {
-      current: state.current,
-      group: state.group,
-      completed: [...state.completed],
-      view: state.view,
-      practice: state.practice,
-    });
+  function orderedWords(item, limit) {
+    const points = item.stats?.words || new Map();
+    const primary = item.pattern.words.slice(0, mastery.WORDS_FOR_MASTERY);
+    const reserve = item.pattern.words.slice(mastery.WORDS_FOR_MASTERY);
+    const priority = (word) => {
+      const value = points.get(word.toLocaleLowerCase()) || 0;
+      if (value > 0 && value < mastery.MAX_WORD_POINTS) return 0;
+      if (value === 0) return 1;
+      return 2;
+    };
+    const sorter = (left, right) => priority(left) - priority(right)
+      || (points.get(right.toLocaleLowerCase()) || 0) - (points.get(left.toLocaleLowerCase()) || 0)
+      || left.localeCompare(right);
+    return [...primary].sort(sorter).concat([...reserve].sort(sorter)).slice(0, limit);
   }
 
-  function currentLesson() {
-    return course.lessons[state.current];
-  }
+  function patternCard(item) {
+    const card = document.createElement('article');
+    card.className = 'learner-pattern-card';
+    if (item.mastered) card.classList.add('mastered');
 
-  function currentGroup() {
-    return currentLesson().practiceGroups[state.group];
-  }
+    const top = document.createElement('div');
+    top.className = 'learner-pattern-top';
+    const grapheme = document.createElement('strong');
+    grapheme.className = 'learner-grapheme';
+    grapheme.textContent = item.pattern.grapheme.replace('_', '…');
+    const label = document.createElement('div');
+    const heading = document.createElement('h3');
+    heading.textContent = item.pattern.label;
+    const example = document.createElement('p');
+    example.textContent = `as in ${item.pattern.words[0]}`;
+    label.append(heading, example);
+    const speak = document.createElement('button');
+    speak.className = 'pattern-speak speaker';
+    speak.type = 'button';
+    speak.setAttribute('aria-label', `Hear ${item.pattern.words[0]}`);
+    speak.title = `Hear ${item.pattern.words[0]}`;
+    speak.textContent = '🔊';
+    speak.addEventListener('click', () => runtime.speak(item.pattern.words[0], { button: speak }));
+    top.append(grapheme, label, speak);
 
-  function currentWords() {
-    return currentGroup().words;
-  }
-
-  function currentFlatIndex() {
-    return allGroups.findIndex((item) => item.lessonIndex === state.current && item.groupIndex === state.group);
-  }
-
-  function moveToFlatIndex(index) {
-    const target = allGroups[index];
-    if (!target) return;
-    closeMetricSession(false);
-    state.current = target.lessonIndex;
-    state.group = target.groupIndex;
-    state.view = 'student';
-    render();
-  }
-
-  function practiceState() {
-    const group = currentGroup();
-    const signature = JSON.stringify(group.words);
-    const existing = state.practice[group.id];
-    if (!existing || existing.signature !== signature) {
-      state.practice[group.id] = { signature, started: false, complete: false, stage: 0, round: 0, word: 0 };
-    }
-    if (!Number.isInteger(state.practice[group.id].round)) state.practice[group.id].round = 0;
-    return state.practice[group.id];
-  }
-
-  function currentWord() {
-    return currentWords()[practiceState().word] || '';
-  }
-
-  function currentStage() {
-    return stages[practiceState().stage] || stages[0];
-  }
-
-  function normalized(value) {
-    return value.trim().toLocaleLowerCase();
-  }
-
-  function ensureMetricSession() {
-    if (!metricSession) {
-      metricSession = runtime.createWordMetricSession({
-        activity: 'phonics',
-        listTitle: `Phonics · Lesson ${currentGroup().id}`,
-        contextLabel: currentGroup().title,
-        stages: stages.map((stage) => stage.id),
-      });
-    }
-    return metricSession;
-  }
-
-  function recordMetricAttempt(entered, correct) {
-    const session = ensureMetricSession();
-    const seconds = attemptStartedAt ? (performance.now() - attemptStartedAt) / 1000 : 0;
-    runtime.recordWordMetricAttempt(session, {
-      word: currentWord(),
-      stage: currentStage().id,
-      entered,
-      correct,
-      seconds,
-      corrections,
-    });
-    attemptStartedAt = performance.now();
-    corrections = 0;
-  }
-
-  function closeMetricSession(completed = false) {
-    if (!metricSession || metricSession.endedAt) return;
-    metricSession.completed = completed;
-    metricSession.endedAt = new Date().toISOString();
-    runtime.saveMetricSession(metricSession);
-    metricSession = null;
-  }
-
-  function appendBlock(block) {
-    const cleaned = block.replace(/([A-Za-z])-\n([a-z])/g, '$1$2').replace(/\n+/g, ' ').trim();
-    if (!cleaned) return;
-    if (cleaned.startsWith('•')) {
-      const list = document.createElement('ul');
-      block.split(/\n(?=\s*•)/).forEach((line) => {
-        const item = document.createElement('li');
-        item.textContent = line.replace(/^\s*•\s*/, '').replace(/\s+/g, ' ').trim();
-        list.append(item);
-      });
-      tutorContent.append(list);
-      return;
-    }
-    const headingPatterns = /^(New material|Warm Up|Continue to Warm Up|Words to read|Have the student read|Have the student write|Introduce the new|More sentences|Do a “triple read”|Choose any)/i;
-    const element = headingPatterns.test(cleaned) || (cleaned.length < 90 && cleaned.endsWith(':'))
-      ? document.createElement('h3')
-      : document.createElement('p');
-    element.textContent = cleaned;
-    tutorContent.append(element);
-  }
-
-  function renderTutor(text) {
-    tutorContent.replaceChildren();
-    text.split(/\n\s*\n/).forEach(appendBlock);
-    tutorContent.scrollTop = 0;
-  }
-
-  function updateCourseProgress() {
-    const done = allGroups.filter((group) => state.completed.has(group.id)).length;
-    const total = allGroups.length;
-    completedLabel.textContent = `${done} of ${total}`;
-    progressTrack.setAttribute('aria-valuemax', String(total));
-    progressTrack.setAttribute('aria-valuenow', String(done));
-    progressFill.style.width = `${Math.round(done / total * 100)}%`;
-  }
-
-  function renderTyped() {
-    typed.replaceChildren();
-    const value = answer.value;
-    if (!value) {
-      const placeholder = document.createElement('span');
-      placeholder.className = 'typed-placeholder';
-      placeholder.textContent = 'Type the word here';
-      typed.append(placeholder);
-      return;
-    }
-    Array.from(value).forEach((character, index) => {
-      const mark = document.createElement('span');
-      mark.textContent = character;
-      if (currentStage().id === 'guided') {
-        const expected = Array.from(currentWord())[index];
-        mark.className = expected && normalized(character) === normalized(expected) ? 'letter-correct' : 'letter-incorrect';
-      }
-      typed.append(mark);
-    });
-  }
-
-  function renderGroupPicker() {
-    const lesson = currentLesson();
-    groupSelect.replaceChildren(...lesson.practiceGroups.map((group, index) => {
-      const option = document.createElement('option');
-      option.value = String(index);
-      option.textContent = `${group.id} · ${group.title}`;
-      return option;
-    }));
-    groupSelect.value = String(state.group);
-    groupSelect.closest('label').hidden = lesson.practiceGroups.length < 2;
-  }
-
-  function renderStartButton() {
-    const words = currentWords();
-    const session = practiceState();
-    wordCount.textContent = `${currentGroup().title} · ${words.length} practice ${words.length === 1 ? 'word' : 'words'}`;
-    startButton.textContent = session.started && !session.complete ? 'Restart this practice set' : session.complete ? 'Practice again' : 'Start practice';
-  }
-
-  function renderActivity() {
-    const session = practiceState();
-    activity.hidden = !session.started;
-    if (!session.started) return;
-    if (session.complete) {
-      stageLabel.textContent = '🌟 Practice set complete';
-      questionProgress.textContent = '';
-      activityFill.style.width = '100%';
-      instruction.textContent = 'Wonderful work! You completed Copy, Guided, and Spell.';
-      shownWord.hidden = false;
-      shownWord.textContent = 'Great job!';
-      speakButton.hidden = true;
-      form.hidden = true;
-      typed.hidden = true;
-      review.hidden = true;
-      feedback.textContent = 'This practice set has been added to your phonics progress.';
-      feedback.className = 'feedback correct';
-      return;
-    }
-
-    const words = currentWords();
-    const stage = currentStage();
-    const overall = (session.stage * masteryRounds + session.round) * words.length + session.word;
-    const total = stages.length * masteryRounds * words.length;
-    stageLabel.textContent = `${stage.icon} ${stage.name} · Stage ${session.stage + 1} of ${stages.length}`;
-    questionProgress.textContent = `Round ${session.round + 1} of ${masteryRounds} · Word ${session.word + 1} of ${words.length}`;
-    activityFill.style.width = `${Math.round(overall / total * 100)}%`;
-    instruction.textContent = stage.instruction;
-    shownWord.hidden = stage.id !== 'copy';
-    shownWord.textContent = stage.id === 'copy' ? currentWord() : '';
-    speakButton.hidden = false;
-    speakButton.classList.toggle('copy-speaker', stage.id === 'copy');
-    form.hidden = false;
-    typed.hidden = false;
-    answer.disabled = false;
-    submit.disabled = true;
-    review.hidden = true;
-    reviewMode = false;
-    answer.value = '';
-    corrections = 0;
-    attemptStartedAt = performance.now();
-    feedback.textContent = '';
-    feedback.className = 'feedback';
-    renderTyped();
-    renderStartButton();
-    if (stage.id !== 'copy') runtime.speak(currentWord(), { button: speakButton });
-    answer.focus();
-  }
-
-  function beginPractice() {
-    clearTimeout(transitionTimer);
-    closeMetricSession(false);
-    const session = practiceState();
-    session.started = true;
-    session.complete = false;
-    session.stage = 0;
-    session.round = 0;
-    session.word = 0;
-    state.completed.delete(currentGroup().id);
-    save();
-    renderStartButton();
-    renderActivity();
-    updateCourseProgress();
-  }
-
-  function advancePractice() {
-    const session = practiceState();
-    const words = currentWords();
-    session.word++;
-    if (session.word >= words.length) {
-      session.word = 0;
-      session.round++;
-    }
-    if (session.round >= masteryRounds) {
-      session.round = 0;
-      session.stage++;
-    }
-    if (session.stage >= stages.length) {
-      session.complete = true;
-      state.completed.add(currentGroup().id);
-      closeMetricSession(true);
-    }
-    save();
-    renderActivity();
-    renderStartButton();
-    updateCourseProgress();
-    const isComplete = state.completed.has(currentGroup().id);
-    complete.textContent = isComplete ? '★ Completed' : '☆ Mark complete';
-    complete.classList.toggle('done', isComplete);
-    complete.setAttribute('aria-pressed', String(isComplete));
-  }
-
-  function playTone(success) {
-    try {
-      const context = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.frequency.value = success ? 660 : 190;
-      gain.gain.setValueAtTime(0.12, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.22);
-      oscillator.connect(gain).connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.22);
-    } catch (_) {}
+    const scoreLine = document.createElement('div');
+    scoreLine.className = 'learner-pattern-score';
+    const scoreLabel = document.createElement('span');
+    scoreLabel.textContent = item.mastered ? 'Mastered ⭐' : `${mastery.formatPoints(item.score)} / 100`;
+    const wordLabel = document.createElement('span');
+    wordLabel.textContent = `${item.practicedWords} words practiced`;
+    scoreLine.append(scoreLabel, wordLabel);
+    const track = document.createElement('div');
+    track.className = 'sound-pattern-track';
+    track.setAttribute('role', 'progressbar');
+    track.setAttribute('aria-label', `${item.pattern.label} mastery`);
+    track.setAttribute('aria-valuemin', '0');
+    track.setAttribute('aria-valuemax', '100');
+    track.setAttribute('aria-valuenow', String(item.score));
+    const fill = document.createElement('span');
+    fill.style.width = `${item.score}%`;
+    track.append(fill);
+    const practice = document.createElement('button');
+    practice.className = 'secondary pattern-practice-button';
+    practice.type = 'button';
+    practice.textContent = item.mastered ? 'Practice again' : 'Practice this pattern';
+    practice.addEventListener('click', () => startPractice([item], `${item.pattern.label} words`, 10, practice));
+    card.append(top, scoreLine, track, practice);
+    return card;
   }
 
   function render() {
-    clearTimeout(transitionTimer);
-    runtime.stopSpeaking();
-    const lesson = currentLesson();
-    const group = currentGroup();
-    select.value = String(state.current);
-    renderGroupPicker();
-    number.textContent = state.view === 'student' ? `Lesson ${group.id}` : `Lesson ${lesson.number}`;
-    title.textContent = lesson.title;
-    const isComplete = state.completed.has(group.id);
-    complete.textContent = isComplete ? '★ Completed' : '☆ Mark complete';
-    complete.classList.toggle('done', isComplete);
-    complete.setAttribute('aria-pressed', String(isComplete));
-    const flatIndex = currentFlatIndex();
-    previous.disabled = flatIndex <= 0;
-    next.disabled = flatIndex >= allGroups.length - 1;
-    studentTab.classList.toggle('active', state.view === 'student');
-    tutorTab.classList.toggle('active', state.view === 'tutor');
-    studentTab.setAttribute('aria-selected', String(state.view === 'student'));
-    tutorTab.setAttribute('aria-selected', String(state.view === 'tutor'));
-    practicePanel.hidden = state.view !== 'student';
-    tutorContent.hidden = state.view !== 'tutor';
-    renderStartButton();
-    renderActivity();
-    if (state.view === 'tutor') renderTutor(lesson.guide);
-    updateCourseProgress();
-    save();
-    document.title = `Lesson ${group.id}: ${lesson.title} · Spelling B`;
+    const practicing = details.filter((item) => item.score > 0 && !item.mastered)
+      .sort((left, right) => left.score - right.score || left.order - right.order);
+    const unpracticed = details.filter((item) => item.score === 0);
+    const mastered = details.filter((item) => item.mastered)
+      .sort((left, right) => left.pattern.label.localeCompare(right.pattern.label));
+    const practiced = details.length - unpracticed.length;
+    const averageScore = details.length ? details.reduce((sum, item) => sum + item.score, 0) / details.length : 0;
+
+    masteredCount.textContent = `${mastered.length} of ${details.length} mastered`;
+    practicedCount.textContent = practiced ? `${practiced} patterns practiced` : 'Start with a word list';
+    overallTrack.setAttribute('aria-valuemax', String(details.length));
+    overallTrack.setAttribute('aria-valuenow', String(averageScore / 100 * details.length));
+    overallFill.style.width = `${averageScore}%`;
+
+    practicingSectionCount.textContent = practicing.length ? `${practicing.length} patterns` : '';
+    practicingContainer.replaceChildren(...practicing.map(patternCard));
+    practicingEmpty.hidden = practicing.length > 0;
+
+    newSectionCount.textContent = `${unpracticed.length} to discover`;
+    newContainer.replaceChildren(...unpracticed.slice(0, newPatternLimit).map(patternCard));
+    showMoreButton.hidden = newPatternLimit >= unpracticed.length;
+
+    masteredSectionCount.textContent = mastered.length ? `${mastered.length} patterns` : '';
+    masteredContainer.replaceChildren(...mastered.map(patternCard));
+    masteredEmpty.hidden = mastered.length > 0;
   }
 
-  course.lessons.forEach((lesson, index) => {
-    const option = document.createElement('option');
-    option.value = String(index);
-    option.textContent = `${lesson.number}. ${lesson.title}`;
-    select.append(option);
-  });
+  function dailyPatterns() {
+    return [...details].map((item) => ({
+      ...item,
+      priority: item.score > 0 && !item.mastered ? 0 : item.score === 0 ? 1 : 2,
+    })).sort((left, right) => left.priority - right.priority
+      || left.score - right.score
+      || left.order - right.order).slice(0, 3);
+  }
 
-  select.addEventListener('change', () => {
-    closeMetricSession(false);
-    state.current = Number(select.value);
-    state.group = 0;
-    state.view = 'student';
-    render();
-  });
-  groupSelect.addEventListener('change', () => {
-    closeMetricSession(false);
-    state.group = Number(groupSelect.value);
-    state.view = 'student';
-    render();
-  });
-  previous.addEventListener('click', () => moveToFlatIndex(currentFlatIndex() - 1));
-  next.addEventListener('click', () => moveToFlatIndex(currentFlatIndex() + 1));
-  complete.addEventListener('click', () => {
-    const groupID = currentGroup().id;
-    if (state.completed.has(groupID)) state.completed.delete(groupID);
-    else {
-      state.completed.add(groupID);
-      closeMetricSession(true);
+  async function loadWritableConfig() {
+    if (runtime.isExtension) return runtime.loadConfig();
+    const response = await fetch('/api/config', { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('Could not load the saved word lists.');
+    return response.json();
+  }
+
+  async function saveWritableConfig(config) {
+    if (runtime.isExtension) return runtime.saveConfig(config);
+    const response = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error || 'Could not save the sound-pattern list.');
     }
-    render();
-  });
-  tutorTab.addEventListener('click', () => {
-    state.view = 'tutor';
-    render();
-  });
-  studentTab.addEventListener('click', () => {
-    state.view = 'student';
-    render();
-  });
-  startButton.addEventListener('click', beginPractice);
-  speakButton.addEventListener('click', () => runtime.speak(currentWord(), { button: speakButton }));
-  runtime.captureTextInput(answer, {
-    active: () => !activity.hidden && !answer.disabled,
-    onBackspace: () => { if (answer.value) corrections++; },
-  });
-  answer.addEventListener('input', () => {
-    renderTyped();
-    submit.disabled = reviewMode || normalized(answer.value) === '';
-    if (reviewMode) review.disabled = normalized(answer.value) !== normalized(currentWord());
-  });
-  answer.addEventListener('keydown', (event) => {
-    if (event.key === 'Backspace' && answer.value) corrections++;
-  });
-  review.addEventListener('click', () => {
-    if (review.disabled) return;
-    reviewMode = false;
-    renderActivity();
-  });
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (reviewMode || normalized(answer.value) === '') return;
-    const correct = normalized(answer.value) === normalized(currentWord());
-    recordMetricAttempt(answer.value.trim(), correct);
-    playTone(correct);
-    if (correct) {
-      answer.disabled = true;
-      submit.disabled = true;
-      feedback.textContent = 'Nice work! ⭐';
-      feedback.className = 'feedback correct';
-      transitionTimer = setTimeout(advancePractice, 450);
-      return;
+  }
+
+  async function startPractice(selected, title, wordsPerPattern, button) {
+    button.disabled = true;
+    status.textContent = 'Building your sound-pattern word list…';
+    status.className = 'sound-focus-status';
+    try {
+      const words = [];
+      selected.forEach((item) => {
+        let added = 0;
+        for (const word of orderedWords(item, item.pattern.words.length)) {
+          if (!words.some((existing) => existing.toLocaleLowerCase() === word.toLocaleLowerCase())) {
+            words.push(word);
+            added++;
+          }
+          if (added >= wordsPerPattern || words.length >= 12) break;
+        }
+      });
+      if (!words.length) throw new Error('No practice words were available.');
+      const config = await loadWritableConfig();
+      if (!Array.isArray(config.lists)) config.lists = [];
+      const focusID = 'sound-pattern-focus';
+      const focusList = { id: focusID, title: `Sound Patterns · ${title}`, words };
+      const existing = config.lists.findIndex((list) => list.id === focusID);
+      if (existing >= 0) config.lists[existing] = focusList;
+      else config.lists.push(focusList);
+      await saveWritableConfig(config);
+      await runtime.persist(`spelling-b:list:${focusID}:progress:v1`, null);
+      const listIndex = existing >= 0 ? existing : config.lists.length - 1;
+      await runtime.persist('spelling-b:current-word-list:v1', {
+        index: listIndex,
+        signature: JSON.stringify([focusList.title, focusList.words]),
+      });
+      status.textContent = `Ready! Opening ${words.length} words…`;
+      status.className = 'sound-focus-status success';
+      setTimeout(() => { window.location.href = runtime.homeURL; }, 450);
+    } catch (error) {
+      status.textContent = error.message || 'Could not create the sound-pattern word list.';
+      status.className = 'sound-focus-status error';
+      button.disabled = false;
     }
-    if (currentStage().id === 'spell') {
-      reviewMode = true;
-      shownWord.hidden = false;
-      shownWord.textContent = currentWord();
-      submit.disabled = true;
-      review.hidden = false;
-      review.disabled = true;
-      feedback.textContent = 'Read the word, fix your spelling, then press the button.';
-      feedback.className = 'feedback incorrect review-prompt';
-    } else {
-      feedback.textContent = 'Almost — try that word again.';
-      feedback.className = 'feedback incorrect';
-      answer.select();
-    }
+  }
+
+  showMoreButton.addEventListener('click', () => {
+    newPatternLimit += 12;
+    render();
   });
-  document.addEventListener('keydown', (event) => {
-    if (event.target.matches('select, button, input, textarea')) return;
-    if (event.key === 'ArrowLeft') previous.click();
-    if (event.key === 'ArrowRight') next.click();
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && metricSession) runtime.saveMetricSession(metricSession);
-  });
-  window.addEventListener('pagehide', () => closeMetricSession(false));
+  practiceButton.addEventListener('click', () => startPractice(dailyPatterns(), 'Today', 4, practiceButton));
   render();
 })();

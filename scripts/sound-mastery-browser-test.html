@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sound mastery test</title>
+<pre id="result">Running…</pre>
+<script src="../static/sound-mastery.js"></script>
+<script src="../static/runtime.js"></script>
+<script>
+void (async () => {
+  await window.SpellingRuntime.ready;
+  const mastery = window.SpellingSoundMastery;
+  const mapping = { sound: '/æ/', letters: 'a', patternId: 'short-a' };
+  const phonetics = { mappings: [mapping] };
+  const failures = [];
+  const expectedWeights = [['copy', 0, 0.05], ['letters', 3, 0.1], ['letters', 6, 0.15], ['letters', 9, 0.2], ['letters', 24, 0.2], ['guided', 0, 0.4], ['spell', 0, 0.6], ['review', 0, 0.6]];
+  expectedWeights.forEach(([stage, choices, expected]) => {
+    if (mastery.weightFor(stage, choices) !== expected) failures.push(`${stage}/${choices}`);
+  });
+
+  const practiceStandard = (session, word) => {
+    for (let day = 0; day < 2; day++) {
+      for (let count = 0; count < 2; count++) mastery.recordPractice(session, { word, stage: 'copy', correct: true, phonetics });
+      [3, 6, 9].forEach((builderChoices) => mastery.recordPractice(session, { word, stage: 'letters', builderChoices, correct: true, phonetics }));
+      for (let count = 0; count < 2; count++) mastery.recordPractice(session, { word, stage: 'guided', correct: true, phonetics });
+    }
+    for (let day = 0; day < 3; day++) {
+      mastery.recordPractice(session, { word, stage: 'copy', correct: true, phonetics });
+      for (let count = 0; count < 3; count++) mastery.recordPractice(session, { word, stage: 'guided', correct: true, phonetics });
+      for (let count = 0; count < 3; count++) mastery.recordPractice(session, { word, stage: 'spell', correct: true, phonetics });
+    }
+  };
+
+  const session = { soundMastery: {} };
+  for (let index = 0; index < 10; index++) practiceStandard(session, `word${index}`);
+  mastery.recordPractice(session, { word: 'wrong', stage: 'spell', correct: false, phonetics });
+  const aggregate = mastery.aggregate([session]);
+  const result = mastery.scoreFor([...aggregate.values()][0]);
+  if (result.score !== 100 || !result.mastered || result.completedWords !== 10) failures.push('ten-word standard');
+  if (result.words.some((word) => word.word === 'wrong')) failures.push('incorrect attempt earned credit');
+  const stageTotal = Object.values([...aggregate.values()][0].stagePoints).reduce((sum, points) => sum + points, 0);
+  if (Math.round(stageTotal * 100) / 100 !== 118.5) failures.push(`stage weights ${stageTotal}`);
+
+  const shallow = { soundMastery: { test: { sound: '/æ/', letters: 'a', patternId: 'short-a', words: {}, stagePoints: {} } } };
+  for (let index = 0; index < 20; index++) shallow.soundMastery.test.words[`half${index}`] = 5;
+  const shallowResult = mastery.scoreFor([...mastery.aggregate([shallow]).values()][0]);
+  if (shallowResult.score !== 50 || shallowResult.mastered) failures.push('top-ten word cap');
+
+  const runtimeSession = window.SpellingRuntime.createWordMetricSession({ activity: 'word-list', listTitle: 'Test', stages: ['copy', 'spell'] });
+  window.SpellingRuntime.recordWordMetricAttempt(runtimeSession, { word: 'cat', stage: 'copy', entered: 'cat', correct: true, seconds: 1, phonetics });
+  window.SpellingRuntime.recordWordMetricAttempt(runtimeSession, { word: 'cat', stage: 'spell', entered: 'cut', correct: false, seconds: 1, phonetics });
+  const runtimePoints = mastery.scoreFor([...mastery.aggregate([runtimeSession]).values()][0]).score;
+  if (runtimePoints !== 0.05) failures.push(`runtime integration ${runtimePoints}`);
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})();
+</script>

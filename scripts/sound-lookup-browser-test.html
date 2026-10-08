@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sound lookup test</title>
+<pre id="result">Running…</pre>
+<script src="../static/sound-spelling-lookup.js"></script>
+<script src="../static/sound-spelling-bank.js"></script>
+<script>
+  const formerlyMissing = ['overall', 'rainfall', 'stall', 'almond', 'balm', 'palm', 'calm', 'stalk', 'talk', 'chalk', 'walk', 'gold', 'hold', 'bolt', 'jolt', 'swamp', 'swan', 'wasp', 'warp', 'ward', 'swarm'];
+  const failures = formerlyMissing.filter((word) => !window.SpellingSoundBank.mappingsForWord(word).length);
+  const overallPatterns = window.SpellingSoundBank.mappingsForWord('overall').map((mapping) => mapping.patternId);
+  if (overallPatterns.includes('long-o-split')) failures.push('overall incorrectly matched split o_e');
+  const result = document.querySelector('#result');
+  result.textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+</script>

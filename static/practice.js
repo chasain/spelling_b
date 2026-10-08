@@ -38,10 +38,13 @@ void (async () => {
     letters: { name: 'Letter Builder', icon: '🧩', instruction: 'Build the word one letter at a time.' },
     guided: { name: 'Guided', icon: '🌈', instruction: 'Listen and spell. The colors will help you.' },
     spell: { name: 'Spell', icon: '🎯', instruction: 'Listen carefully and spell it all by yourself.' },
+    review: { name: 'Missed-word Review', icon: '💪', instruction: 'Listen again and show what you remember.' },
   };
   const metricsStorageKey = 'spelling-b:session-metrics:v1';
   const currentListKey = 'spelling-b:current-word-list:v1';
-  const planSignature = JSON.stringify(config.lessonPlan);
+  const signaturePlan = JSON.parse(JSON.stringify(config.lessonPlan));
+  if (!signaturePlan.advancedReview?.enabled) delete signaturePlan.advancedReview;
+  const planSignature = JSON.stringify(signaturePlan);
 
   let list;
   let words = [];
@@ -68,19 +71,50 @@ void (async () => {
   }
 
   const currentPlan = () => planForDay(state.day);
-  const currentStagePlan = () => currentPlan()[state.stageIndex];
+  const reviewSettings = () => config.lessonPlan.advancedReview || { enabled: false, repetitions: 1, maxWords: 5 };
+  const currentStagePlan = () => state.reviewActive
+    ? { id: 'review', repetitions: reviewSettings().repetitions }
+    : currentPlan()[state.stageIndex];
   const currentStage = () => currentStagePlan().id;
-  const storageKey = () => `spelling-b:${JSON.stringify([list.title, list.words])}`;
+  const activeWords = () => state.reviewActive ? state.reviewWords : words;
+  const legacyStorageKey = () => `spelling-b:${JSON.stringify([list.title, list.words])}`;
+  const storageKey = () => list.id ? `spelling-b:list:${list.id}:progress:v1` : legacyStorageKey();
   const countKey = (word) => encodeURIComponent(word);
   const wordCount = (word) => state.counts[countKey(word)] || 0;
-  const freshState = (day = 1) => ({ version: 3, planSignature, day, stageIndex: 0, counts: {}, completed: false });
+  const freshState = (day = 1) => ({
+    version: 4,
+    planSignature,
+    day,
+    stageIndex: 0,
+    counts: {},
+    missedSpellWords: {},
+    reviewActive: false,
+    reviewWords: [],
+    completed: false,
+  });
+
+  function normalizedSavedState(saved) {
+    saved.version = 4;
+    saved.day = Math.max(1, Number(saved.day) || 1);
+    saved.missedSpellWords = saved.missedSpellWords && typeof saved.missedSpellWords === 'object' ? saved.missedSpellWords : {};
+    saved.reviewWords = Array.isArray(saved.reviewWords) ? saved.reviewWords.filter((word) => words.includes(word)) : [];
+    saved.reviewActive = saved.reviewActive === true && saved.reviewWords.length > 0;
+    return saved;
+  }
 
   function loadState() {
     try {
-      const saved = runtime.read(storageKey());
-      if (saved && saved.version === 3 && saved.planSignature === planSignature && Number.isInteger(saved.stageIndex) && saved.counts) {
-        saved.day = Math.max(1, Number(saved.day) || 1);
-        if (saved.stageIndex >= 0 && saved.stageIndex < planForDay(saved.day).length) return saved;
+      const primary = runtime.read(storageKey(), null);
+      const saved = primary || runtime.read(legacyStorageKey(), null);
+      if (saved && [3, 4].includes(saved.version) && saved.planSignature === planSignature && Number.isInteger(saved.stageIndex) && saved.counts) {
+        normalizedSavedState(saved);
+        const planLength = planForDay(saved.day).length;
+        const validStage = saved.completed
+          || (saved.reviewActive ? saved.stageIndex === planLength : saved.stageIndex >= 0 && saved.stageIndex < planLength);
+        if (validStage) {
+          if (!primary && storageKey() !== legacyStorageKey()) runtime.write(storageKey(), saved);
+          return saved;
+        }
       }
       if (saved) {
         const savedDay = Math.max(1, Number(saved.day) || 1);
@@ -109,7 +143,7 @@ void (async () => {
       listTitle: list.title,
       day: state.day,
       mode,
-      stages: currentPlan().map((stage) => stage.id),
+      stages: [...currentPlan().map((stage) => stage.id), ...(state.reviewWords.length ? ['review'] : [])],
       wordTimings: [],
       wordStats: {},
       wordSamples: 0,
@@ -124,6 +158,7 @@ void (async () => {
       letterChoices: 0,
       correctLetterChoices: 0,
       builderWords: 0,
+      soundMastery: {},
     };
     persistSession();
     updateSessionMetrics();
@@ -193,24 +228,29 @@ void (async () => {
   function recordTypedAttempt(typed, isCorrect) {
     if (!session) return;
     const seconds = elapsedAttemptSeconds();
-    const characters = Array.from(typed).length;
-    const matches = characterMatches(typed, currentWord);
-    session.typedAttempts++;
-    if (isCorrect) session.correctTypedAttempts++;
-    session.typedCharacters += characters;
-    session.correctPositionCharacters += matches.correct;
-    session.comparedCharacters += matches.compared;
-    session.typingSeconds += seconds;
-    recordWordTiming(currentWord, currentStage(), seconds, isCorrect);
-    persistSession();
+    runtime.recordWordMetricAttempt(session, {
+      word: currentWord,
+      stage: currentStage(),
+      entered: typed,
+      correct: isCorrect,
+      seconds,
+      phonetics: phoneticsForCurrentWord(),
+    });
     updateSessionMetrics();
   }
 
-  function recordBuilderWord() {
+  function recordBuilderWord(builderChoices) {
     if (!session) return;
     const seconds = elapsedAttemptSeconds();
     session.builderWords++;
     recordWordTiming(currentWord, 'letters', seconds, true);
+    window.SpellingSoundMastery?.recordPractice(session, {
+      word: currentWord,
+      stage: 'letters',
+      correct: true,
+      phonetics: phoneticsForCurrentWord(),
+      builderChoices,
+    });
     persistSession();
     updateSessionMetrics();
   }
@@ -238,17 +278,24 @@ void (async () => {
     metricCharacters.textContent = characterAccuracy === null ? '—' : `${characterAccuracy}%`;
   }
 
+  function displayPlan() {
+    const plan = [...currentPlan()];
+    if (state.reviewWords.length) plan.push({ id: 'review', repetitions: reviewSettings().repetitions });
+    return plan;
+  }
+
   function stageFraction(stageIndex) {
     if (state.completed || stageIndex < state.stageIndex) return 1;
     if (stageIndex > state.stageIndex) return 0;
-    const repetitions = currentPlan()[stageIndex].repetitions;
-    const earned = words.reduce((sum, word) => sum + Math.min(wordCount(word), repetitions), 0);
-    return words.length ? earned / (words.length * repetitions) : 0;
+    const stage = displayPlan()[stageIndex];
+    const stageWords = stage.id === 'review' ? state.reviewWords : words;
+    const earned = stageWords.reduce((sum, word) => sum + Math.min(wordCount(word), stage.repetitions), 0);
+    return stageWords.length ? earned / (stageWords.length * stage.repetitions) : 0;
   }
 
   function updateProgress() {
     progressContainer.replaceChildren();
-    currentPlan().forEach((stage, index) => {
+    displayPlan().forEach((stage, index) => {
       const detail = stageDetails[stage.id];
       const fraction = stageFraction(index);
       const percentage = Math.round(fraction * 100);
@@ -289,7 +336,7 @@ void (async () => {
 
   function incompleteWords() {
     const repetitions = currentStagePlan().repetitions;
-    return words.filter((word) => wordCount(word) < repetitions);
+    return activeWords().filter((word) => wordCount(word) < repetitions);
   }
 
   function chooseWord() {
@@ -309,7 +356,7 @@ void (async () => {
     const stage = currentStage();
     const detail = stageDetails[stage];
     dayNumber.textContent = state.day;
-    levelLabel.textContent = `Stage ${state.stageIndex + 1} · ${detail.name}`;
+    levelLabel.textContent = stage === 'review' ? detail.name : `Stage ${state.stageIndex + 1} · ${detail.name}`;
     instructions.textContent = `${detail.instruction} ${currentStagePlan().repetitions} ${currentStagePlan().repetitions === 1 ? 'round' : 'rounds'} per word.`;
     newDayButton.hidden = true;
     reviewMode = false;
@@ -470,9 +517,11 @@ void (async () => {
   }
 
   function completeLetterWord() {
+    const completedRound = Math.min(wordCount(currentWord) + 1, currentStagePlan().repetitions);
+    const builderChoices = Math.min(completedRound * 3, 24);
     state.counts[countKey(currentWord)] = wordCount(currentWord) + 1;
     saveState();
-    recordBuilderWord();
+    recordBuilderWord(builderChoices);
     updateProgress();
     builtWord.querySelectorAll('.built-letter').forEach((slot) => slot.classList.add('done'));
     feedback.textContent = 'You built it! ⭐';
@@ -495,6 +544,11 @@ void (async () => {
     const matchingKey = Object.keys(sentences).find((word) => word.toLocaleLowerCase() === currentWord.toLocaleLowerCase());
     return matchingKey ? String(sentences[matchingKey] || '').trim() : '';
   }
+  function phoneticsForCurrentWord() {
+    const trustedMappings = window.SpellingSoundBank?.mappingsForWord(currentWord) || [];
+    return trustedMappings.length ? { mappings: trustedMappings } : null;
+  }
+
 
   function speakSentence(button) {
     const sentence = sentenceForCurrentWord();
@@ -526,8 +580,48 @@ void (async () => {
     setTimeout(() => context.close(), 700);
   }
 
+  function startMissedWordReview() {
+    const settings = reviewSettings();
+    if (modeForDay(state.day) !== 'advanced' || !settings.enabled) return false;
+    const ranked = words
+      .map((word, index) => ({ word, index, misses: Number(state.missedSpellWords[countKey(word)]) || 0 }))
+      .filter((item) => item.misses > 0)
+      .sort((left, right) => right.misses - left.misses || left.index - right.index)
+      .slice(0, settings.maxWords);
+    if (!ranked.length) return false;
+    state.reviewWords = ranked.map((item) => item.word);
+    state.reviewActive = true;
+    state.stageIndex = currentPlan().length;
+    state.counts = {};
+    saveState();
+    if (session && !session.stages.includes('review')) {
+      session.stages.push('review');
+      persistSession();
+    }
+    updateProgress();
+    levelLabel.textContent = 'Spell complete!';
+    instructions.textContent = `${state.reviewWords.length} missed ${state.reviewWords.length === 1 ? 'word gets' : 'words get'} one focused review.`;
+    shownWord.hidden = true;
+    copySpeakButton.hidden = true;
+    speakButton.hidden = true;
+    copySentenceSpeakButton.hidden = true;
+    sentenceSpeakButton.hidden = true;
+    letterBuilder.hidden = true;
+    form.hidden = true;
+    feedback.textContent = '💪 Quick review, then you’re done!';
+    feedback.className = 'feedback level-passed';
+    nextTimer = setTimeout(chooseWord, 1500);
+    return true;
+  }
+
   function passStage() {
     const plan = currentPlan();
+    if (state.reviewActive) {
+      state.completed = true;
+      saveState();
+      showComplete();
+      return;
+    }
     if (state.stageIndex < plan.length - 1) {
       const finished = stageDetails[currentStage()].name;
       state.stageIndex++;
@@ -548,6 +642,7 @@ void (async () => {
       nextTimer = setTimeout(chooseWord, 1500);
       return;
     }
+    if (startMissedWordReview()) return;
     state.completed = true;
     saveState();
     showComplete();
@@ -565,7 +660,9 @@ void (async () => {
     sentenceSpeakButton.hidden = true;
     letterBuilder.hidden = true;
     form.hidden = true;
-    feedback.textContent = '⭐ ⭐ ⭐';
+    const completionID = `${list.id || encodeURIComponent(JSON.stringify([list.title, list.words]))}:day:${state.day}`;
+    const stickerAward = runtime.awardSticker(completionID);
+    feedback.textContent = stickerAward?.newlyAwarded ? `New sticker earned! ${stickerAward.sticker}` : '⭐ ⭐ ⭐';
     feedback.className = 'feedback level-passed celebration';
     newDayButton.hidden = false;
     closeSession(true);
@@ -632,9 +729,17 @@ void (async () => {
     newSession();
     chooseWord();
   });
-  reviewButton.addEventListener('click', () => {
+  function acceptReviewedWord() {
     if (!reviewMode || reviewButton.disabled) return;
     prepareEntry();
+  }
+
+  reviewButton.addEventListener('click', acceptReviewedWord);
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.isComposing || !reviewMode || reviewButton.disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    acceptReviewedWord();
   });
 
   document.addEventListener('keydown', (event) => {
@@ -655,16 +760,21 @@ void (async () => {
     if (!typed) return;
     const isCorrect = typed.localeCompare(currentWord, undefined, { sensitivity: 'accent' }) === 0;
     recordTypedAttempt(typed, isCorrect);
+    if (!isCorrect && currentStage() === 'spell' && modeForDay(state.day) === 'advanced' && reviewSettings().enabled) {
+      const key = countKey(currentWord);
+      state.missedSpellWords[key] = (Number(state.missedSpellWords[key]) || 0) + 1;
+      saveState();
+    }
     if (isCorrect) {
       state.counts[countKey(currentWord)] = wordCount(currentWord) + 1;
       saveState();
       feedback.textContent = ['Nice work! ⭐', 'Super spelling! 🌟', 'You got it! 🎉'][Math.floor(Math.random() * 3)];
       feedback.className = 'feedback correct';
-    } else if (currentStage() === 'spell') {
+    } else if (['spell', 'review'].includes(currentStage())) {
       reviewMode = true;
       shownWord.hidden = false;
       shownWord.textContent = currentWord;
-      feedback.textContent = 'Read the word, fix your spelling below, then press the button.';
+      feedback.textContent = 'Read the word, fix your spelling below, then press Enter or the button.';
       feedback.className = 'feedback incorrect review-prompt';
     } else {
       feedback.textContent = currentStage() === 'copy' ? 'Almost! Give that word another try.' : `Good try! The word was “${currentWord}”.`;

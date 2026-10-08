@@ -9,13 +9,13 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
-    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Phonics</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a aria-current="page" href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
   <main class="metrics-shell">
     <div class="metrics-title">
       <div><p class="eyebrow">Learning progress</p><h1>Session stars</h1></div>
-      <span class="metrics-mascot" aria-hidden="true">📈⭐</span>
+      <div class="metrics-title-actions"><button id="export-progress" class="secondary" type="button">Export teacher CSV</button><span class="metrics-mascot" aria-hidden="true">📈⭐</span></div>
     </div>
     <p class="hint">Times are capped at 60 seconds per word. Copy speed uses the fastest 75% of Copy samples so thinking breaks do not skew it. All data stays on this device.</p>
 
@@ -26,7 +26,6 @@
       <div><strong id="overall-speed">—</strong><span>copy speed (CPM)</span></div>
       <div><strong id="active-time">—</strong><span>active practice</span></div>
     </section>
-
     <section id="metrics-charts" class="metrics-charts" aria-label="Progress graphs" hidden>
       <article class="chart-card">
         <div class="chart-heading"><div><p class="eyebrow">All activities</p><h2>Accuracy by activity</h2></div><span aria-hidden="true">🎯</span></div>
@@ -47,12 +46,55 @@
       <div id="needs-practice" class="needs-practice"></div>
     </section>
 
+    <section id="sound-pattern-section" class="sound-pattern-section" aria-labelledby="sound-pattern-heading">
+      <div class="section-heading sound-pattern-heading">
+        <div><p class="eyebrow">Sound → spelling</p><h2 id="sound-pattern-heading">Sound-to-spelling patterns</h2></div>
+        <button id="create-sound-focus-list" class="secondary" type="button">Create focus word list</button>
+      </div>
+      <p id="sound-pattern-summary" class="sound-pattern-summary">Practice will reveal which sound spellings need more attention.</p>
+      <p class="sound-pattern-help">Mastery grows through successful practice across ten different words. The focus list continues patterns already in progress, then introduces unpracticed patterns, with at most 12 words.</p>
+      <details class="sound-pattern-sources">
+        <summary>Sources and methodology</summary>
+        <p>The 98-pattern scope was cross-checked against the <a href="open-source-phonics-120-lessons.pdf" target="_blank" rel="noopener">Open Source Phonics 120-lesson sequence</a>, the University of Florida Literacy Institute’s <a href="https://ufli.education.ufl.edu/wp-content/uploads/2022/01/UFLI-Scope-Sequence.pdf" target="_blank" rel="noopener">Suggested Scope &amp; Sequence for Teaching Phoneme–Grapheme Correspondences</a>, and an audit of the <a href="https://github.com/cmusphinx/cmudict" target="_blank" rel="noopener">CMU Pronouncing Dictionary</a>. Definitions follow the <a href="https://ufli.education.ufl.edu/resources/teaching-resources/glossary/" target="_blank" rel="noopener">UFLI literacy glossary</a>.</p>
+        <h3>Where these metrics come from</h3>
+        <ol class="sound-method-list">
+          <li><strong>Dictionary audit:</strong> Spelling B took the first North American English pronunciation for 117,493 lowercase CMUdict headwords. A many-to-many letter/phone aligner successfully processed 117,454 of them.</li>
+          <li><strong>Frequency screen:</strong> 294 statistical chunks occurred in at least 100 distinct headwords. Reaching that threshold made a chunk a review candidate; it did not automatically make it a teaching pattern.</li>
+          <li><strong>Human review:</strong> name-driven spellings, accidental alignment pieces, whole endings, overlapping fragments, and strongly dialect-sensitive categories were rejected. Conventional units that an aligner tends to split, such as <strong>qu</strong>, <strong>tch</strong>, and <strong>tion</strong>, were reviewed as units.</li>
+          <li><strong>Deterministic word lookup:</strong> the same fixed alignment was used at build time to associate 116,563 CMUdict headwords with only the 98 reviewed patterns. During Guided, Spell, and Review, teacher-provided words use those word-specific character positions. The most specific non-overlapping spelling wins, so the same letters are not blamed twice.</li>
+          <li><strong>Curated practice bank:</strong> every accepted pattern separately keeps 20 hand-reviewed, child-appropriate example words—1,960 pattern-word associations. Only these curated words can be selected automatically for a Sound Pattern Focus list; raw CMUdict headwords are never suggested to a child.</li>
+          <li><strong>Mastery score:</strong> successful Copy practice earns 0.05 points; Letter Builder earns 0.1, 0.15, or 0.2 points for its 3-, 6-, or 9-plus-choice rounds; Guided earns 0.4; and Spell or missed-word Review earns 0.6. Incorrect attempts neither add nor remove points. Each word contributes at most 10 points, and only the ten strongest words count, producing a 0–100 pattern score. A pattern is mastered at 100.</li>
+        </ol>
+        <p><strong>AI-generated mappings are separate.</strong> Mappings generated or imported in Settings are editable teacher reference data for that word list. They can be exported and shared, but they never change Progress metrics or the automatic Sound Pattern Focus list. Those features use only the bundled reviewed bank.</p>
+        <h3>How to read the notation</h3>
+        <dl class="sound-notation-list">
+          <div><dt>Phoneme</dt><dd>A speech sound. Spelling B places its broad IPA label between slashes, such as <code>/ʃ/</code>.</dd></div>
+          <div><dt>Grapheme</dt><dd>The letter or letter group used to spell a sound. For example, <strong>sh</strong> can spell <code>/ʃ/</code>.</dd></div>
+          <div><dt><code>C</code> and <code>V</code></dt><dd>Consonant and vowel. These describe a whole word’s structure in the cited teaching documents; they are not extra Spelling B mappings.</dd></div>
+          <div><dt><code>CVC</code></dt><dd>Consonant–vowel–consonant, such as <em>cat</em>.</dd></div>
+          <div><dt><code>CCVC</code></dt><dd>Two consonants–vowel–consonant, such as <em>stop</em>.</dd></div>
+          <div><dt><code>CVCC</code></dt><dd>Consonant–vowel–two consonants, such as <em>hand</em>.</dd></div>
+          <div><dt><code>CCVCC</code></dt><dd>Two consonants–vowel–two consonants, such as <em>plant</em>.</dd></div>
+          <div><dt>Underscore</dt><dd>A split spelling: <strong>a_e</strong> means an <strong>a</strong> and a later silent <strong>e</strong>, as in <em>cake</em>.</dd></div>
+        </dl>
+        <p><a href="https://www.readingrockets.org/topics/early-literacy-development/articles/how-now-brown-cow-phonological-awareness-activities" target="_blank" rel="noopener">Reading Rockets’ notation guide</a> also defines <code>CV</code>, <code>VC</code>, and <code>CVC</code>.</p>
+        <h3 id="sound-pattern-inventory-heading">Patterns tracked by Spelling B</h3>
+        <div id="sound-pattern-inventory" class="sound-pattern-inventory" aria-labelledby="sound-pattern-inventory-heading"></div>
+        <p>The 20 focus-list words for each pattern are an original, hand-curated Spelling B practice bank—not a word list copied from either source. The larger lookup analyzes words a teacher already supplied but never introduces its own words into practice. Sound labels use broad General American English IPA as compact identifiers; pronunciation and sound-to-spelling relationships can vary by speaker and dialect.</p>
+      </details>
+      <p id="sound-focus-status" class="sound-focus-status" role="status" aria-live="polite"></p>
+      <div id="sound-patterns" class="sound-patterns"></div>
+      <button id="show-more-sound-patterns" class="secondary show-more-sound-patterns" type="button" hidden>Show more patterns</button>
+    </section>
+
     <section class="history-section" aria-labelledby="history-heading">
       <h2 id="history-heading">Recent sessions</h2>
       <div id="empty-metrics" class="empty-metrics" hidden><span aria-hidden="true">🌟</span><p>Complete some practice and your progress will appear here.</p><a class="primary button-link" href="/">Start practicing</a></div>
       <div id="session-history" class="session-history"></div>
     </section>
   </main>
+  <script src="/static/sound-spelling-bank.js" defer></script>
+  <script src="/static/sound-mastery.js" defer></script>
   <script src="/static/runtime.js" defer></script>
   <script src="/static/metrics.js" defer></script>
 </body>

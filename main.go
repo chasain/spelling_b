@@ -1,7 +1,9 @@
 package main
 
 import (
+	cryptorand "crypto/rand"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,10 +24,26 @@ import (
 //go:embed templates/*.html static/*
 var embeddedFiles embed.FS
 
+type SoundMapping struct {
+	Sound    string   `json:"sound,omitempty"` // Legacy format; normalized into Phonemes when loaded.
+	Phonemes []string `json:"phonemes"`
+	Letters  string   `json:"letters"`
+	Example  string   `json:"example,omitempty"`
+	Start    int      `json:"start"`
+	End      int      `json:"end"`
+}
+
+type WordPhonetics struct {
+	Pronunciation string         `json:"pronunciation,omitempty"`
+	Mappings      []SoundMapping `json:"mappings"`
+}
+
 type WordList struct {
-	Title     string            `json:"title"`
-	Words     []string          `json:"words"`
-	Sentences map[string]string `json:"sentences,omitempty"`
+	Title     string                   `json:"title"`
+	ID        string                   `json:"id"`
+	Words     []string                 `json:"words"`
+	Sentences map[string]string        `json:"sentences,omitempty"`
+	Phonetics map[string]WordPhonetics `json:"phonetics,omitempty"`
 }
 
 type LessonRepetitions struct {
@@ -35,10 +53,17 @@ type LessonRepetitions struct {
 	Spell         int `json:"spell"`
 }
 
+type ReviewSettings struct {
+	Enabled     bool `json:"enabled"`
+	Repetitions int  `json:"repetitions"`
+	MaxWords    int  `json:"maxWords"`
+}
+
 type LessonPlan struct {
-	BeginnerDays int               `json:"beginnerDays"`
-	Beginner     LessonRepetitions `json:"beginner"`
-	Advanced     LessonRepetitions `json:"advanced"`
+	BeginnerDays   int               `json:"beginnerDays"`
+	Beginner       LessonRepetitions `json:"beginner"`
+	Advanced       LessonRepetitions `json:"advanced"`
+	AdvancedReview ReviewSettings    `json:"advancedReview"`
 }
 
 type Config struct {
@@ -60,15 +85,16 @@ const defaultSentenceSystemPrompt = "You create very short spelling-practice exa
 
 var defaultConfig = Config{
 	Lists: []WordList{
-		{Title: "Starter words", Words: []string{"apple", "because", "friend", "little", "school", "would"}},
+		{ID: "starter-words", Title: "Starter words", Words: []string{"apple", "because", "friend", "little", "school", "would"}},
 	},
 	TestWordsPerList:     5,
 	SentencePrompt:       defaultSentencePrompt,
 	SentenceSystemPrompt: defaultSentenceSystemPrompt,
 	LessonPlan: LessonPlan{
-		BeginnerDays: 2,
-		Beginner:     LessonRepetitions{Copy: 2, LetterBuilder: 3, Guided: 1},
-		Advanced:     LessonRepetitions{Copy: 1, Guided: 2, Spell: 2},
+		BeginnerDays:   2,
+		Beginner:       LessonRepetitions{Copy: 2, LetterBuilder: 3, Guided: 1},
+		Advanced:       LessonRepetitions{Copy: 1, Guided: 2, Spell: 2},
+		AdvancedReview: ReviewSettings{Enabled: true, Repetitions: 1, MaxWords: 5},
 	},
 }
 
@@ -81,8 +107,12 @@ func NewStore(path string) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(data, &s.config); err != nil {
+	var loaded Config
+	if err := json.Unmarshal(data, &loaded); err != nil {
 		return nil, fmt.Errorf("read settings: %w", err)
+	}
+	if err := s.Save(loaded); err != nil {
+		return nil, fmt.Errorf("migrate settings: %w", err)
 	}
 	return s, nil
 }
@@ -121,15 +151,34 @@ func (s *Store) Save(config Config) error {
 func cloneConfig(config Config) Config {
 	out := Config{Lists: make([]WordList, len(config.Lists)), TestWordsPerList: config.TestWordsPerList, LessonPlan: config.LessonPlan, SentencePrompt: config.SentencePrompt, SentenceSystemPrompt: config.SentenceSystemPrompt}
 	for i, list := range config.Lists {
-		out.Lists[i] = WordList{Title: list.Title, Words: append([]string(nil), list.Words...)}
+		out.Lists[i] = WordList{ID: list.ID, Title: list.Title, Words: append([]string(nil), list.Words...)}
 		if len(list.Sentences) > 0 {
 			out.Lists[i].Sentences = make(map[string]string, len(list.Sentences))
 			for word, sentence := range list.Sentences {
 				out.Lists[i].Sentences[word] = sentence
 			}
 		}
+		if len(list.Phonetics) > 0 {
+			out.Lists[i].Phonetics = make(map[string]WordPhonetics, len(list.Phonetics))
+			for word, phonetics := range list.Phonetics {
+				copied := WordPhonetics{Pronunciation: phonetics.Pronunciation, Mappings: make([]SoundMapping, len(phonetics.Mappings))}
+				copy(copied.Mappings, phonetics.Mappings)
+				for mappingIndex := range copied.Mappings {
+					copied.Mappings[mappingIndex].Phonemes = append([]string{}, phonetics.Mappings[mappingIndex].Phonemes...)
+				}
+				out.Lists[i].Phonetics[word] = copied
+			}
+		}
 	}
 	return out
+}
+
+func newListID() string {
+	bytes := make([]byte, 12)
+	if _, err := cryptorand.Read(bytes); err == nil {
+		return "list-" + hex.EncodeToString(bytes)
+	}
+	return fmt.Sprintf("list-%d", time.Now().UnixNano())
 }
 
 func cleanConfig(config Config) Config {
@@ -144,8 +193,21 @@ func cleanConfig(config Config) Config {
 	if config.SentenceSystemPrompt == "" {
 		config.SentenceSystemPrompt = defaultSentenceSystemPrompt
 	}
+	if config.LessonPlan == (LessonPlan{}) {
+		config.LessonPlan = defaultConfig.LessonPlan
+		config.LessonPlan.AdvancedReview.Enabled = false
+	}
+	if config.LessonPlan.AdvancedReview.Repetitions == 0 && config.LessonPlan.AdvancedReview.MaxWords == 0 {
+		config.LessonPlan.AdvancedReview = ReviewSettings{Repetitions: 1, MaxWords: 5}
+	}
+	seenListIDs := make(map[string]bool)
 	for i := range config.Lists {
 		config.Lists[i].Title = strings.TrimSpace(config.Lists[i].Title)
+		config.Lists[i].ID = strings.TrimSpace(config.Lists[i].ID)
+		if config.Lists[i].ID == "" || len(config.Lists[i].ID) > 100 || seenListIDs[config.Lists[i].ID] {
+			config.Lists[i].ID = newListID()
+		}
+		seenListIDs[config.Lists[i].ID] = true
 		words := make([]string, 0, len(config.Lists[i].Words))
 		seen := make(map[string]bool)
 		for _, word := range config.Lists[i].Words {
@@ -170,6 +232,36 @@ func cleanConfig(config Config) Config {
 				}
 			}
 			config.Lists[i].Sentences = sentences
+		}
+		if len(config.Lists[i].Phonetics) > 0 {
+			phonetics := make(map[string]WordPhonetics)
+			for _, word := range words {
+				for storedWord, record := range config.Lists[i].Phonetics {
+					if strings.EqualFold(strings.TrimSpace(storedWord), word) {
+						record.Pronunciation = strings.TrimSpace(record.Pronunciation)
+						for mappingIndex := range record.Mappings {
+							mapping := &record.Mappings[mappingIndex]
+							mapping.Example = strings.TrimSpace(mapping.Example)
+							mapping.Sound = strings.TrimSpace(mapping.Sound)
+							mapping.Letters = strings.TrimSpace(mapping.Letters)
+							phonemes := make([]string, 0, len(mapping.Phonemes)+1)
+							for _, phoneme := range mapping.Phonemes {
+								if phoneme = strings.TrimSpace(phoneme); phoneme != "" && !strings.EqualFold(phoneme, "silent") {
+									phonemes = append(phonemes, phoneme)
+								}
+							}
+							if len(phonemes) == 0 && mapping.Sound != "" && !strings.EqualFold(mapping.Sound, "silent") {
+								phonemes = append(phonemes, mapping.Sound)
+							}
+							mapping.Phonemes = phonemes
+							mapping.Sound = ""
+						}
+						phonetics[word] = record
+						break
+					}
+				}
+			}
+			config.Lists[i].Phonetics = phonetics
 		}
 	}
 	return config
@@ -206,6 +298,37 @@ func validateConfig(config Config) error {
 				return fmt.Errorf("%q has an example sentence for %q that is too long", list.Title, word)
 			}
 		}
+		for word, phonetics := range list.Phonetics {
+			if len(phonetics.Pronunciation) > 120 {
+				return fmt.Errorf("%q has an invalid pronunciation for %q", list.Title, word)
+			}
+			characters := []rune(word)
+			if len(phonetics.Mappings) == 0 || len(phonetics.Mappings) > len(characters) {
+				return fmt.Errorf("%q has invalid sound mappings for %q", list.Title, word)
+			}
+			cursor := 0
+			for _, mapping := range phonetics.Mappings {
+				if len(mapping.Example) > 60 {
+					return fmt.Errorf("%q has an overlong sound example for %q", list.Title, word)
+				}
+				if len(mapping.Phonemes) > 8 || mapping.Start != cursor || mapping.End <= mapping.Start || mapping.End > len(characters) {
+					return fmt.Errorf("%q has an invalid sound mapping for %q", list.Title, word)
+				}
+				for _, phoneme := range mapping.Phonemes {
+					if phoneme == "" || len(phoneme) > 40 {
+						return fmt.Errorf("%q has an invalid phoneme for %q", list.Title, word)
+					}
+				}
+				expectedLetters := string(characters[mapping.Start:mapping.End])
+				if !strings.EqualFold(mapping.Letters, expectedLetters) {
+					return fmt.Errorf("%q has a sound mapping that does not match the letters in %q", list.Title, word)
+				}
+				cursor = mapping.End
+			}
+			if cursor != len(characters) {
+				return fmt.Errorf("%q has incomplete sound mappings for %q", list.Title, word)
+			}
+		}
 	}
 	return nil
 }
@@ -213,6 +336,20 @@ func validateConfig(config Config) error {
 func validateLessonPlan(plan LessonPlan) error {
 	if plan.BeginnerDays < 0 || plan.BeginnerDays > 365 {
 		return errors.New("beginner days must be between 0 and 365")
+	}
+	review := plan.AdvancedReview
+	if !review.Enabled && review.Repetitions == 0 && review.MaxWords == 0 {
+		review.Repetitions = 1
+		review.MaxWords = 5
+	}
+	if review.Repetitions < 1 || review.Repetitions > 10 {
+		return errors.New("advanced review repetitions must be between 1 and 10")
+	}
+	if review.MaxWords < 1 || review.MaxWords > 50 {
+		return errors.New("advanced review maximum words must be between 1 and 50")
+	}
+	if review.Enabled && plan.Advanced.Spell < 1 {
+		return errors.New("advanced Spell must be at least 1 when missed-word review is enabled")
 	}
 	validateMode := func(name string, mode LessonRepetitions, required bool) error {
 		values := []int{mode.Copy, mode.LetterBuilder, mode.Guided, mode.Spell}
@@ -278,6 +415,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /settings", a.settings)
 	mux.HandleFunc("GET /test", a.test)
 	mux.HandleFunc("GET /progress", a.progress)
+	mux.HandleFunc("GET /stickers", a.stickers)
 	mux.HandleFunc("GET /high-frequency", a.highFrequency)
 	mux.HandleFunc("GET /phonics", a.phonics)
 	mux.HandleFunc("GET /typing", a.typing)
@@ -301,6 +439,10 @@ func (a *App) test(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) progress(w http.ResponseWriter, r *http.Request) {
 	a.render(w, "progress.html", nil)
+}
+
+func (a *App) stickers(w http.ResponseWriter, r *http.Request) {
+	a.render(w, "stickers.html", nil)
 }
 
 func (a *App) highFrequency(w http.ResponseWriter, r *http.Request) {

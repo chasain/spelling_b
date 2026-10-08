@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Progress collapse test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1100" height="800"></iframe>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for Progress.'));
+    else setTimeout(check, 25);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  const fixture = await (await fetch('../test_data/mastered-spelling-b.spellingb-profile')).json();
+  localStorage.setItem('spelling-b:profiles:v1', JSON.stringify({
+    version: 1,
+    activeId: 'default',
+    profiles: [{ id: 'default', name: 'Learner', createdAt: new Date().toISOString() }],
+    migratedLegacy: true,
+  }));
+  localStorage.setItem(
+    'spelling-b:profile:default:spelling-b:session-metrics:v1',
+    JSON.stringify(fixture.learnerData['spelling-b:session-metrics:v1']),
+  );
+
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.src = '../dist/chrome-extension/progress.html';
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelectorAll('.sound-pattern-card').length === 12);
+  const button = app.querySelector('#show-more-sound-patterns');
+  if (button.hidden) failures.push('show-more button is hidden');
+  if (button.textContent !== 'Show 86 more patterns') failures.push(`collapsed label ${JSON.stringify(button.textContent)}`);
+  button.click();
+  if (app.querySelectorAll('.sound-pattern-card').length !== 98) failures.push('expanded list does not show 98 patterns');
+  if (button.textContent !== 'Show fewer patterns') failures.push('expanded label is incorrect');
+  button.click();
+  if (app.querySelectorAll('.sound-pattern-card').length !== 12) failures.push('list did not collapse to 12 patterns');
+
+  const packs = frame.contentWindow.SpellingRuntime.stickerPacks;
+  if (packs.dinosaurs.label !== 'Prehistoric World') failures.push('prehistoric pack label');
+  if (packs.robots.label !== 'Tech & Games') failures.push('tech pack label');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

@@ -1,6 +1,30 @@
 (() => {
   const textDecoder = new TextDecoder();
 
+  function parseRelaxedJSON(text) {
+    const source = String(text || '').replace(/^\uFEFF/, '');
+    try {
+      return { value: JSON.parse(source), repaired: false };
+    } catch (strictError) {
+      let repaired = '';
+      let changed = false;
+      for (let index = 0; index < source.length; index += 1) {
+        const character = source[index];
+        if (character !== '\\') {
+          repaired += character;
+          continue;
+        }
+        const next = source[index + 1];
+        const validSimpleEscape = next && '"\\/bfnrt'.includes(next);
+        const validUnicodeEscape = next === 'u' && /^[0-9a-fA-F]{4}$/.test(source.slice(index + 2, index + 6));
+        if (validSimpleEscape || validUnicodeEscape || next === undefined) repaired += character;
+        else changed = true;
+      }
+      if (!changed) throw strictError;
+      return { value: JSON.parse(repaired), repaired: true };
+    }
+  }
+
   function parseDelimited(text, delimiter) {
     const rows = [];
     let row = [];
@@ -243,5 +267,5 @@
     return lists;
   }
 
-  window.SpellingTabularImport = { detectDelimiter, parseDelimited, readXlsx, rowsToLists };
+  window.SpellingTabularImport = { detectDelimiter, parseDelimited, parseRelaxedJSON, readXlsx, rowsToLists };
 })();

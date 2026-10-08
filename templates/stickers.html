@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sticker Book · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
+    <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" aria-current="page" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
+  </header>
+
+  <main class="sticker-book-shell">
+    <section class="sticker-book-hero" aria-labelledby="sticker-book-title">
+      <div class="sticker-book-sparkles" aria-hidden="true">⭐ ✨ 🌟</div>
+      <p class="eyebrow">Your daily rewards</p>
+      <h1 id="sticker-book-title">My Sticker Book</h1>
+      <p>Finish a day in Word Lists to earn a sticker from your chosen pack—or let it be a surprise!</p>
+      <div class="sticker-collection-summary"><strong id="sticker-total">0 of 200 stickers collected</strong><span>20 packs to complete</span></div>
+    </section>
+
+    <section class="sticker-sheet" aria-labelledby="sticker-pack-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Pick your favorites</p><h2 id="sticker-pack-title">Choose a pack or be surprised</h2></div>
+        <p>You can switch packs whenever you like.</p>
+      </div>
+      <div id="sticker-pack-tabs" class="sticker-pack-tabs" role="tablist" aria-label="Sticker packs"></div>
+      <div class="sticker-pack-summary"><strong id="sticker-pack-name">Animals</strong><span id="sticker-pack-count">0 of 10 earned</span></div>
+      <div id="sticker-grid" class="sticker-grid" aria-live="polite"></div>
+      <p id="sticker-status" class="sticker-status" role="status"></p>
+      <a class="primary button-link sticker-practice-link" href="/">Practice to earn a sticker 🐝</a>
+    </section>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+  <script src="/static/stickers.js" defer></script>
+</body>
+</html>

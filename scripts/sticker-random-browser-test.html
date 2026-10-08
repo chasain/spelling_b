@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sticker random mode test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1000" height="800"></iframe>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for Sticker Book.'));
+    else setTimeout(check, 25);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  localStorage.clear();
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.src = '../dist/chrome-extension/stickers.html';
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelectorAll('.sticker-pack-tab').length === 21);
+  const selected = app.querySelector('.sticker-pack-tab[aria-selected="true"]');
+  if (selected?.textContent !== '🎲 Surprise Me') failures.push(`default selection ${JSON.stringify(selected?.textContent)}`);
+  if (app.querySelector('#sticker-pack-name')?.textContent !== '🎲 Surprise Me') failures.push('random summary title');
+  if (app.querySelectorAll('.sticker-pack-overview').length !== 20) failures.push('random overview does not show all packs');
+  if (!app.querySelector('#sticker-status')?.textContent.includes('surprise')) failures.push('random explanation is missing');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

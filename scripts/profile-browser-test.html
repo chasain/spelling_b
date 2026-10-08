@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Profile runtime test</title></head>
+<body data-result="running">
+  <header class="topbar"><a class="brand" href="#">Spelling B</a><nav class="topnav"></nav></header>
+  <pre id="result">running</pre>
+  <script>
+    localStorage.clear();
+    localStorage.setItem('spelling-b:stickers:v1', JSON.stringify({ selectedPack: 'space', earned: {}, awards: {} }));
+    localStorage.setItem('spelling-b:session-metrics:v1', JSON.stringify([{ id: 'legacy-session' }]));
+  </script>
+  <script src="../static/runtime.js"></script>
+  <script>
+    void (async () => {
+      const output = document.querySelector('#result');
+      const assert = (condition, message) => { if (!condition) throw new Error(message); };
+      try {
+        const runtime = window.SpellingRuntime;
+        await runtime.ready;
+        assert(runtime.profiles().length === 1, 'default profile missing');
+        assert(runtime.metricSessions()[0]?.id === 'legacy-session', 'legacy metrics were not migrated');
+        assert(runtime.stickerCollection().selectedPack === 'space', 'legacy stickers were not migrated');
+
+        const first = runtime.activeProfile();
+        const second = await runtime.createProfile('Alex');
+        await runtime.switchProfile(second.id);
+        assert(runtime.metricSessions().length === 0, 'new profile inherited metrics');
+        assert(runtime.stickerCollection().selectedPack === 'random', 'new profile does not default to surprise rewards');
+        runtime.selectStickerPack('animals');
+        runtime.write('spelling-b:stickers:v1', {
+          selectedPack: 'animals',
+          earned: { animals: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+          awards: {},
+        });
+        const finalAnimal = runtime.awardSticker('complete-animals');
+        assert(finalAnimal?.packID === 'animals' && finalAnimal.stickerIndex === 9, 'selected pack did not award its final sticker');
+        assert(runtime.stickerCollection().selectedPack === 'random', 'completed pack did not return to surprise rewards');
+        const nearlyComplete = {};
+        Object.entries(runtime.stickerPacks).forEach(([id, details]) => {
+          nearlyComplete[id] = details.stickers.map((_, index) => index);
+        });
+        nearlyComplete.space = nearlyComplete.space.slice(0, -1);
+        runtime.write('spelling-b:stickers:v1', { selectedPack: 'random', earned: nearlyComplete, awards: {} });
+        const onlyRemaining = runtime.awardSticker('last-random-sticker');
+        assert(onlyRemaining?.packID === 'space' && onlyRemaining.stickerIndex === 9, 'surprise mode did not choose the remaining sticker');
+        runtime.write('spelling-b:typing-progress:v2', { level: 3 });
+        runtime.write('spelling-b:list:sound-pattern-focus:progress:v1', null);
+        assert(runtime.profileData(second.id)['spelling-b:typing-progress:v2'].level === 3, 'profile export data missing');
+        assert(Object.hasOwn(runtime.validateProfileData(runtime.profileData(second.id)), 'spelling-b:list:sound-pattern-focus:progress:v1'), 'nullable reset record was rejected');
+
+        await runtime.switchProfile(first.id);
+        assert(runtime.metricSessions()[0]?.id === 'legacy-session', 'switch did not restore first profile');
+        assert(runtime.read('spelling-b:typing-progress:v2', null) === null, 'typing data leaked between profiles');
+
+        await runtime.renameProfile(second.id, 'Alex Student');
+        assert(runtime.profiles().find((profile) => profile.id === second.id)?.name === 'Alex Student', 'rename failed');
+        await runtime.deleteProfile(first.id);
+        assert(runtime.profiles().length === 1 && runtime.activeProfile().id === second.id, 'delete or active fallback failed');
+        let protectedLastProfile = false;
+        try { await runtime.deleteProfile(second.id); } catch (_) { protectedLastProfile = true; }
+        assert(protectedLastProfile, 'last profile was not protected');
+        let rejectedInvalidData = false;
+        try { runtime.validateProfileData({ 'spelling-b:config:v1': {} }); } catch (_) { rejectedInvalidData = true; }
+        assert(rejectedInvalidData, 'unsupported profile data was accepted');
+
+        document.body.dataset.result = 'pass';
+        output.textContent = 'pass';
+      } catch (error) {
+        document.body.dataset.result = 'fail';
+        output.textContent = error.stack || error.message;
+      }
+    })();
+  </script>
+</body>
+</html>
