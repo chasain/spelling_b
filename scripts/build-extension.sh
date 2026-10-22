@@ -4,7 +4,8 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "$0")/.." && pwd)"
 dist_dir="$project_dir/dist"
 extension_dir="$dist_dir/chrome-extension"
-zip_file="$dist_dir/spelling-b-chrome-extension-1.7.0-RC1.zip"
+zip_file="$dist_dir/spelling-b-chrome-extension-1.7.1.zip"
+legacy_rc_file="$dist_dir/spelling-b-chrome-extension-1.7.0-RC1.zip"
 
 rm -rf "$extension_dir"
 mkdir -p "$extension_dir/icons" "$extension_dir/hand-guides"
@@ -41,7 +42,7 @@ done
 
 go run "$project_dir/scripts/make-extension-icons.go" "$extension_dir/icons"
 
-rm -f "$zip_file"
+rm -f "$zip_file" "$legacy_rc_file"
 (
   cd "$extension_dir"
   zip -q -r "$zip_file" .

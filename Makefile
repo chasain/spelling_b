@@ -22,5 +22,5 @@ all-artifacts: artifacts extension
 
 clean-artifacts:
 	rm -f $(DIST)/spelling-b-linux-amd64 $(DIST)/spelling-b-linux-arm64 $(DIST)/SHA256SUMS
-	rm -f $(DIST)/spelling-b-chrome-extension.zip $(DIST)/spelling-b-chrome-extension.sha256
+	rm -f $(DIST)/spelling-b-chrome-extension-*.zip $(DIST)/spelling-b-chrome-extension.sha256
 	rm -rf $(DIST)/chrome-extension

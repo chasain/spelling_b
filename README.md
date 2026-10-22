@@ -170,7 +170,7 @@ make GO=/usr/local/go/bin/go extension
 This creates:
 
 - `dist/chrome-extension/` — an unpacked build for local testing with **Load unpacked**;
-- `dist/spelling-b-chrome-extension-1.7.0-RC1.zip` — the fixed-name Chrome Web Store upload artifact (the packaged manifest carries the final release version);
+- `dist/spelling-b-chrome-extension-1.7.1.zip` — the Chrome Web Store upload artifact;
 - `dist/spelling-b-chrome-extension.sha256` — a copy-verification checksum.
 
 For local testing, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome-extension`. Click the Spelling B toolbar icon to open the full-page app.
