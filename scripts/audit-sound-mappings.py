@@ -3,6 +3,7 @@
 
 import argparse
 import collections
+import gzip
 import hashlib
 import json
 import re
@@ -22,6 +23,18 @@ PHONE_IPA = {
 }
 
 
+def read_bytes(path):
+    source = Path(path)
+    if source.suffix == ".gz":
+        with gzip.open(source, "rb") as handle:
+            return handle.read()
+    return source.read_bytes()
+
+
+def read_text(path):
+    return read_bytes(path).decode("utf-8")
+
+
 def normalized_phone(phone):
     match = re.fullmatch(r"([A-Z]+)([012])?", phone)
     if not match:
@@ -38,7 +51,8 @@ def prepare(args):
     seen = set()
     rows = []
     source = Path(args.cmudict)
-    for raw_line in source.read_text(encoding="utf-8").splitlines():
+    source_bytes = read_bytes(source)
+    for raw_line in source_bytes.decode("utf-8").splitlines():
         line = raw_line.strip()
         if not line or line.startswith(";;; "):
             continue
@@ -58,7 +72,7 @@ def prepare(args):
         training = rows[::args.training_stride]
         training_rows = len(training)
         Path(args.training_output).write_text("\n".join(training) + "\n", encoding="utf-8")
-    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    digest = hashlib.sha256(source_bytes).hexdigest()
     print(json.dumps({"headwords": len(rows), "trainingHeadwords": training_rows, "cmudictSha256": digest, "output": str(output)}))
 
 
@@ -74,7 +88,7 @@ def analyze(args):
     examples = collections.defaultdict(list)
     example_sets = collections.defaultdict(set)
     aligned_words = 0
-    for raw_line in Path(args.alignments).read_text(encoding="utf-8").splitlines():
+    for raw_line in read_text(args.alignments).splitlines():
         if not raw_line.strip() or "\t" not in raw_line:
             continue
         left, right = raw_line.split("\t", 1)

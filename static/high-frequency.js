@@ -2,6 +2,7 @@ void (async () => {
   const runtime = window.SpellingRuntime;
   const soundMastery = window.SpellingSoundMastery;
   await runtime.ready;
+  const config = await runtime.loadConfig();
   const dataURL = runtime.isExtension ? 'high-frequency-words.json' : '/static/high-frequency-words.json';
   const response = await fetch(dataURL);
   if (!response.ok) throw new Error('Could not load the high-frequency word levels.');
@@ -32,6 +33,9 @@ void (async () => {
   const form = document.querySelector('#frequency-answer-form');
   const answerField = document.querySelector('#frequency-answer-field');
   const answer = document.querySelector('#frequency-answer');
+  const guidedLetterCounter = document.querySelector('#frequency-guided-letter-counter');
+  const guidedHint = document.querySelector('#frequency-guided-hint');
+  const guidedHintText = document.querySelector('#frequency-guided-hint-text');
   const submit = document.querySelector('#frequency-submit');
   const review = document.querySelector('#frequency-review');
   const feedback = document.querySelector('#frequency-feedback');
@@ -53,6 +57,39 @@ void (async () => {
   let metricSession = null;
   let attemptStartedAt = 0;
   let corrections = 0;
+  let guidedGhostIndex = null;
+
+  const guidedHintDelays = window.SPELLING_GUIDED_HINT_DELAYS || {};
+  const guidedHintsEnabled = config.lessonPlan.guidedHints !== false;
+  const guidedCoach = window.SpellingGuidedHints.createCoach({
+    hintDelay: guidedHintDelays.hint,
+    revealDelay: guidedHintDelays.reveal,
+    getPrompt: () => {
+      if (reviewMode || currentStage().id !== 'guided' || answer.disabled || activity.hidden) return null;
+      return window.SpellingGuidedHints.promptFor(currentWord(), answer.value, window.SpellingSoundBank?.mappingsForWord(currentWord()) || []);
+    },
+    onClear: () => {
+      guidedGhostIndex = null;
+      guidedHint.hidden = true;
+      guidedHint.classList.remove('revealed');
+      guidedHintText.textContent = '';
+    },
+    onHint: (prompt) => {
+      guidedHintText.textContent = prompt.hint;
+      guidedHint.classList.remove('revealed');
+      guidedHint.hidden = false;
+    },
+    onReveal: (prompt) => {
+      guidedGhostIndex = prompt.index;
+      const direction = prompt.replacing
+        ? ` Replace the red letter with ${prompt.letter.toLocaleUpperCase()}.`
+        : ` Try ${prompt.letter.toLocaleUpperCase()} next.`;
+      guidedHintText.textContent = `${prompt.hint}${direction}`;
+      guidedHint.classList.add('revealed');
+      guidedHint.hidden = false;
+      renderTyped();
+    },
+  });
 
   function currentLevel() {
     return course.levels[state.current];
@@ -232,6 +269,7 @@ void (async () => {
   }
 
   function renderTyped() {
+    renderGuidedLetterCounter();
     typed.replaceChildren();
     const value = answer.value;
     const caretOffset = typeof answer.selectionStart === 'number' ? answer.selectionStart : value.length;
@@ -239,11 +277,21 @@ void (async () => {
     const caret = document.createElement('span');
     caret.className = 'typed-caret';
     caret.setAttribute('aria-hidden', 'true');
+    const appendGhost = () => {
+      const ghost = document.createElement('span');
+      ghost.className = 'guided-ghost-letter';
+      ghost.textContent = Array.from(currentWord())[guidedGhostIndex] || '';
+      typed.append(ghost);
+    };
     if (!value) {
-      const placeholder = document.createElement('span');
-      placeholder.className = 'typed-placeholder';
-      placeholder.textContent = currentStage().id === 'copy' ? 'Copy the word here' : 'Type what you hear';
-      typed.append(caret, placeholder);
+      typed.append(caret);
+      if (currentStage().id === 'guided' && guidedGhostIndex === 0) appendGhost();
+      else {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'typed-placeholder';
+        placeholder.textContent = currentStage().id === 'copy' ? 'Copy the word here' : 'Type what you hear';
+        typed.append(placeholder);
+      }
       return;
     }
     const characters = Array.from(value);
@@ -256,8 +304,23 @@ void (async () => {
         mark.className = expected && normalized(character) === normalized(expected) ? 'letter-correct' : 'letter-incorrect';
       }
       typed.append(mark);
+      if (currentStage().id === 'guided' && index === guidedGhostIndex) appendGhost();
     });
-    if (caretIndex >= characters.length) typed.append(caret);
+    if (caretIndex >= characters.length) {
+      typed.append(caret);
+      if (currentStage().id === 'guided' && guidedGhostIndex === characters.length) appendGhost();
+    } else if (currentStage().id === 'guided' && guidedGhostIndex === characters.length) appendGhost();
+  }
+
+  function renderGuidedLetterCounter() {
+    const visible = !reviewMode && currentStage().id === 'guided' && !form.hidden && !practiceState().complete;
+    guidedLetterCounter.hidden = !visible;
+    if (!visible) return;
+    const entered = Array.from(answer.value.trim()).length;
+    const total = Array.from(currentWord()).length;
+    guidedLetterCounter.textContent = `${entered}/${total} letters`;
+    guidedLetterCounter.classList.toggle('complete', entered === total);
+    guidedLetterCounter.classList.toggle('over', entered > total);
   }
 
   function renderStartButton() {
@@ -269,10 +332,12 @@ void (async () => {
   }
 
   function renderActivity() {
+    guidedCoach.stop();
     const session = practiceState();
     activity.hidden = !session.started;
     if (!session.started) return;
     if (session.complete) {
+      guidedLetterCounter.hidden = true;
       const summary = levelMastery();
       stageLabel.textContent = summary.mastered ? '🌟 Level mastered' : '⭐ Practice pass complete';
       questionProgress.textContent = '';
@@ -315,6 +380,7 @@ void (async () => {
     feedback.textContent = '';
     feedback.className = 'feedback';
     renderTyped();
+    if (stage.id === 'guided' && guidedHintsEnabled) guidedCoach.refresh(true);
     renderStartButton();
     if (stage.id !== 'copy') runtime.speak(currentWord(), { button: speakButton });
     answer.focus({ preventScroll: true });
@@ -414,6 +480,7 @@ void (async () => {
     onBackspace: () => { if (answer.value) corrections++; },
   });
   answer.addEventListener('input', () => {
+    if (guidedHintsEnabled) guidedCoach.refresh();
     renderTyped();
     submit.disabled = reviewMode || normalized(answer.value) === '';
     if (reviewMode) review.disabled = normalized(answer.value) !== normalized(currentWord());
@@ -436,6 +503,7 @@ void (async () => {
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     if (reviewMode || normalized(answer.value) === '') return;
+    guidedCoach.stop();
     const correct = normalized(answer.value) === normalized(currentWord());
     recordMetricAttempt(answer.value.trim(), correct);
     playTone(correct);

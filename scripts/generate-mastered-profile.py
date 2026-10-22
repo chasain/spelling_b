@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "test_data" / "mastered-spelling-b.spellingb-profile"
-APP_VERSION = "1.6.0"
+APP_VERSION = "1.7.1"
 FIXTURE_DATE = date(2026, 10, 7)
 FIXTURE_TIMESTAMP = "2026-10-07T12:00:00Z"
 LIST_ID = "mastered-profile-test-words"
@@ -19,6 +19,7 @@ LIST_TITLE = "Mastered Profile Words"
 LIST_WORDS = ["apple", "because", "friend", "little", "school", "would", "world", "water", "mother", "through"]
 PLAN = {
     "beginnerDays": 2,
+    "guidedHints": True,
     "beginner": {"copy": 2, "letterBuilder": 3, "guided": 1, "spell": 0},
     "advanced": {"copy": 1, "letterBuilder": 0, "guided": 2, "spell": 2},
     "advancedReview": {"enabled": True, "repetitions": 1, "maxWords": 5},
@@ -203,7 +204,7 @@ def legacy_phonics_progress() -> dict[str, object]:
 
 def typing_progress(today: date, timestamp: str) -> dict[str, object]:
     best = [{"cpm": 97 + level, "accuracy": 100, "rank": "Lightning Bee", "at": timestamp} for level in range(7)]
-    daily_levels = {str(level): {"correct": 999, "tested": True, "practiceCPM": 95} for level in range(7)}
+    daily_levels = {str(level): {"correct": 999, "tested": True, "practiceCPM": 95, "practiceAttempts": 999} for level in range(7)}
     return {
         "level": 6,
         "unlocked": 6,

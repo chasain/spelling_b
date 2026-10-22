@@ -2,6 +2,11 @@
   const MAX_WORD_POINTS = 10;
   const WORDS_FOR_MASTERY = 10;
   const MAX_PATTERN_SCORE = MAX_WORD_POINTS * WORDS_FOR_MASTERY;
+  const reviewedCorrections = Object.freeze([
+    Object.freeze({ word: 'break', sound: '/k/', letters: 'k', patternId: 'consonant-k' }),
+    Object.freeze({ word: 'steak', sound: '/k/', letters: 'k', patternId: 'consonant-k' }),
+    Object.freeze({ word: 'outbreak', sound: '/k/', letters: 'k', patternId: 'consonant-k' }),
+  ]);
 
   const rounded = (value) => Math.round((Number(value) || 0) * 100) / 100;
   const keyFor = (sound, letters) => encodeURIComponent(`${sound}\u0000${letters.toLocaleLowerCase()}`);
@@ -77,6 +82,29 @@
     return patterns;
   }
 
+  function repairReviewedCorrections(session) {
+    if (!session?.soundMastery || typeof session.soundMastery !== 'object') return false;
+    let changed = false;
+    reviewedCorrections.forEach((correction) => {
+      const points = Math.max(0, ...Object.values(session.soundMastery).map((stats) => Number(stats?.words?.[correction.word]) || 0));
+      if (!points) return;
+      const key = keyFor(correction.sound, correction.letters);
+      const target = session.soundMastery[key] || {
+        sound: correction.sound,
+        letters: correction.letters,
+        patternId: correction.patternId,
+        words: {},
+        stagePoints: {},
+      };
+      const repaired = rounded(Math.min(MAX_WORD_POINTS, points));
+      if ((Number(target.words[correction.word]) || 0) >= repaired) return;
+      target.words[correction.word] = repaired;
+      session.soundMastery[key] = target;
+      changed = true;
+    });
+    return changed;
+  }
+
   function scoreFor(stats) {
     const words = [...(stats?.words || new Map()).entries()]
       .map(([word, points]) => ({ word, points: rounded(Math.min(MAX_WORD_POINTS, Number(points) || 0)) }))
@@ -104,6 +132,7 @@
     MAX_PATTERN_SCORE,
     weightFor,
     recordPractice,
+    repairReviewedCorrections,
     aggregate,
     scoreFor,
     formatPoints,

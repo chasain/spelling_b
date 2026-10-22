@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Accessibility settings test</title>
+<pre id="result">Running…</pre>
+<script>
+localStorage.clear();
+localStorage.setItem('spelling-b:accessibility:v1', JSON.stringify({
+  largeText: true,
+  highContrast: true,
+  reduceMotion: true,
+}));
+</script>
+<script src="../dist/chrome-extension/runtime.js"></script>
+<script>
+void (async () => {
+  await window.SpellingRuntime.ready;
+  const expected = ['accessibility-large-text', 'accessibility-high-contrast', 'accessibility-reduce-motion'];
+  const missing = expected.filter((className) => !document.documentElement.classList.contains(className));
+  const saved = window.SpellingRuntime.accessibilitySettings();
+  if (!saved.largeText || !saved.highContrast || !saved.reduceMotion) missing.push('saved preferences');
+  document.querySelector('#result').textContent = missing.length ? `FAIL: missing ${missing.join(', ')}` : 'PASS';
+  document.title = missing.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

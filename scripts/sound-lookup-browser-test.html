@@ -9,6 +9,58 @@
   const failures = formerlyMissing.filter((word) => !window.SpellingSoundBank.mappingsForWord(word).length);
   const overallPatterns = window.SpellingSoundBank.mappingsForWord('overall').map((mapping) => mapping.patternId);
   if (overallPatterns.includes('long-o-split')) failures.push('overall incorrectly matched split o_e');
+  [
+    ['cake', 'long-a-split', [1, 3]],
+    ['bike', 'long-i-split', [1, 3]],
+    ['home', 'long-o-split', [1, 3]],
+    ['break', 'consonant-k', [4]],
+    ['rowed', 'ow-snow', [1, 2]],
+    ['lamb', 'short-a', [1]],
+    ['lamb', 'consonant-m', [2]],
+    ['sign', 'long-i-open', [1]],
+    ['signed', 'long-i-open', [1]],
+    ['doubt', 'ou-cloud', [1, 2]],
+    ['hymn', 'y-short-i', [1]],
+    ['folk', 'long-o-open', [1]],
+    ['makes', 'long-a-split', [1, 3]],
+    ['safely', 'long-a-split', [1, 3]],
+    ['walk', 'consonant-k', [3]],
+    ['calm', 'consonant-m', [3]],
+    ['head', 'consonant-d', [3]],
+    ['group', 'consonant-p', [4]],
+    ['eight', 'consonant-t', [4]],
+    ['thought', 'consonant-t', [6]],
+  ].forEach(([word, patternId, expectedIndexes]) => {
+    const mapping = window.SpellingSoundBank.mappingsForWord(word)
+      .find((candidate) => candidate.patternId === patternId);
+    if (!mapping || mapping.indexes.join(',') !== expectedIndexes.join(',')) {
+      failures.push(`${word} did not match ${patternId} at ${expectedIndexes.join(',')}`);
+    }
+  });
+  [
+    ['lamb', 'terminal-mb', 3],
+    ['lambs', 'terminal-mb', 3],
+    ['hymn', 'terminal-mn', 3],
+    ['sign', 'terminal-gn', 2],
+    ['signed', 'terminal-gn', 2],
+    ['folk', 'terminal-lk', 2],
+    ['folks', 'terminal-lk', 2],
+    ['doubt', 'terminal-bt', 3],
+    ['doubts', 'terminal-bt', 3],
+    ['hoped', 'split-o-e', 3],
+  ].forEach(([word, ruleId, index]) => {
+    const annotation = window.SpellingSoundBank.silentLettersForWord(word)
+      .find((candidate) => candidate.ruleId === ruleId && candidate.index === index);
+    if (!annotation) failures.push(`${word} did not identify silent letter ${index + 1} with ${ruleId}`);
+  });
+  if (window.SpellingSoundBank.mappingsForWord('lamb').some((mapping) => mapping.indexes.includes(3))) {
+    failures.push('lamb silent b was incorrectly added to sound-pattern mastery');
+  }
+  ['milk', 'silk', 'bulk'].forEach((word) => {
+    if (window.SpellingSoundBank.silentLettersForWord(word).some((annotation) => annotation.ruleId === 'terminal-lk')) {
+      failures.push(`${word} incorrectly identified its pronounced l as silent`);
+    }
+  });
   const result = document.querySelector('#result');
   result.textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
   document.title = failures.length ? 'FAIL' : 'PASS';

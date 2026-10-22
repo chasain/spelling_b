@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
     <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
-  <main class="practice-shell">
+  <main id="main-content" class="practice-shell">
     <section class="practice-card kid-card" aria-labelledby="list-title">
       <div class="card-sparkles" aria-hidden="true"><span>★</span><span>●</span><span>★</span></div>
       <div class="list-picker">
@@ -39,6 +40,11 @@
         <button id="sentence-speak" class="speaker sentence-speaker" type="button" aria-label="Hear this word in a sentence" title="Hear it in a sentence" hidden><span aria-hidden="true">💬</span></button>
       </div>
 
+      <section id="sentence-clue" class="sentence-clue" aria-labelledby="sentence-clue-label" hidden>
+        <p id="sentence-clue-label" class="sentence-clue-label">Sentence clue</p>
+        <p id="sentence-clue-text" class="sentence-clue-text"></p>
+      </section>
+
       <section id="letter-builder" class="letter-builder" tabindex="0" hidden aria-label="Build the word with letters">
         <p id="letter-round" class="letter-round"></p>
         <div id="built-word" class="built-word" aria-live="polite"></div>
@@ -50,8 +56,10 @@
         <label class="sr-only" for="answer">Enter the spelling</label>
         <div id="answer-field" class="answer-field">
           <div id="typed-display" class="typed-display" aria-hidden="true"></div>
-          <input id="answer" name="answer" type="text" inputmode="text" spellcheck="false" autocapitalize="none" aria-describedby="feedback" disabled>
+          <input id="answer" name="answer" type="text" inputmode="text" spellcheck="false" autocapitalize="none" aria-describedby="guided-hint-text feedback" disabled>
         </div>
+        <p id="guided-letter-counter" class="guided-letter-counter" hidden></p>
+        <div id="guided-hint" class="guided-hint" role="status" aria-live="polite" hidden><span aria-hidden="true">💡</span><span id="guided-hint-text"></span></div>
         <button id="submit" class="primary" type="submit" disabled>Check my word</button>
       </form>
       <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
@@ -70,6 +78,7 @@
 
   <script src="/static/sound-spelling-lookup.js" defer></script>
   <script src="/static/sound-spelling-bank.js" defer></script>
+  <script src="/static/guided-hints.js" defer></script>
   <script src="/static/sound-mastery.js" defer></script>
   <script>window.SPELLING_CONFIG = {{.Config | json}};</script>
   <script src="/static/runtime.js" defer></script>

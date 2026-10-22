@@ -102,17 +102,19 @@
 
   const wordKey = (value) => String(value || '').trim().toLocaleLowerCase();
 
-  function indexesFor(word, grapheme, requestedStart = 0) {
+  function indexesFor(word, grapheme, requestedStart = null) {
+    const hasRequestedStart = Number.isInteger(requestedStart) && requestedStart >= 0;
+    const searchStart = hasRequestedStart ? requestedStart : 0;
     const pieces = grapheme.toLocaleLowerCase().split('_');
     if (pieces.length === 1) {
-      const start = wordKey(word).indexOf(pieces[0], requestedStart);
+      const start = wordKey(word).indexOf(pieces[0], searchStart);
       return start < 0 ? [] : Array.from({ length: Array.from(pieces[0]).length }, (_, offset) => start + offset);
     }
     const indexes = [];
-    let cursor = requestedStart;
+    let cursor = searchStart;
     pieces.forEach((piece, pieceIndex) => {
       const start = wordKey(word).indexOf(piece, cursor);
-      if (pieceIndex === 0 && start !== requestedStart) return;
+      if (pieceIndex === 0 && hasRequestedStart && start !== requestedStart) return;
       if (start < 0) return;
       for (let offset = 0; offset < Array.from(piece).length; offset += 1) indexes.push(start + offset);
       cursor = start + Array.from(piece).length;
@@ -167,10 +169,27 @@
       .map(({ order, ...mapping }) => mapping);
   }
 
+  function silentLettersForWord(word) {
+    const key = wordKey(word);
+    const lookup = window.SpellingSilentLetterLookup;
+    const encoded = lookup?.words?.[key];
+    if (!Array.isArray(encoded) || !Array.isArray(lookup.ruleIds)) return [];
+    const result = [];
+    for (let offset = 0; offset + 1 < encoded.length; offset += 2) {
+      const index = Number(encoded[offset]);
+      const ruleId = lookup.ruleIds[encoded[offset + 1]];
+      if (!Number.isInteger(index) || index < 0 || index >= Array.from(key).length || !ruleId) continue;
+      result.push({ index, letter: Array.from(key)[index], ruleId });
+    }
+    return result;
+  }
+
   const invalid = patterns.filter((pattern) => pattern.words.length < 20
     || new Set(pattern.words.map(wordKey)).size < 20
     || pattern.words.some((word) => indexesFor(word, pattern.grapheme).length === 0));
-  if (invalid.length) console.error('[Spelling B] Invalid sound-spelling bank patterns', invalid);
+  if (invalid.length) {
+    console.error('[Spelling B] Invalid sound-spelling bank patterns', invalid.map((pattern) => pattern.id).join(', '));
+  }
 
-  window.SpellingSoundBank = Object.freeze({ patterns, mappingsForWord });
+  window.SpellingSoundBank = Object.freeze({ patterns, mappingsForWord, silentLettersForWord });
 })();

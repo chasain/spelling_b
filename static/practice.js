@@ -14,6 +14,8 @@ void (async () => {
   const copySpeakButton = document.querySelector('#copy-speak');
   const sentenceSpeakButton = document.querySelector('#sentence-speak');
   const copySentenceSpeakButton = document.querySelector('#copy-sentence-speak');
+  const sentenceClue = document.querySelector('#sentence-clue');
+  const sentenceClueText = document.querySelector('#sentence-clue-text');
   const letterBuilder = document.querySelector('#letter-builder');
   const letterRound = document.querySelector('#letter-round');
   const builtWord = document.querySelector('#built-word');
@@ -22,6 +24,9 @@ void (async () => {
   const answerField = document.querySelector('#answer-field');
   const answer = document.querySelector('#answer');
   const typedDisplay = document.querySelector('#typed-display');
+  const guidedLetterCounter = document.querySelector('#guided-letter-counter');
+  const guidedHint = document.querySelector('#guided-hint');
+  const guidedHintText = document.querySelector('#guided-hint-text');
   const submit = document.querySelector('#submit');
   const feedback = document.querySelector('#feedback');
   const newDayButton = document.querySelector('#restart');
@@ -57,6 +62,39 @@ void (async () => {
   let attemptStartedAt = 0;
   let session = null;
   let reviewMode = false;
+  let guidedGhostIndex = null;
+
+  const guidedHintDelays = window.SPELLING_GUIDED_HINT_DELAYS || {};
+  const guidedHintsEnabled = config.lessonPlan.guidedHints !== false;
+  const guidedCoach = window.SpellingGuidedHints.createCoach({
+    hintDelay: guidedHintDelays.hint,
+    revealDelay: guidedHintDelays.reveal,
+    getPrompt: () => {
+      if (!state || state.completed || reviewMode || currentStage() !== 'guided' || answer.disabled) return null;
+      return window.SpellingGuidedHints.promptFor(currentWord, answer.value, window.SpellingSoundBank?.mappingsForWord(currentWord) || []);
+    },
+    onClear: () => {
+      guidedGhostIndex = null;
+      guidedHint.hidden = true;
+      guidedHint.classList.remove('revealed');
+      guidedHintText.textContent = '';
+    },
+    onHint: (prompt) => {
+      guidedHintText.textContent = prompt.hint;
+      guidedHint.classList.remove('revealed');
+      guidedHint.hidden = false;
+    },
+    onReveal: (prompt) => {
+      guidedGhostIndex = prompt.index;
+      const direction = prompt.replacing
+        ? ` Replace the red letter with ${prompt.letter.toLocaleUpperCase()}.`
+        : ` Try ${prompt.letter.toLocaleUpperCase()} next.`;
+      guidedHintText.textContent = `${prompt.hint}${direction}`;
+      guidedHint.classList.add('revealed');
+      guidedHint.hidden = false;
+      renderTyped();
+    },
+  });
 
   function modeForDay(day) {
     return config.lessonPlan.beginnerDays > 0 && day <= config.lessonPlan.beginnerDays ? 'beginner' : 'advanced';
@@ -353,6 +391,7 @@ void (async () => {
   }
 
   function prepareEntry() {
+    guidedCoach.stop();
     const stage = currentStage();
     const detail = stageDetails[stage];
     dayNumber.textContent = state.day;
@@ -370,8 +409,10 @@ void (async () => {
     const hasSentence = Boolean(sentenceForCurrentWord());
     copySentenceSpeakButton.hidden = stage !== 'copy' || !hasSentence;
     sentenceSpeakButton.hidden = stage === 'copy' || !hasSentence;
+    renderSentenceClue();
     letterBuilder.hidden = stage !== 'letters';
     form.hidden = stage === 'letters';
+    guidedLetterCounter.hidden = stage !== 'guided';
     updateProgress();
     attemptStartedAt = performance.now();
 
@@ -385,11 +426,13 @@ void (async () => {
     submit.disabled = true;
     answerField.classList.toggle('guided', stage === 'guided');
     renderTyped();
+    if (stage === 'guided' && guidedHintsEnabled) guidedCoach.refresh(true);
     if (stage !== 'copy') speak(speakButton);
     answer.focus();
   }
 
   function renderTyped() {
+    renderGuidedLetterCounter();
     typedDisplay.replaceChildren();
     const typed = answer.value;
     const caretOffset = typeof answer.selectionStart === 'number' ? answer.selectionStart : typed.length;
@@ -397,11 +440,21 @@ void (async () => {
     const caret = document.createElement('span');
     caret.className = 'typed-caret';
     caret.setAttribute('aria-hidden', 'true');
+    const appendGhost = () => {
+      const ghost = document.createElement('span');
+      ghost.className = 'guided-ghost-letter';
+      ghost.textContent = Array.from(currentWord)[guidedGhostIndex] || '';
+      typedDisplay.append(ghost);
+    };
     if (!typed) {
-      const placeholder = document.createElement('span');
-      placeholder.className = 'typed-placeholder';
-      placeholder.textContent = currentStage() === 'copy' ? 'Copy the word here' : 'Type what you hear';
-      typedDisplay.append(caret, placeholder);
+      typedDisplay.append(caret);
+      if (currentStage() === 'guided' && guidedGhostIndex === 0) appendGhost();
+      else {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'typed-placeholder';
+        placeholder.textContent = currentStage() === 'copy' ? 'Copy the word here' : 'Type what you hear';
+        typedDisplay.append(placeholder);
+      }
       return;
     }
     const characters = Array.from(typed);
@@ -414,8 +467,23 @@ void (async () => {
         span.className = expected && character.toLocaleLowerCase() === expected.toLocaleLowerCase() ? 'letter-correct' : 'letter-incorrect';
       }
       typedDisplay.append(span);
+      if (currentStage() === 'guided' && index === guidedGhostIndex) appendGhost();
     });
-    if (caretIndex >= characters.length) typedDisplay.append(caret);
+    if (caretIndex >= characters.length) {
+      typedDisplay.append(caret);
+      if (currentStage() === 'guided' && guidedGhostIndex === characters.length) appendGhost();
+    } else if (currentStage() === 'guided' && guidedGhostIndex === characters.length) appendGhost();
+  }
+
+  function renderGuidedLetterCounter() {
+    const visible = Boolean(state) && !state.completed && !reviewMode && currentStage() === 'guided' && !form.hidden;
+    guidedLetterCounter.hidden = !visible;
+    if (!visible) return;
+    const entered = Array.from(answer.value.trim()).length;
+    const total = Array.from(currentWord).length;
+    guidedLetterCounter.textContent = `${entered}/${total} letters`;
+    guidedLetterCounter.classList.toggle('complete', entered === total);
+    guidedLetterCounter.classList.toggle('over', entered > total);
   }
 
   function startLetterWord() {
@@ -491,8 +559,12 @@ void (async () => {
     recordLetterChoice(isCorrect);
     if (!isCorrect) {
       restartAnimation(button, 'choice-wrong');
+      feedback.textContent = 'That letter does not fit here. Try another one.';
+      feedback.className = 'feedback incorrect';
       return;
     }
+    feedback.textContent = '';
+    feedback.className = 'feedback';
     letterLocked = true;
     button.classList.add('choice-correct');
     builtLetters.push(expected);
@@ -514,6 +586,8 @@ void (async () => {
   function rejectKeyboardLetter() {
     recordLetterChoice(false);
     restartAnimation(letterChoices, 'all-wrong');
+    feedback.textContent = 'That key is not one of the choices. Try a letter shown here.';
+    feedback.className = 'feedback incorrect';
   }
 
   function completeLetterWord() {
@@ -543,6 +617,53 @@ void (async () => {
     if (!sentences || typeof sentences !== 'object') return '';
     const matchingKey = Object.keys(sentences).find((word) => word.toLocaleLowerCase() === currentWord.toLocaleLowerCase());
     return matchingKey ? String(sentences[matchingKey] || '').trim() : '';
+  }
+
+  function sentenceWordRanges(sentence, word) {
+    const source = String(sentence || '').toLocaleLowerCase().replaceAll('’', "'");
+    const target = String(word || '').trim().toLocaleLowerCase().replaceAll('’', "'");
+    if (!target) return [];
+    const ranges = [];
+    let position = source.indexOf(target);
+    while (position >= 0) {
+      const before = source[position - 1] || '';
+      const after = source[position + target.length] || '';
+      if (!/[\p{L}\p{N}]/u.test(before) && !/[\p{L}\p{N}]/u.test(after)) {
+        ranges.push([position, position + target.length]);
+      }
+      position = source.indexOf(target, position + target.length);
+    }
+    return ranges;
+  }
+
+  function hideSentenceClue() {
+    sentenceClue.hidden = true;
+    sentenceClueText.replaceChildren();
+  }
+
+  function renderSentenceClue() {
+    const sentence = sentenceForCurrentWord();
+    const ranges = sentenceWordRanges(sentence, currentWord);
+    if (!sentence || !ranges.length || state.completed) {
+      hideSentenceClue();
+      return;
+    }
+    const content = [];
+    let offset = 0;
+    ranges.forEach(([start, end]) => {
+      if (start > offset) content.push(document.createTextNode(sentence.slice(offset, start)));
+      const blank = document.createElement('span');
+      blank.className = 'sentence-blank';
+      blank.style.minWidth = `${Math.max(4, Array.from(sentence.slice(start, end)).length)}ch`;
+      blank.setAttribute('role', 'img');
+      blank.setAttribute('aria-label', 'blank');
+      blank.textContent = '\u00a0';
+      content.push(blank);
+      offset = end;
+    });
+    if (offset < sentence.length) content.push(document.createTextNode(sentence.slice(offset)));
+    sentenceClueText.replaceChildren(...content);
+    sentenceClue.hidden = false;
   }
   function phoneticsForCurrentWord() {
     const trustedMappings = window.SpellingSoundBank?.mappingsForWord(currentWord) || [];
@@ -606,8 +727,10 @@ void (async () => {
     speakButton.hidden = true;
     copySentenceSpeakButton.hidden = true;
     sentenceSpeakButton.hidden = true;
+    hideSentenceClue();
     letterBuilder.hidden = true;
     form.hidden = true;
+    guidedLetterCounter.hidden = true;
     feedback.textContent = '💪 Quick review, then you’re done!';
     feedback.className = 'feedback level-passed';
     nextTimer = setTimeout(chooseWord, 1500);
@@ -635,8 +758,10 @@ void (async () => {
       speakButton.hidden = true;
       copySentenceSpeakButton.hidden = true;
       sentenceSpeakButton.hidden = true;
+      hideSentenceClue();
       letterBuilder.hidden = true;
       form.hidden = true;
+      guidedLetterCounter.hidden = true;
       feedback.textContent = '⭐ Great work! ⭐';
       feedback.className = 'feedback level-passed';
       nextTimer = setTimeout(chooseWord, 1500);
@@ -658,8 +783,10 @@ void (async () => {
     speakButton.hidden = true;
     copySentenceSpeakButton.hidden = true;
     sentenceSpeakButton.hidden = true;
+    hideSentenceClue();
     letterBuilder.hidden = true;
     form.hidden = true;
+    guidedLetterCounter.hidden = true;
     const completionID = `${list.id || encodeURIComponent(JSON.stringify([list.title, list.words]))}:day:${state.day}`;
     const stickerAward = runtime.awardSticker(completionID);
     feedback.textContent = stickerAward?.newlyAwarded ? `New sticker earned! ${stickerAward.sticker}` : '⭐ ⭐ ⭐';
@@ -694,6 +821,7 @@ void (async () => {
   });
 
   answer.addEventListener('input', () => {
+    if (guidedHintsEnabled) guidedCoach.refresh();
     renderTyped();
     submit.disabled = reviewMode || answer.value.trim() === '';
     if (reviewMode) {
@@ -758,6 +886,7 @@ void (async () => {
     event.preventDefault();
     const typed = answer.value.trim();
     if (!typed) return;
+    guidedCoach.stop();
     const isCorrect = typed.localeCompare(currentWord, undefined, { sensitivity: 'accent' }) === 0;
     recordTypedAttempt(typed, isCorrect);
     if (!isCorrect && currentStage() === 'spell' && modeForDay(state.day) === 'advanced' && reviewSettings().enabled) {

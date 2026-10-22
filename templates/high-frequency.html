@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
     <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
     <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a aria-current="page" href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
-  <main class="phonics-shell frequency-shell">
+  <main id="main-content" class="phonics-shell frequency-shell">
     <section class="phonics-hero frequency-hero">
       <div><p class="eyebrow">100 levels · 1,000 words</p><h1>High Frequency Words</h1><p>Build confidence with ten useful words at a time.</p></div>
       <div class="phonics-overall">
@@ -57,8 +58,10 @@
             <label class="sr-only" for="frequency-answer">Enter the spelling</label>
             <div id="frequency-answer-field" class="answer-field">
               <div id="frequency-typed" class="typed-display" aria-hidden="true"></div>
-              <input id="frequency-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="frequency-feedback">
+              <input id="frequency-answer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="frequency-guided-hint-text frequency-feedback">
             </div>
+            <p id="frequency-guided-letter-counter" class="guided-letter-counter" hidden></p>
+            <div id="frequency-guided-hint" class="guided-hint" role="status" aria-live="polite" hidden><span aria-hidden="true">💡</span><span id="frequency-guided-hint-text"></span></div>
             <button id="frequency-submit" class="primary" type="submit" disabled>Check</button>
           </form>
           <button id="frequency-review" class="secondary review-word" type="button" hidden disabled>I've fixed it — try again</button>
@@ -75,6 +78,7 @@
 
   <script src="/static/sound-spelling-lookup.js" defer></script>
   <script src="/static/sound-spelling-bank.js" defer></script>
+  <script src="/static/guided-hints.js" defer></script>
   <script src="/static/sound-mastery.js" defer></script>
   <script src="/static/runtime.js" defer></script>
   <script src="/static/high-frequency.js" defer></script>

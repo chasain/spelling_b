@@ -1,7 +1,7 @@
 {
   "format": "spelling-b-profile",
   "version": 1,
-  "appVersion": "1.6.0",
+  "appVersion": "1.7.1",
   "exportedAt": "2026-10-07T12:00:00Z",
   "profile": {
     "name": "Mastery Test Learner"
@@ -5877,44 +5877,51 @@
           "0": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "1": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "2": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "3": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "4": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "5": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           },
           "6": {
             "correct": 999,
             "tested": true,
-            "practiceCPM": 95
+            "practiceCPM": 95,
+            "practiceAttempts": 999
           }
         }
       }
     },
     "spelling-b:list:mastered-profile-test-words:progress:v1": {
       "version": 4,
-      "planSignature": "{\"beginnerDays\":2,\"beginner\":{\"copy\":2,\"letterBuilder\":3,\"guided\":1,\"spell\":0},\"advanced\":{\"copy\":1,\"letterBuilder\":0,\"guided\":2,\"spell\":2},\"advancedReview\":{\"enabled\":true,\"repetitions\":1,\"maxWords\":5}}",
+      "planSignature": "{\"beginnerDays\":2,\"guidedHints\":true,\"beginner\":{\"copy\":2,\"letterBuilder\":3,\"guided\":1,\"spell\":0},\"advanced\":{\"copy\":1,\"letterBuilder\":0,\"guided\":2,\"spell\":2},\"advancedReview\":{\"enabled\":true,\"repetitions\":1,\"maxWords\":5}}",
       "day": 5,
       "stageIndex": 3,
       "counts": {},

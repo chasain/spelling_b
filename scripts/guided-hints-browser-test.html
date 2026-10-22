@@ -1,0 +1,200 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Guided hints test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="900" height="800"></iframe>
+<iframe id="disabled-app" width="900" height="800"></iframe>
+<iframe id="frequency-app" width="900" height="800"></iframe>
+<iframe id="disabled-frequency-app" width="900" height="800"></iframe>
+<script src="../dist/chrome-extension/sound-spelling-lookup.js"></script>
+<script src="../dist/chrome-extension/sound-spelling-bank.js"></script>
+<script src="../dist/chrome-extension/guided-hints.js"></script>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for guided hint behavior.'));
+    else setTimeout(check, 10);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  const hints = window.SpellingGuidedHints;
+  if (hints.targetIndex('break', 'bre') !== 3) failures.push('break target is not its fourth letter');
+  const homePrompt = hints.promptFor('home', 'hom', window.SpellingSoundBank.mappingsForWord('home'));
+  if (!homePrompt?.hint.startsWith('This word uses a silent e. It helps o say its name.')) failures.push('silent-e explanation is missing');
+  const breakPrompt = hints.promptFor('break', 'bre', window.SpellingSoundBank.mappingsForWord('break'));
+  if (!/unusual ea vowel team.*long a/u.test(breakPrompt?.hint || '')) failures.push(`break exception explanation is missing (${breakPrompt?.hint || 'blank'})`);
+  if ((breakPrompt?.hint.match(/“[^”]+”/gu) || []).length !== 2 || breakPrompt?.hint.includes('“break”')) failures.push('break hint examples are not safe');
+  const greatExamples = hints.exampleChoices(['break', 'steak', 'great'], 'great');
+  if (greatExamples.length !== 2 || greatExamples.includes('great')) failures.push('active word was not excluded from examples');
+  hints.reviewedExceptions.forEach((exception) => exception.words.forEach((word) => {
+    const exceptionHint = hints.hintFor(word, word.indexOf(exception.grapheme), []);
+    const shownExamples = [...exceptionHint.matchAll(/“([^”]+)”/gu)].map((match) => match[1].toLocaleLowerCase());
+    if (shownExamples.length !== 2) failures.push(`${word} does not show exactly two exception examples`);
+    if (shownExamples.includes(word.toLocaleLowerCase())) failures.push(`${word} is shown as its own exception example`);
+  }));
+  window.SpellingSoundBank.patterns.forEach((pattern) => hints.hintsForPattern(pattern).forEach((hint) => {
+    if ((hint.match(/“[^”]+”/gu) || []).length !== 2) failures.push(`${pattern.id} does not show two reviewed examples`);
+  }));
+  const breakMappings = window.SpellingSoundBank.mappingsForWord('break');
+  if (!breakMappings.some((mapping) => mapping.patternId === 'consonant-k' && mapping.indexes.join(',') === '4')) failures.push('break final k mapping is missing');
+  const rowedPrompt = hints.promptFor('rowed', 'ro', window.SpellingSoundBank.mappingsForWord('rowed'));
+  if (!/Keep building the vowel team/u.test(rowedPrompt?.hint || '') || !rowedPrompt?.hint.includes('“own”') || !rowedPrompt?.hint.includes('“snow.”')) failures.push(`rowed long-o hint is missing (${rowedPrompt?.hint || 'blank'})`);
+  [
+    ['lamb', 'lam', /mb team.*b is written but not spoken/u],
+    ['lambs', 'lam', /mb team.*b is written but not spoken/u],
+    ['hymn', 'hym', /mn team.*n is written but not spoken/u],
+    ['sign', 'si', /gn team.*g is written but not spoken/u],
+    ['signed', 'si', /gn team.*g is written but not spoken/u],
+    ['folk', 'fo', /lk team.*l is written but not spoken/u],
+    ['folks', 'fo', /lk team.*l is written but not spoken/u],
+    ['doubt', 'dou', /bt team.*b is written but not spoken/u],
+    ['doubts', 'dou', /bt team.*b is written but not spoken/u],
+    ['hoped', 'hop', /silent e.*helps o say its name/u],
+  ].forEach(([word, entered, expected]) => {
+    const prompt = hints.promptFor(word, entered, window.SpellingSoundBank.mappingsForWord(word));
+    if (!expected.test(prompt?.hint || '')) failures.push(`${word} silent-letter explanation is missing (${prompt?.hint || 'blank'})`);
+    const shownExamples = [...(prompt?.hint || '').matchAll(/“([^”]+)”/gu)].map((match) => match[1].toLocaleLowerCase());
+    if (shownExamples.length !== 2 || shownExamples.includes(word)) failures.push(`${word} silent-letter examples are not safe`);
+  });
+  [
+    ['talk', 't', /alk family.*Write a.*quiet l.*before k/u],
+    ['walk', 'wa', /alk family/u],
+    ['wall', 'w', /all family.*Write a followed by ll/u],
+    ['calm', 'c', /alm family.*Write a.*quiet l.*before m/u],
+    ['more', 'm', /ore family.*Write o and r.*quiet e/u],
+    ['dog', 'd', /og family.*spelled o/u],
+    ['long', 'l', /ong family.*spelled o/u],
+    ['lost', 'l', /ost family.*spelled o/u],
+    ['cross', 'cr', /oss family.*spelled o/u],
+    ['want', 'w', /After a w sound.*spelled with a/u],
+    ['pen', 'p', /short vowel with e/u],
+  ].forEach(([word, entered, expected]) => {
+    const prompt = hints.promptFor(word, entered, window.SpellingSoundBank.mappingsForWord(word));
+    if (!expected.test(prompt?.hint || '')) failures.push(`${word} spelling-family hint is missing (${prompt?.hint || 'blank'})`);
+    const shownExamples = [...(prompt?.hint || '').matchAll(/“([^”]+)”/gu)].map((match) => match[1].toLocaleLowerCase());
+    if (shownExamples.length !== 2 || shownExamples.includes(word)) failures.push(`${word} spelling-family examples are not safe`);
+  });
+
+  localStorage.clear();
+  localStorage.setItem('spelling-b:config:v1', JSON.stringify({
+    lists: [{ id: 'guided-test', title: 'Guided test', words: ['break'] }],
+    lessonPlan: {
+      beginnerDays: 2,
+      beginner: { copy: 0, letterBuilder: 0, guided: 1, spell: 0 },
+      advanced: { copy: 0, letterBuilder: 0, guided: 1, spell: 0 },
+      advancedReview: { enabled: false, repetitions: 1, maxWords: 5 },
+    },
+    testWordsPerList: 5,
+  }));
+
+  const html = await fetch('../dist/chrome-extension/index.html').then((response) => response.text());
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.srcdoc = html
+    .replace('<head>', '<head><base href="../dist/chrome-extension/">')
+    .replace('<script src="runtime.js" defer><\/script>', '<script>window.SPELLING_GUIDED_HINT_DELAYS = { hint: 20, reveal: 30 };<\/script><script src="runtime.js" defer><\/script>');
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelector('#answer')?.disabled === false);
+  const answer = app.querySelector('#answer');
+  answer.value = 'bre';
+  answer.dispatchEvent(new Event('input', { bubbles: true }));
+  if (app.querySelector('#guided-letter-counter').textContent !== '3/5 letters') failures.push('Word Lists Guided counter is not 3/5');
+  await waitFor(() => app.querySelector('#guided-hint')?.hidden === false);
+  if (!/unusual ea vowel team/u.test(app.querySelector('#guided-hint-text').textContent)) failures.push('first hint was not rendered');
+  if (app.querySelector('.guided-ghost-letter')) failures.push('answer was revealed with the first hint');
+  await waitFor(() => app.querySelector('.guided-ghost-letter'));
+  if (app.querySelector('.guided-ghost-letter').textContent.toLocaleLowerCase() !== 'a') failures.push('ghosted next letter is not a');
+  if (!/Try A next/u.test(app.querySelector('#guided-hint-text').textContent)) failures.push('accessible letter reveal is missing');
+
+  const disabledConfig = JSON.parse(localStorage.getItem('spelling-b:config:v1'));
+  disabledConfig.lessonPlan.guidedHints = false;
+  localStorage.setItem('spelling-b:config:v1', JSON.stringify(disabledConfig));
+  const disabledFrame = document.querySelector('#disabled-app');
+  const disabledLoaded = new Promise((resolve) => disabledFrame.addEventListener('load', resolve, { once: true }));
+  disabledFrame.srcdoc = html
+    .replace('<head>', '<head><base href="../dist/chrome-extension/">')
+    .replace('<script src="runtime.js" defer><\/script>', '<script>window.SPELLING_GUIDED_HINT_DELAYS = { hint: 20, reveal: 30 };<\/script><script src="runtime.js" defer><\/script>');
+  await disabledLoaded;
+  const disabledApp = disabledFrame.contentDocument;
+  await waitFor(() => disabledApp.querySelector('#answer')?.disabled === false);
+  const disabledAnswer = disabledApp.querySelector('#answer');
+  disabledAnswer.value = 'bre';
+  disabledAnswer.dispatchEvent(new Event('input', { bubbles: true }));
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  if (!disabledApp.querySelector('#guided-hint')?.hidden) failures.push('Word Lists displayed a timed hint while Guided hints were disabled');
+  if (disabledApp.querySelector('.guided-ghost-letter')) failures.push('Word Lists revealed a ghost letter while Guided hints were disabled');
+  if (disabledApp.querySelector('#guided-letter-counter').textContent !== '3/5 letters') failures.push('disabling hints also removed the Guided letter counter');
+
+  disabledConfig.lessonPlan.guidedHints = true;
+  localStorage.setItem('spelling-b:config:v1', JSON.stringify(disabledConfig));
+
+  const course = await fetch('../dist/chrome-extension/high-frequency-words.json').then((response) => response.json());
+  const firstLevel = course.levels[0];
+  const frequencyProgress = {
+    current: 0,
+    completed: [],
+    practice: {
+      '1': {
+        signature: JSON.stringify(firstLevel.words),
+        started: true,
+        complete: false,
+        stage: 1,
+        round: 0,
+        word: 0,
+      },
+    },
+    mastery: {},
+  };
+  const frequencyFrame = document.querySelector('#frequency-app');
+  const frequencyLoaded = new Promise((resolve) => frequencyFrame.addEventListener('load', resolve, { once: true }));
+  const frequencyHTML = await fetch('../dist/chrome-extension/high-frequency.html').then((response) => response.text());
+  const frequencyJS = await fetch('../dist/chrome-extension/high-frequency.js').then((response) => response.text());
+  const testFrequencyJS = frequencyJS.replace("const saved = runtime.read(storageKey, {});", `const saved = ${JSON.stringify(frequencyProgress)};`);
+  const courseScript = `<script>window.fetch = (url) => String(url).includes('high-frequency-words.json') ? Promise.resolve(new Response(${JSON.stringify(JSON.stringify(course))}, { status: 200 })) : parent.fetch(url);<\/script>`;
+  frequencyFrame.srcdoc = frequencyHTML
+    .replace('<head>', `<head><base href="../dist/chrome-extension/">${courseScript}`)
+    .replace('<script src="high-frequency.js" defer><\/script>', `<script src="data:text/javascript;charset=utf-8,${encodeURIComponent(testFrequencyJS)}" defer><\/script>`)
+    .replace('<script src="runtime.js" defer><\/script>', '<script>window.SPELLING_GUIDED_HINT_DELAYS = { hint: 20, reveal: 30 };<\/script><script src="runtime.js" defer><\/script>');
+  await frequencyLoaded;
+  const frequencyApp = frequencyFrame.contentDocument;
+  await waitFor(() => frequencyApp.querySelector('#frequency-stage')?.textContent.includes('Guided'));
+  const frequencyAnswer = frequencyApp.querySelector('#frequency-answer');
+  frequencyAnswer.value = firstLevel.words[0].slice(0, -1);
+  frequencyAnswer.dispatchEvent(new Event('input', { bubbles: true }));
+  const expectedFrequencyCount = `${Array.from(frequencyAnswer.value).length}/${Array.from(firstLevel.words[0]).length} letters`;
+  if (frequencyApp.querySelector('#frequency-guided-letter-counter').textContent !== expectedFrequencyCount) failures.push(`High Frequency Guided counter is incorrect (${frequencyApp.querySelector('#frequency-guided-letter-counter').textContent || 'blank'}; expected ${expectedFrequencyCount}; stage ${frequencyApp.querySelector('#frequency-stage').textContent})`);
+  await waitFor(() => frequencyApp.querySelector('#frequency-guided-hint')?.hidden === false);
+  await waitFor(() => frequencyApp.querySelector('.guided-ghost-letter'));
+  if (!frequencyApp.querySelector('#frequency-guided-hint-text').textContent.includes('Try')) failures.push('High Frequency reveal is missing');
+
+  disabledConfig.lessonPlan.guidedHints = false;
+  localStorage.setItem('spelling-b:config:v1', JSON.stringify(disabledConfig));
+  const disabledFrequencyFrame = document.querySelector('#disabled-frequency-app');
+  const disabledFrequencyLoaded = new Promise((resolve) => disabledFrequencyFrame.addEventListener('load', resolve, { once: true }));
+  disabledFrequencyFrame.srcdoc = frequencyHTML
+    .replace('<head>', `<head><base href="../dist/chrome-extension/">${courseScript}`)
+    .replace('<script src="high-frequency.js" defer><\/script>', `<script src="data:text/javascript;charset=utf-8,${encodeURIComponent(testFrequencyJS)}" defer><\/script>`)
+    .replace('<script src="runtime.js" defer><\/script>', '<script>window.SPELLING_GUIDED_HINT_DELAYS = { hint: 20, reveal: 30 };<\/script><script src="runtime.js" defer><\/script>');
+  await disabledFrequencyLoaded;
+  const disabledFrequencyApp = disabledFrequencyFrame.contentDocument;
+  await waitFor(() => disabledFrequencyApp.querySelector('#frequency-stage')?.textContent.includes('Guided'));
+  const disabledFrequencyAnswer = disabledFrequencyApp.querySelector('#frequency-answer');
+  disabledFrequencyAnswer.value = firstLevel.words[0].slice(0, -1);
+  disabledFrequencyAnswer.dispatchEvent(new Event('input', { bubbles: true }));
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  if (!disabledFrequencyApp.querySelector('#frequency-guided-hint')?.hidden) failures.push('High Frequency displayed a timed hint while Guided hints were disabled');
+  if (disabledFrequencyApp.querySelector('.guided-ghost-letter')) failures.push('High Frequency revealed a ghost letter while Guided hints were disabled');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

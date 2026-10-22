@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
     <a class="brand" href="/"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
     <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a aria-current="page" href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a><a class="icon-link" href="/settings" aria-label="Open settings" title="Settings">⚙</a></nav>
   </header>
 
-  <main class="metrics-shell">
+  <main id="main-content" class="metrics-shell">
     <div class="metrics-title">
       <div><p class="eyebrow">Learning progress</p><h1>Session stars</h1></div>
       <div class="metrics-title-actions"><button id="export-progress" class="secondary" type="button">Export teacher CSV</button><span class="metrics-mascot" aria-hidden="true">📈⭐</span></div>
@@ -61,11 +62,12 @@
           <li><strong>Dictionary audit:</strong> Spelling B took the first North American English pronunciation for 117,493 lowercase CMUdict headwords. A many-to-many letter/phone aligner successfully processed 117,454 of them.</li>
           <li><strong>Frequency screen:</strong> 294 statistical chunks occurred in at least 100 distinct headwords. Reaching that threshold made a chunk a review candidate; it did not automatically make it a teaching pattern.</li>
           <li><strong>Human review:</strong> name-driven spellings, accidental alignment pieces, whole endings, overlapping fragments, and strongly dialect-sensitive categories were rejected. Conventional units that an aligner tends to split, such as <strong>qu</strong>, <strong>tch</strong>, and <strong>tion</strong>, were reviewed as units.</li>
-          <li><strong>Deterministic word lookup:</strong> the same fixed alignment was used at build time to associate 116,563 CMUdict headwords with only the 98 reviewed patterns. During Guided, Spell, and Review, teacher-provided words use those word-specific character positions. The most specific non-overlapping spelling wins, so the same letters are not blamed twice.</li>
+          <li><strong>Deterministic word lookup:</strong> the same fixed alignment was used at build time to associate 117,177 CMUdict headwords with only the 98 reviewed patterns. Conservative additive passes recover reviewed patterns hidden inside larger statistical chunks, across five verified silent-letter endings, and in pronunciation-matched suffixed forms, without replacing any prior mapping. A separate local annotation layer gives Guided specific explanations for verified silent letters and split-e spellings without awarding mastery credit for a soundless letter. During Guided, Spell, and Review, teacher-provided words use those word-specific character positions. The most specific non-overlapping spelling wins, so the same letters are not blamed twice.</li>
+          <li><strong>Mappings and hints serve different purposes:</strong> a mastery mapping awards progress for a reviewed sound-to-spelling pattern, while a Guided annotation may explain a spelling feature without scoring it. For example, in <em>talk</em>, final <strong>k</strong> → /k/ earns mastery credit and the vowel remains unscored, but Guided can still explain the complete <strong>alk</strong> spelling—write <strong>a</strong>, then a quiet <strong>l</strong>, before <strong>k</strong>. Other bounded, reviewed families such as <strong>all</strong>, <strong>alm</strong>, and <strong>ore</strong> receive the same dialect-neutral treatment.</li>
           <li><strong>Curated practice bank:</strong> every accepted pattern separately keeps 20 hand-reviewed, child-appropriate example words—1,960 pattern-word associations. Only these curated words can be selected automatically for a Sound Pattern Focus list; raw CMUdict headwords are never suggested to a child.</li>
           <li><strong>Mastery score:</strong> successful Copy practice earns 0.05 points; Letter Builder earns 0.1, 0.15, or 0.2 points for its 3-, 6-, or 9-plus-choice rounds; Guided earns 0.4; and Spell or missed-word Review earns 0.6. Incorrect attempts neither add nor remove points. Each word contributes at most 10 points, and only the ten strongest words count, producing a 0–100 pattern score. A pattern is mastered at 100.</li>
         </ol>
-        <p><strong>AI-generated mappings are separate.</strong> Mappings generated or imported in Settings are editable teacher reference data for that word list. They can be exported and shared, but they never change Progress metrics or the automatic Sound Pattern Focus list. Those features use only the bundled reviewed bank.</p>
+        <p><strong>One trusted source:</strong> Progress and automatic Sound Pattern Focus lists use only the bundled, reviewed sound bank. Example-sentence generation does not create or change sound mappings.</p>
         <h3>How to read the notation</h3>
         <dl class="sound-notation-list">
           <div><dt>Phoneme</dt><dd>A speech sound. Spelling B places its broad IPA label between slashes, such as <code>/ʃ/</code>.</dd></div>

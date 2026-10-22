@@ -1,0 +1,72 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sentence reminder test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1000" height="900"></iframe>
+<script>
+const waitFor = (condition, timeout = 12000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for sentence reminder behavior.'));
+    else setTimeout(check, 20);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  const config = {
+    lists: [{ id: 'starter', title: 'Starter words', words: ['apple'], sentences: {} }],
+    testWordsPerList: 5,
+    sentencePrompt: 'Write three to seven words about the spelling word',
+    lessonPlan: {
+      beginnerDays: 2,
+      beginner: { copy: 2, letterBuilder: 3, guided: 1, spell: 0 },
+      advanced: { copy: 1, letterBuilder: 0, guided: 2, spell: 2 },
+      advancedReview: { enabled: true, repetitions: 1, maxWords: 5 },
+    },
+  };
+  const html = await fetch('../dist/chrome-extension/settings.html').then((response) => response.text());
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  const bootstrap = `<script>window.fetch = async (url, options = {}) => {
+    if (!String(url).includes('/api/config')) return parent.fetch(url, options);
+    if (options.method === 'POST') { window.__savedConfig = JSON.parse(options.body); return new Response('{}', { status: 200 }); }
+    return new Response(JSON.stringify(${JSON.stringify(config)}), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };<\/script>`;
+  frame.srcdoc = html.replace('<head>', `<head><base href="../dist/chrome-extension/">${bootstrap}`);
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelectorAll('.word-list-card').length === 1);
+
+  app.querySelector('#add-list').click();
+  const card = [...app.querySelectorAll('.word-list-card')].find((candidate) => candidate.dataset.newList === 'true');
+  card.querySelector('.title-input').value = 'New words';
+  const words = card.querySelector('.words-input');
+  words.value = 'pear\nbear';
+  words.dispatchEvent(new Event('input', { bubbles: true }));
+  app.querySelector('#settings-form').requestSubmit();
+  const reminder = app.querySelector('#sentence-reminder-dialog');
+  await waitFor(() => reminder.open);
+  app.querySelector('#sentence-reminder-back').click();
+
+  await frame.contentWindow.SpellingRuntime.persist('spelling-b:sentence-reminder-seen:v1', false);
+  const sentenceFields = card.querySelectorAll('.sentence-row input');
+  sentenceFields[0].value = 'green pear';
+  sentenceFields[0].dispatchEvent(new Event('input', { bubbles: true }));
+  app.querySelector('#settings-form').requestSubmit();
+  await waitFor(() => app.querySelector('#save-status').textContent === 'Saved!' || reminder.open);
+  if (reminder.open) failures.push('a new list with an example still showed the reminder');
+  if (!frame.contentWindow.__savedConfig) failures.push('settings were not saved after adding an example');
+  if (frame.contentWindow.__savedConfig?.lists?.[0]?.sentences && Object.keys(frame.contentWindow.__savedConfig.lists[0].sentences).length) {
+    failures.push('sentence-less starter list affected the reminder or save');
+  }
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

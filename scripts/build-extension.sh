@@ -4,7 +4,7 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "$0")/.." && pwd)"
 dist_dir="$project_dir/dist"
 extension_dir="$dist_dir/chrome-extension"
-zip_file="$dist_dir/spelling-b-chrome-extension-1.6.0.zip"
+zip_file="$dist_dir/spelling-b-chrome-extension-1.7.0-RC1.zip"
 
 rm -rf "$extension_dir"
 mkdir -p "$extension_dir/icons" "$extension_dir/hand-guides"
@@ -13,7 +13,7 @@ cp "$project_dir/chrome/manifest.json" "$extension_dir/manifest.json"
 cp "$project_dir/chrome/background.js" "$extension_dir/background.js"
 
 for asset in \
-  app.css runtime.js sound-spelling-lookup.js sound-spelling-bank.js sound-mastery.js import-data.js practice.js settings.js test.js metrics.js stickers.js \
+  app.css runtime.js sound-spelling-lookup.js sound-spelling-bank.js sound-mastery.js guided-hints.js educator-review.js import-data.js practice.js settings.js test.js metrics.js stickers.js \
   phonics.js phonics-lessons.json open-source-phonics-120-lessons.pdf PHONICS-LICENSE.txt \
   high-frequency.js high-frequency-words.json HIGH-FREQUENCY-LICENSE.txt \
   typing.js; do
@@ -22,7 +22,7 @@ done
 
 cp "$project_dir/static/hand-guides/"*.png "$extension_dir/hand-guides/"
 
-for page in index settings test progress stickers high-frequency phonics typing; do
+for page in index settings test progress stickers high-frequency phonics typing educator-review; do
   sed \
     -e 's|href="/settings"|href="settings.html"|g' \
     -e 's|href="/stickers"|href="stickers.html"|g' \

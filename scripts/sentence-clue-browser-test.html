@@ -1,0 +1,60 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sentence clue test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="900" height="800"></iframe>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for homophone practice.'));
+    else setTimeout(check, 25);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  localStorage.clear();
+  localStorage.setItem('spelling-b:config:v1', JSON.stringify({
+    lists: [{
+      id: 'homophone-test',
+      title: 'Homophones',
+      words: ['there', 'their'],
+      sentences: {
+        there: 'Put the book over there',
+        their: 'Their dog likes naps',
+      },
+    }],
+    lessonPlan: {
+      beginnerDays: 2,
+      beginner: { copy: 0, letterBuilder: 0, guided: 1, spell: 0 },
+      advanced: { copy: 0, letterBuilder: 0, guided: 1, spell: 0 },
+      advancedReview: { enabled: false, repetitions: 1, maxWords: 5 },
+    },
+    testWordsPerList: 5,
+  }));
+
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.src = '../dist/chrome-extension/index.html';
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelector('#sentence-clue')?.hidden === false);
+
+  const clue = app.querySelector('#sentence-clue-text');
+  const clueText = clue.textContent.toLocaleLowerCase();
+  if (/\b(there|their)\b/u.test(clueText)) failures.push(`target word leaked into clue: ${JSON.stringify(clue.textContent)}`);
+  if (clue.querySelectorAll('.sentence-blank').length !== 1) failures.push('clue does not contain exactly one blank');
+  if (clue.querySelector('.sentence-blank')?.getAttribute('aria-label') !== 'blank') failures.push('blank has no accessible label');
+  if (!app.querySelector('#shown-word').hidden) failures.push('guided stage exposed the spelling word');
+  if (app.querySelector('#sentence-speak').hidden) failures.push('sentence speech button is hidden');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

@@ -1,0 +1,86 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>List transfer test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1000" height="900"></iframe>
+<script>
+const waitFor = (condition, timeout = 12000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for list transfer behavior.'));
+    else setTimeout(check, 20);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  const config = {
+    lists: [{ id: 'starter', title: 'Starter', words: ['apple'], sentences: { apple: 'red apple' } }],
+    testWordsPerList: 5,
+    sentencePrompt: 'Write three words.',
+    lessonPlan: {
+      beginnerDays: 2,
+      beginner: { copy: 2, letterBuilder: 3, guided: 1, spell: 0 },
+      advanced: { copy: 1, letterBuilder: 0, guided: 2, spell: 2 },
+      advancedReview: { enabled: true, repetitions: 1, maxWords: 5 },
+    },
+  };
+  const html = await fetch('../dist/chrome-extension/settings.html').then((response) => response.text());
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  const bootstrap = `<script>window.confirm = () => true; window.fetch = async (url, options) => String(url).includes('/api/config') ? new Response(JSON.stringify(${JSON.stringify(config)}), { status: 200, headers: { 'Content-Type': 'application/json' } }) : parent.fetch(url, options);<\/script>`;
+  frame.srcdoc = html.replace('<head>', `<head><base href="../dist/chrome-extension/">${bootstrap}`);
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelectorAll('.word-list-card').length === 1);
+
+  const oldExport = new File([
+    '\uFEFF"word","sentence"\r\n"pear","green pear"\r\n"bear","small bear"\r\n',
+  ], 'week-4-sentences.csv', { type: 'text/csv' });
+  const input = app.querySelector('#list-file');
+  const transfer = new DataTransfer();
+  transfer.items.add(oldExport);
+  Object.defineProperty(input, 'files', { configurable: true, value: transfer.files });
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  await waitFor(() => app.querySelectorAll('.word-list-card').length === 2);
+  const imported = [...app.querySelectorAll('.word-list-card')].find((card) => card.querySelector('.title-input').value === 'Week 4');
+  if (!imported) failures.push('old two-column export did not create a titled list');
+  if (imported?.querySelector('.words-input').value !== 'pear\nbear') failures.push('imported words are incorrect');
+  const examples = [...(imported?.querySelectorAll('.sentence-row input') || [])].map((field) => field.value);
+  if (examples.join('|') !== 'green pear|small bear') failures.push('imported examples are incorrect');
+  if (!app.querySelector('#list-import-status').textContent.includes('Review it, then save settings')) failures.push('save reminder is missing');
+
+  const stableID = imported?.dataset.listId;
+  const currentExport = new File([
+    `"word","sentence","list title","list id"\r\n"hare","quick hare","Week 4","${stableID}"\r\n`,
+  ], 'week-4-spelling-list.csv', { type: 'text/csv' });
+  const updateTransfer = new DataTransfer();
+  updateTransfer.items.add(currentExport);
+  Object.defineProperty(input, 'files', { configurable: true, value: updateTransfer.files });
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  await waitFor(() => [...app.querySelectorAll('.word-list-card')].some((card) => card.querySelector('.words-input').value === 'hare'));
+  const updated = [...app.querySelectorAll('.word-list-card')].find((card) => card.querySelector('.title-input').value === 'Week 4');
+  if (app.querySelectorAll('.word-list-card').length !== 2) failures.push('matching list import created a duplicate');
+  if (updated?.dataset.listId !== stableID) failures.push('matching list import did not preserve its stable ID');
+  if (updated?.querySelector('.sentence-row input').value !== 'quick hare') failures.push('matching list examples were not replaced');
+
+  const pastedResponse = updated.querySelector('.external-model-response');
+  pastedResponse.value = JSON.stringify({
+    hare: { sentence: 'quick haare' },
+    weaak: { sentence: 'very weaak bridge' },
+  });
+  updated.querySelector('.load-model-response').click();
+  const pastedStatus = updated.querySelector('.sentence-status').textContent;
+  if (updated.querySelector('.sentence-row input').value !== 'quick haare') failures.push('invalid exact-key response was not kept as an editable draft');
+  if (!pastedStatus.includes('hare') || !pastedStatus.includes('must include that exact word')) failures.push('invalid sentence reason was not shown');
+  if (!pastedStatus.includes('weaak') || !pastedStatus.includes('unrecognized word')) failures.push('misspelled response key was silently filtered');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

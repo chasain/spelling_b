@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Educator Methodology Review · Spelling B</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="educator-review-page">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Spelling B home"><span aria-hidden="true">🐝</span> Spelling B</a>
+    <span class="review-page-label">Unlinked educator reference</span>
+  </header>
+
+  <main class="educator-review-shell">
+    <section class="review-hero">
+      <p class="eyebrow">Educator methodology reference</p>
+      <h1>Review the evidence behind sound-pattern practice</h1>
+      <p>This offline page exposes the bundled teaching patterns, guided hints, reviewed examples, and deterministic CMUdict lookup. It reads no learner profiles, practice history, or settings.</p>
+      <div class="review-stat-grid" aria-label="Bundled data summary">
+        <div><strong id="review-pattern-count">—</strong><span>reviewed patterns</span></div>
+        <div><strong id="review-example-count">—</strong><span>reviewed examples</span></div>
+        <div><strong id="review-word-count">—</strong><span>mapped headwords</span></div>
+        <div><strong id="review-association-count">—</strong><span>word-pattern links</span></div>
+      </div>
+    </section>
+
+    <section class="review-section" aria-labelledby="method-title">
+      <h2 id="method-title">How the mapping was built</h2>
+      <div class="method-grid">
+        <article><strong>1 · Align</strong><p>The first North American pronunciation for each lowercase alphabetic CMUdict headword was aligned to its spelling with m2m-aligner.</p></article>
+        <article><strong>2 · Audit</strong><p>Patterns found in at least 100 distinct aligned headwords became review candidates; frequency alone never adds a teaching pattern.</p></article>
+        <article><strong>3 · Review</strong><p>Reusable correspondences were reviewed, and each shipped pattern received 20 familiar examples. Ambiguous, rare, overlapping, or name-heavy candidates were excluded.</p></article>
+        <article><strong>4 · Bundle</strong><p>A fixed local lookup connects CMUdict headwords only to reviewed patterns and character positions. Conservative additive passes recover reviewed patterns at alignment-chunk edges, across five verified silent-letter endings, and in pronunciation-matched suffixed forms.</p></article>
+      </div>
+      <details>
+        <summary>Audit facts, limitations, and mastery weights</summary>
+        <div class="review-details-grid">
+          <div>
+            <h3>Audit snapshot</h3>
+            <ul>
+              <li>CMUdict snapshot: 2026-10-06; SHA-256 <code>81917843…d22</code></li>
+              <li>117,493 distinct input headwords; 117,454 aligned; 39 failed alignment</li>
+              <li>19,583 deterministic training entries; four-letter/two-phone maximum chunks</li>
+              <li>294 statistical candidates met the 100-headword audit threshold</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Mastery credit per successful practice</h3>
+            <table class="compact-review-table"><thead><tr><th>Activity</th><th>Points</th></tr></thead><tbody>
+              <tr><td>Copy</td><td>0.05</td></tr><tr><td>Letter Builder · 3 choices</td><td>0.10</td></tr>
+              <tr><td>Letter Builder · 6 choices</td><td>0.15</td></tr><tr><td>Letter Builder · 9 choices</td><td>0.20</td></tr>
+              <tr><td>Guided</td><td>0.40</td></tr><tr><td>Spell / missed-word review</td><td>0.60</td></tr>
+            </tbody></table>
+            <p>Each word is capped at 10 points. The ten strongest words count, so a pattern reaches mastery at 100.</p>
+          </div>
+        </div>
+        <p><strong>Additive recovery audit:</strong> 20,094 reviewed consonants were recovered at alignment-chunk edges; 2,614 patterns were unlocked by silent <em>e</em> in final <em>-ed</em>; 119 patterns were recovered across verified final <em>mb</em>, <em>mn</em>, <em>gn</em>, <em>lk</em>, and <em>bt</em> families; and 1,850 unchanged mappings were inherited by pronunciation-matched suffixed forms. Examples include <em>rowed</em>, <em>lamb</em>, <em>sign</em>, <em>doubt</em>, <em>makes</em>, and <em>safely</em>. No prior association or headword was removed. The exact dictionary, canonical alignment, and complete ledger are retained as development data and are not packaged in the extension.</p>
+        <p><strong>Limits:</strong> statistical boundaries are not linguistic authority. CMUdict includes names, compounds, and dialect-sensitive pronunciations. Broad IPA is a compact educator label, not a pronunciation lesson. A mapped word can still contain sounds outside the reviewed bank.</p>
+        <p><strong>Mastery mappings versus Guided annotations:</strong> a mastery mapping awards progress for a reviewed sound-to-spelling pattern. A Guided annotation can explain a spelling feature without treating a soundless letter as a mastery category. In <em>talk</em>, for example, final <strong>k</strong> → /k/ earns mastery credit and the vowel is left unscored, while Guided explains the complete <strong>alk</strong> family: write <strong>a</strong>, then a quiet <strong>l</strong>, before <strong>k</strong>. This teaches the useful spelling context shared by <em>talk</em>, <em>walk</em>, and <em>chalk</em> without claiming that <strong>a</strong> always says /ɔ/. Other bounded dialect-sensitive families use the same non-scoring approach.</p>
+        <p>Development references: <a href="https://github.com/cmusphinx/cmudict">CMUdict</a>, <a href="https://github.com/letter-to-phoneme/m2m-aligner">m2m-aligner</a>, and <a href="https://cmusphinx.github.io/page23/">CMUSphinx letter-to-phoneme notes</a>.</p>
+      </details>
+    </section>
+
+    <section class="review-section" aria-labelledby="patterns-title">
+      <h2 id="patterns-title">Reviewed sound mappings and guided hints</h2>
+      <p class="section-intro">Hints are generated from the same local rules used after a learner pauses in Guided practice. Multiple rows may share a pronunciation because a sound can have several spellings.</p>
+      <div class="review-filters">
+        <label>Search patterns <input id="pattern-query" type="search" placeholder="e.g. silent e, /ʃ/, vowel team"></label>
+        <label>Pronunciation <select id="pattern-sound"><option value="">All pronunciations</option></select></label>
+        <label>Rows <select id="pattern-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label>
+      </div>
+      <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Pattern ID</th><th>Letters</th><th>Pronunciation</th><th>Teaching label</th><th>Guided hint</th><th>Reviewed examples</th></tr></thead><tbody id="pattern-rows"></tbody></table></div>
+      <div id="pattern-pager" class="review-pager"></div>
+      <h3>Reviewed hint exceptions</h3>
+      <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Words</th><th>Letters</th><th>Pronunciation</th><th>Hint</th><th>Example pool</th></tr></thead><tbody id="exception-rows"></tbody></table></div>
+      <h3>Silent-letter Guided hints</h3>
+      <p class="section-intro">These deterministic annotations improve scaffolding but never earn sound-pattern mastery credit.</p>
+      <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Rule ID</th><th>Letters</th><th>Annotated words</th><th>Guided hint</th><th>Example pool</th></tr></thead><tbody id="silent-hint-rows"></tbody></table></div>
+    </section>
+
+    <section class="review-section" aria-labelledby="examples-title">
+      <h2 id="examples-title">Curated example bank</h2>
+      <p class="section-intro">These are the manually reviewed words eligible for automatic sound-pattern focus lists.</p>
+      <div class="review-filters">
+        <label>Search words <input id="example-query" type="search" placeholder="e.g. school"></label>
+        <label>Pattern <select id="example-pattern"><option value="">All patterns</option></select></label>
+        <label>Rows <select id="example-size"><option>25</option><option selected>50</option><option>100</option></select></label>
+      </div>
+      <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Word</th><th>Pattern ID</th><th>Letters</th><th>Pronunciation</th><th>Teaching label</th></tr></thead><tbody id="example-rows"></tbody></table></div>
+      <div id="example-pager" class="review-pager"></div>
+    </section>
+
+    <section class="review-section" aria-labelledby="lookup-title">
+      <h2 id="lookup-title">CMUdict word-to-reviewed-pattern lookup</h2>
+      <p class="section-intro">This is the bundled runtime lookup—not raw CMUdict and not a complete phonetic transcription. One word can occupy several rows when several reviewed patterns were found.</p>
+      <div class="review-filters lookup-filters">
+        <label>Search words <input id="lookup-query" type="search" placeholder="Type a whole word or part"></label>
+        <label>Match <select id="lookup-match"><option value="starts">Starts with</option><option value="contains">Contains</option><option value="exact">Exact word</option></select></label>
+        <label>Pattern <select id="lookup-pattern"><option value="">All patterns</option></select></label>
+        <label>Pronunciation <select id="lookup-sound"><option value="">All pronunciations</option></select></label>
+        <label>Words per page <select id="lookup-size"><option>25</option><option selected>50</option><option>100</option></select></label>
+      </div>
+      <p id="lookup-working" class="lookup-working" role="status"></p>
+      <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Headword</th><th>Matched letters</th><th>Position</th><th>Pattern ID</th><th>Pronunciation</th><th>Teaching label</th></tr></thead><tbody id="lookup-rows"></tbody></table></div>
+      <div id="lookup-pager" class="review-pager"></div>
+    </section>
+  </main>
+
+  <script src="/static/sound-spelling-lookup.js" defer></script>
+  <script src="/static/sound-spelling-bank.js" defer></script>
+  <script src="/static/guided-hints.js" defer></script>
+  <script src="/static/educator-review.js" defer></script>
+</body>
+</html>

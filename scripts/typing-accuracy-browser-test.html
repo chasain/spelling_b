@@ -1,0 +1,84 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Typing accuracy gate test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1000" height="800"></iframe>
+<script>
+const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for typing practice.'));
+    else setTimeout(check, 25);
+  };
+  check();
+});
+
+const today = new Date().toLocaleDateString('en-CA');
+const progressKey = 'spelling-b:profile:default:spelling-b:typing-progress:v2';
+const frame = document.querySelector('#app');
+let stage = 'starting';
+
+async function loadWith(practiceAttempts) {
+  localStorage.setItem(progressKey, JSON.stringify({
+    level: 0,
+    unlocked: 0,
+    mastered: [],
+    best: [],
+    days: [],
+    daily: { date: today, levels: { 0: { correct: 999, tested: false, practiceCPM: 100, practiceAttempts } } },
+  }));
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.src = `../dist/chrome-extension/typing.html?attempts=${practiceAttempts}`;
+  await loaded;
+  await waitFor(() => frame.contentDocument.querySelector('#typing-test'));
+  return frame.contentDocument;
+}
+
+void (async () => {
+  const failures = [];
+  localStorage.clear();
+
+  stage = 'loading low-accuracy practice';
+  let app = await loadWith(2000);
+  if (!app.querySelector('#typing-test').hidden) failures.push('test opened below 80% practice accuracy');
+  if (!app.querySelector('#typing-round-detail').textContent.includes('80% accuracy')) failures.push('practice accuracy goal is not explained');
+
+  stage = 'loading passing practice';
+  app = await loadWith(999);
+  const testButton = app.querySelector('#typing-test');
+  if (testButton.hidden || testButton.disabled) failures.push('test stayed locked at passing speed and accuracy');
+  testButton.click();
+  stage = 'starting test';
+  await waitFor(() => app.querySelector('#typing-guidance').hidden && app.querySelector('#typing-prompt').textContent.length > 10);
+  const target = Array.from(app.querySelector('#typing-prompt').textContent.replaceAll('\u00a0', ' '));
+  target.forEach((expected, index) => {
+    const key = index % 4 === 0 ? (expected.toLocaleLowerCase() === 'x' ? 'z' : 'x') : expected;
+    app.body.dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown', { key, bubbles: true }));
+  });
+  stage = 'finishing inaccurate test';
+  await waitFor(() => !app.querySelector('#typing-result').hidden);
+  if (!app.querySelector('#typing-unlock-result').textContent.includes('accuracy')) failures.push('sub-80% test did not report the accuracy requirement');
+  const saved = JSON.parse(localStorage.getItem(progressKey));
+  if (saved.unlocked !== 0 || saved.mastered?.[0]) failures.push('sub-80% test unlocked or mastered the level');
+
+  stage = 'loading accurate test';
+  app = await loadWith(999);
+  app.querySelector('#typing-test').click();
+  await waitFor(() => app.querySelector('#typing-guidance').hidden && app.querySelector('#typing-prompt').textContent.length > 10);
+  const accurateTarget = Array.from(app.querySelector('#typing-prompt').textContent.replaceAll('\u00a0', ' '));
+  accurateTarget.forEach((key) => {
+    app.body.dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown', { key, bubbles: true }));
+  });
+  stage = 'finishing accurate test';
+  await waitFor(() => !app.querySelector('#typing-result').hidden);
+  const passed = JSON.parse(localStorage.getItem(progressKey));
+  if (passed.unlocked !== 1 || !passed.mastered?.[0]) failures.push('accurate 60+ CPM test did not unlock and master the level');
+
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL during ${stage}: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

@@ -119,7 +119,7 @@ func TestCopiedAIPromptIsExampleOnly(t *testing.T) {
 	if strings.Contains(promptSource, "Each mapping needs") || strings.Contains(promptSource, `"mappings"`) {
 		t.Fatal("copied AI prompt still requests sound mappings")
 	}
-	if !strings.Contains(promptSource, `"sentence":"green swamp plants"`) || !strings.Contains(promptSource, "Do not add pronunciation or sound mappings") {
+	if !strings.Contains(promptSource, `"sentence":"green swamp plants"`) || !strings.Contains(promptSource, "Do not add any other fields") {
 		t.Fatal("copied AI prompt does not clearly request sentence-only JSON")
 	}
 }
@@ -150,6 +150,18 @@ func TestOldConfigGetsDefaultTestLimit(t *testing.T) {
 	}
 	if got := store.Get().SentenceSystemPrompt; got != defaultSentenceSystemPrompt {
 		t.Fatalf("default sentence system prompt = %q", got)
+	}
+}
+
+func TestLegacySentencePromptMigratesWithoutReplacingCustomPrompt(t *testing.T) {
+	legacy := cleanConfig(Config{SentencePrompt: legacySentencePrompt})
+	if legacy.SentencePrompt != defaultSentencePrompt {
+		t.Fatalf("legacy sentence prompt = %q", legacy.SentencePrompt)
+	}
+
+	custom := cleanConfig(Config{SentencePrompt: "Mention soccer when relevant"})
+	if custom.SentencePrompt != "Mention soccer when relevant" {
+		t.Fatalf("custom sentence prompt = %q", custom.SentencePrompt)
 	}
 }
 
@@ -253,25 +265,38 @@ func TestEmbeddedAppIncludesPagesAndStaticAssets(t *testing.T) {
 		{path: "/progress", contentType: "text/html", contains: "Export teacher CSV"},
 		{path: "/static/stickers.js", contentType: "text/javascript", contains: "renderStickerBook"},
 		{path: "/settings", contentType: "text/html", contains: "advanced-review-enabled"},
+		{path: "/settings", contentType: "text/html", contains: "guided-hints"},
 		{path: "/static/practice.js", contentType: "text/javascript", contains: "missedSpellWords"},
 		{path: "/static/settings.js", contentType: "text/javascript", contains: "migrateListProgress"},
 		{path: "/settings", contentType: "text/html", contains: "Export classroom setup"},
 		{path: "/settings", contentType: "text/html", contains: "Download the language model?"},
 		{path: "/settings", contentType: "text/html", contains: "export-sentences"},
+		{path: "/settings", contentType: "text/html", contains: "Import list"},
+		{path: "/static/settings.js", contentType: "text/javascript", contains: "readExportedListFile"},
 		{path: "/settings", contentType: "text/html", contains: "settings-panel-guides"},
 		{path: "/settings", contentType: "text/html", contains: "speech-normal-rate"},
 		{path: "/settings", contentType: "text/html", contains: "Copy AI prompt"},
+		{path: "/settings", contentType: "text/html", contains: "Make examples feel familiar"},
+		{path: "/settings", contentType: "text/html", contains: "Try to relate some of these words to dinosaurs"},
 		{path: "/settings", contentType: "text/html", contains: "typing-practice-repetitions"},
 		{path: "/static/runtime.js", contentType: "text/javascript", contains: "captureTextInput"},
 		{path: "/static/runtime.js", contentType: "text/javascript", contains: "requestSubmit(submitter)"},
 		{path: "/static/runtime.js", contentType: "text/javascript", contains: "closest('.speaker')"},
+		{path: "/", contentType: "text/html", contains: "sentence-clue"},
+		{path: "/static/practice.js", contentType: "text/javascript", contains: "renderSentenceClue"},
 		{path: "/static/settings.js", contentType: "text/javascript", contains: "spelling-b-classroom"},
 		{path: "/static/import-data.js", contentType: "text/javascript", contains: "readXlsx"},
 		{path: "/static/metrics.js", contentType: "text/javascript", contains: "copySpeed"},
 		{path: "/static/sound-spelling-lookup.js", contentType: "text/javascript", contains: "SpellingSoundLookup"},
 		{path: "/static/sound-mastery.js", contentType: "text/javascript", contains: "WORDS_FOR_MASTERY"},
+		{path: "/static/guided-hints.js", contentType: "text/javascript", contains: "createCoach"},
+		{path: "/static/guided-hints.js", contentType: "text/javascript", contains: "exampleChoices"},
+		{path: "/static/educator-review.js", contentType: "text/javascript", contains: "renderLookup"},
+		{path: "/", contentType: "text/html", contains: "guided-hint-text"},
+		{path: "/", contentType: "text/html", contains: "guided-letter-counter"},
 		{path: "/high-frequency", contentType: "text/html", contains: "High Frequency Words"},
 		{path: "/high-frequency", contentType: "text/html", contains: "frequency-answer-field"},
+		{path: "/educator-review", contentType: "text/html", contains: "CMUdict word-to-reviewed-pattern lookup"},
 		{path: "/phonics", contentType: "text/html", contains: "Sound Patterns"},
 		{path: "/typing", contentType: "text/html", contains: "Typing trail"},
 		{path: "/static/high-frequency-words.json", contentType: "application/json", contains: "\"levels\":"},
@@ -359,6 +384,9 @@ func TestLegacySettingsGainStableListIDsAndDisabledReview(t *testing.T) {
 	}
 	if config.LessonPlan.AdvancedReview.Enabled || config.LessonPlan.AdvancedReview.Repetitions != 1 || config.LessonPlan.AdvancedReview.MaxWords != 5 {
 		t.Fatalf("legacy review settings = %#v", config.LessonPlan.AdvancedReview)
+	}
+	if !config.LessonPlan.GuidedHints {
+		t.Fatal("legacy lesson plan did not default Guided hints on")
 	}
 	reloaded, err := NewStore(path)
 	if err != nil {
@@ -560,6 +588,7 @@ func TestHighFrequencyUsesCumulativeAndSoundMastery(t *testing.T) {
 		`phonetics: phoneticsForWord(currentWord())`,
 		`soundMasteryBackfillVersion`,
 		`score >= 100`,
+		`guidedCoach.refresh`,
 	} {
 		if !strings.Contains(source, behavior) {
 			t.Errorf("high-frequency.js is missing mastery behavior %q", behavior)
@@ -643,7 +672,8 @@ func TestMasteredProfileFixtureIsCompleteAndNotPackaged(t *testing.T) {
 		Unlocked int    `json:"unlocked"`
 		Mastered []bool `json:"mastered"`
 		Best     []struct {
-			CPM float64 `json:"cpm"`
+			CPM      float64 `json:"cpm"`
+			Accuracy float64 `json:"accuracy"`
 		} `json:"best"`
 	}
 	if err := json.Unmarshal(profile.LearnerData["spelling-b:typing-progress:v2"], &typing); err != nil {
@@ -653,7 +683,7 @@ func TestMasteredProfileFixtureIsCompleteAndNotPackaged(t *testing.T) {
 		t.Fatalf("fixture typing unlocked=%d mastered=%d best=%d", typing.Unlocked, len(typing.Mastered), len(typing.Best))
 	}
 	for index := range typing.Mastered {
-		if !typing.Mastered[index] || typing.Best[index].CPM < 60 {
+		if !typing.Mastered[index] || typing.Best[index].CPM < 60 || typing.Best[index].Accuracy < 80 {
 			t.Fatalf("typing level %d is not mastered with a passing score", index+1)
 		}
 	}
@@ -700,7 +730,7 @@ func TestChromeManifestAvoidsUnsupportedFileHandlers(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.VersionName != "1.6.0" {
+	if manifest.VersionName != "1.7.1" {
 		t.Fatalf("version_name = %q", manifest.VersionName)
 	}
 	if len(manifest.Extra) != 0 {
@@ -726,17 +756,6 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 				"PEAR":   "I ate a pear.",
 				"unused": "This should be removed.",
 			},
-			Phonetics: map[string]WordPhonetics{
-				"apple": {
-					Pronunciation: " /ˈæpəl/ ",
-					Mappings: []SoundMapping{
-						{Sound: " /æ/ ", Letters: "a", Start: 0, End: 1},
-						{Sound: "/p/", Letters: "pp", Start: 1, End: 3},
-						{Sound: "/əl/", Letters: "le", Start: 3, End: 5},
-					},
-				},
-				"unused": {Pronunciation: "/x/", Mappings: []SoundMapping{{Sound: "/x/", Letters: "unused", Start: 0, End: 6}}},
-			},
 		}},
 		TestWordsPerList:     2,
 		LessonPlan:           defaultConfig.LessonPlan,
@@ -752,10 +771,6 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 	got.Lists[0].Sentences["Apple"] = "Changed outside the store."
 	if sentence := store.Get().Lists[0].Sentences["Apple"]; sentence != "The apple is red." {
 		t.Fatalf("stored sentence changed through Get(): %q", sentence)
-	}
-	got.Lists[0].Phonetics["Apple"] = WordPhonetics{Pronunciation: "changed"}
-	if pronunciation := store.Get().Lists[0].Phonetics["Apple"].Pronunciation; pronunciation != "/ˈæpəl/" {
-		t.Fatalf("stored phonetics changed through Get(): %q", pronunciation)
 	}
 
 	reloaded, err := NewStore(path)
@@ -777,20 +792,6 @@ func TestStoreSaveCleansAndPersistsSentences(t *testing.T) {
 	}
 	if _, exists := sentences["unused"]; exists {
 		t.Fatalf("sentence for removed word was persisted: %#v", sentences)
-	}
-	phonetics := reloaded.Get().Lists[0].Phonetics
-	if len(phonetics) != 1 {
-		t.Fatalf("phonetics = %#v", phonetics)
-	}
-	if phonetics["Apple"].Pronunciation != "/ˈæpəl/" || len(phonetics["Apple"].Mappings) != 3 {
-		t.Fatalf("phonetics = %#v", phonetics)
-	}
-	firstMapping := phonetics["Apple"].Mappings[0]
-	if firstMapping.Sound != "" || len(firstMapping.Phonemes) != 1 || firstMapping.Phonemes[0] != "/æ/" {
-		t.Fatalf("legacy sound mapping was not migrated to phonemes: %#v", firstMapping)
-	}
-	if _, exists := phonetics["unused"]; exists {
-		t.Fatalf("phonetics for removed word were persisted: %#v", phonetics)
 	}
 }
 
@@ -820,26 +821,6 @@ func TestConfigRejectsOverlongSentencePrompt(t *testing.T) {
 		t.Fatal("validateConfig() accepted an overlong sentence-generation prompt")
 	}
 }
-func TestConfigRejectsInvalidSoundMapping(t *testing.T) {
-	config := Config{
-		Lists: []WordList{{
-			Title: "Examples",
-			Words: []string{"school"},
-			Phonetics: map[string]WordPhonetics{
-				"school": {
-					Pronunciation: "/skuːl/",
-					Mappings:      []SoundMapping{{Sound: "/s/", Letters: "x", Start: 0, End: 1}},
-				},
-			},
-		}},
-		TestWordsPerList: 1,
-		LessonPlan:       defaultConfig.LessonPlan,
-	}
-	if err := validateConfig(config); err == nil {
-		t.Fatal("validateConfig() accepted an invalid sound mapping")
-	}
-}
-
 func TestConfigRejectsOverlongSentenceSystemPrompt(t *testing.T) {
 	config := Config{
 		Lists:                []WordList{{Title: "Examples", Words: []string{"apple"}}},

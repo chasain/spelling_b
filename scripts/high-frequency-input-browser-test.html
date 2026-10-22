@@ -2,13 +2,13 @@
 <meta charset="utf-8">
 <title>High Frequency input test</title>
 <pre id="result">Running…</pre>
-<iframe id="app" src="../dist/chrome-extension/high-frequency.html" width="1000" height="700"></iframe>
+<iframe id="app" width="1000" height="700"></iframe>
 <script>
-const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) => {
+const waitFor = (condition, label, timeout = 10000) => new Promise((resolve, reject) => {
   const started = performance.now();
   const check = () => {
     if (condition()) resolve();
-    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for High Frequency practice.'));
+    else if (performance.now() - started > timeout) reject(new Error(`Timed out waiting for High Frequency practice (${label}).`));
     else setTimeout(check, 25);
   };
   check();
@@ -16,11 +16,17 @@ const waitFor = (condition, timeout = 10000) => new Promise((resolve, reject) =>
 
 void (async () => {
   const frame = document.querySelector('#app');
-  await new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  const html = await fetch('../dist/chrome-extension/high-frequency.html').then((response) => response.text());
+  const packagedCourse = await fetch('../dist/chrome-extension/high-frequency-words.json').then((response) => response.json());
+  const courseScript = `<script>window.fetch = (url) => String(url).includes('high-frequency-words.json') ? Promise.resolve(new Response(${JSON.stringify(JSON.stringify(packagedCourse))}, { status: 200 })) : parent.fetch(url);<\/script>`;
+  const renderedHTML = html.replace('<head>', `<head><base href="../dist/chrome-extension/">${courseScript}`);
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.srcdoc = renderedHTML;
+  await loaded;
   let app = frame.contentDocument;
-  await waitFor(() => app.querySelector('#frequency-title')?.textContent === 'Words 1–10');
+  await waitFor(() => app.querySelector('#frequency-title')?.textContent === 'Words 1–10', 'initial level');
   app.querySelector('#frequency-start').click();
-  await waitFor(() => !app.querySelector('#frequency-activity').hidden);
+  await waitFor(() => !app.querySelector('#frequency-activity').hidden, 'copy stage');
 
   const failures = [];
   const field = app.querySelector('#frequency-answer-field');
@@ -59,10 +65,10 @@ void (async () => {
       masteryVersion: 1,
     });
     const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
-    frame.contentWindow.location.reload();
+    frame.srcdoc = renderedHTML;
     await loaded;
     app = frame.contentDocument;
-    await waitFor(() => !app.querySelector('#frequency-activity')?.hidden);
+    await waitFor(() => !app.querySelector('#frequency-activity')?.hidden, `stage ${stage}`);
     return {
       field: app.querySelector('#frequency-answer-field'),
       display: app.querySelector('#frequency-typed'),

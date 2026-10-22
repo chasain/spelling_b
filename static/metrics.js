@@ -47,6 +47,15 @@ void (async () => {
       return [];
     }
   }
+  const savedSessions = history();
+  let repairedSoundMappings = false;
+  if (soundMastery?.repairReviewedCorrections) savedSessions.forEach((session) => {
+    if (soundMastery.repairReviewedCorrections(session)) repairedSoundMappings = true;
+  });
+  if (repairedSoundMappings) {
+    await runtime.persist('spelling-b:session-metrics:v1', savedSessions);
+  }
+
   function csvCell(value) {
     let text = String(value ?? '');
     if (/^[=+\-@]/.test(text)) text = `'${text}`;

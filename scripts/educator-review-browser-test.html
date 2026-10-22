@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Educator review test</title>
+<pre id="result">Running…</pre>
+<iframe id="app" width="1200" height="800"></iframe>
+<script>
+const waitFor = (condition, timeout = 15000) => new Promise((resolve, reject) => {
+  const started = performance.now();
+  const check = () => {
+    if (condition()) resolve();
+    else if (performance.now() - started > timeout) reject(new Error('Timed out waiting for educator review page.'));
+    else setTimeout(check, 20);
+  };
+  check();
+});
+
+void (async () => {
+  const failures = [];
+  const html = await fetch('../dist/chrome-extension/educator-review.html').then((response) => response.text());
+  const frame = document.querySelector('#app');
+  const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+  frame.srcdoc = html.replace('<head>', '<head><base href="../dist/chrome-extension/">');
+  await loaded;
+  const app = frame.contentDocument;
+  await waitFor(() => app.querySelectorAll('#lookup-rows tr').length > 0);
+  if (app.querySelector('#review-pattern-count').textContent !== '98') failures.push('pattern total is not 98');
+  if (Number(app.querySelector('#review-word-count').textContent.replaceAll(',', '')) < 100000) failures.push('lookup word total is unexpectedly small');
+  if (app.querySelectorAll('#pattern-rows tr').length !== 25) failures.push('pattern pagination did not use 25 rows');
+  if (app.querySelectorAll('#silent-hint-rows tr').length !== 8) failures.push('silent-letter hint table does not show all 8 rules');
+  if (![...app.querySelectorAll('#silent-hint-rows tr')].some((row) => row.textContent.includes('terminal-mb') && row.textContent.includes('b is written but not spoken'))) failures.push('silent mb methodology row is missing');
+  const query = app.querySelector('#lookup-query');
+  const match = app.querySelector('#lookup-match');
+  match.value = 'exact';
+  query.value = 'swamp';
+  query.dispatchEvent(new Event('input', { bubbles: true }));
+  await waitFor(() => app.querySelector('#lookup-pager').textContent.includes('1 of 1 words'));
+  if (![...app.querySelectorAll('#lookup-rows td:first-child')].every((cell) => cell.textContent === 'swamp')) failures.push('exact lookup filter returned another word');
+  const patternQuery = app.querySelector('#pattern-query');
+  patternQuery.value = 'silent e';
+  patternQuery.dispatchEvent(new Event('input', { bubbles: true }));
+  await waitFor(() => app.querySelector('#pattern-pager').textContent.includes('patterns'));
+  if (![...app.querySelectorAll('#pattern-rows tr')].some((row) => row.textContent.includes('silent e'))) failures.push('hint search did not find silent-e patterns');
+  document.querySelector('#result').textContent = failures.length ? `FAIL: ${failures.join(', ')}` : 'PASS';
+  document.title = failures.length ? 'FAIL' : 'PASS';
+})().catch((error) => {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  document.title = 'FAIL';
+});
+</script>

@@ -9,6 +9,10 @@ void (async () => {
   };
   typingDisplay.gapMM = Math.min(25, Math.max(0, Number(typingDisplay.gapMM) || 0));
   typingDisplay.repetitionsPerKey = Math.min(6, Math.max(1, Math.round(Number(typingDisplay.repetitionsPerKey) || typingDisplayDefaults.repetitionsPerKey)));
+  const minimumCPM = 60;
+  const minimumAccuracy = 80;
+  const accuracyPercent = (correct, attempts) => attempts > 0 ? Math.round(correct / attempts * 100) : 0;
+  const meetsTypingGoal = (cpm, accuracy) => Number(cpm) >= minimumCPM && Number(accuracy) >= minimumAccuracy;
   const storageKey = 'spelling-b:typing-progress:v2';
   const legacy = runtime.read('spelling-b:typing-progress:v1', {});
   const today = new Date().toLocaleDateString('en-CA');
@@ -191,6 +195,7 @@ void (async () => {
       lastMetricCorrectAt = now;
       session.cpm = top75CPM(session.correctIntervals);
     }
+    session.accuracy = accuracyPercent(session.correctCharacters, session.characterAttempts);
     lastMetricKeyAt = now;
     runtime.saveMetricSession(session);
     return session.cpm || 0;
@@ -210,9 +215,31 @@ void (async () => {
 
   function dailyLevel() {
     const key = String(state.level);
-    if (!state.daily.levels[key]) state.daily.levels[key] = { correct: 0, tested: false, practiceCPM: 0 };
-    if (!Number.isFinite(Number(state.daily.levels[key].practiceCPM))) state.daily.levels[key].practiceCPM = 0;
-    return state.daily.levels[key];
+    if (!state.daily.levels[key]) state.daily.levels[key] = { correct: 0, tested: false, practiceCPM: 0, practiceAttempts: 0 };
+    const daily = state.daily.levels[key];
+    if (!Number.isFinite(Number(daily.practiceCPM))) daily.practiceCPM = 0;
+    if (!Number.isFinite(Number(daily.practiceAttempts))) daily.practiceAttempts = Number(daily.correct) || 0;
+    daily.practiceAttempts = Math.max(Number(daily.correct) || 0, Number(daily.practiceAttempts) || 0);
+    return daily;
+  }
+
+  function dailyPracticeAccuracy(daily = dailyLevel()) {
+    return accuracyPercent(Number(daily.correct) || 0, Number(daily.practiceAttempts) || 0);
+  }
+
+  function practiceTestReady(daily = dailyLevel()) {
+    return daily.correct >= trainingTotal() && meetsTypingGoal(daily.practiceCPM, dailyPracticeAccuracy(daily));
+  }
+
+  function practiceGoalMessage(daily = dailyLevel()) {
+    const rawCPM = Number(daily.practiceCPM) || 0;
+    const cpm = Math.round(rawCPM);
+    const accuracy = dailyPracticeAccuracy(daily);
+    if (meetsTypingGoal(rawCPM, accuracy)) return `${cpm} CPM · ${accuracy}% accuracy · your level test is ready.`;
+    const needs = [];
+    if (rawCPM < minimumCPM) needs.push(`${minimumCPM} CPM`);
+    if (accuracy < minimumAccuracy) needs.push(`${minimumAccuracy}% accuracy`);
+    return `${cpm} CPM · ${accuracy}% accuracy · reach ${needs.join(' and ')} to unlock the test.`;
   }
 
   function availableKeys(levelIndex = state.level) {
@@ -313,6 +340,12 @@ void (async () => {
     return { name: 'Growing Typist', icon: '🌱' };
   }
 
+  function bestScoreText(record) {
+    if (!record) return 'No test score yet';
+    const accuracy = Number.isFinite(Number(record.accuracy)) ? `${Math.round(Number(record.accuracy))}% accuracy` : 'accuracy not recorded';
+    return `Best: ${Math.round(record.cpm)} CPM · ${accuracy} · ${record.rank}`;
+  }
+
   function currentRound(correct = dailyLevel().correct) {
     const index = roundEnds().findIndex((end) => correct < end);
     return index < 0 ? 3 : index;
@@ -396,7 +429,7 @@ void (async () => {
     const starts = roundStarts();
     const ends = roundEnds();
     const total = trainingTotal();
-    const testReady = daily.correct >= total && daily.practiceCPM >= 60;
+    const testReady = practiceTestReady(daily);
     const labels = ['Follow the highlighted key', 'Find the key yourself', 'Memory keyboard'];
     missionStars.replaceChildren(...ends.map((end) => {
       const star = document.createElement('span');
@@ -406,13 +439,11 @@ void (async () => {
     }));
     if (round >= 3) {
       roundLabel.textContent = testReady ? 'Test ready! ⭐' : 'Training complete';
-      roundDetail.textContent = testReady
-        ? `${Math.round(daily.practiceCPM)} CPM · your level test is ready.`
-        : `${Math.round(daily.practiceCPM)} CPM · reach 60 CPM to unlock the test.`;
+      roundDetail.textContent = practiceGoalMessage(daily);
     } else {
       roundLabel.textContent = `Round ${round + 1} of 3 · ${labels[round]}`;
       const speed = daily.practiceCPM > 0 ? `${Math.round(daily.practiceCPM)} CPM` : 'measuring speed';
-      roundDetail.textContent = `${daily.correct - starts[round]} of ${ends[round] - starts[round]} correct keys · ${speed}`;
+      roundDetail.textContent = `${daily.correct - starts[round]} of ${ends[round] - starts[round]} correct keys · ${speed} · ${dailyPracticeAccuracy(daily)}% accuracy`;
     }
     const percent = Math.min(100, Math.round(daily.correct / total * 100));
     progressFill.style.width = `${percent}%`;
@@ -427,7 +458,7 @@ void (async () => {
     prompt.replaceChildren();
     if (daily.correct >= trainingTotal()) {
       const ready = document.createElement('strong');
-      ready.textContent = daily.practiceCPM >= 60 ? 'Test ready! ⭐' : `Training complete · ${Math.round(daily.practiceCPM)} CPM`;
+      ready.textContent = practiceTestReady(daily) ? 'Test ready! ⭐' : `Training complete · ${Math.round(daily.practiceCPM)} CPM · ${dailyPracticeAccuracy(daily)}% accuracy`;
       prompt.append(ready);
       showKeyboard();
     } else {
@@ -497,10 +528,10 @@ void (async () => {
     instructions.textContent = state.level === 0
       ? 'Learn the home-row keys first. Looking at the guide is encouraged.'
       : `Add ${Array.from(level.newKeys).join(' ').toUpperCase()} while keeping every earlier key in practice.`;
-    best.textContent = high ? `Best: ${Math.round(high.cpm)} CPM · ${high.rank}` : 'No test score yet';
+    best.textContent = bestScoreText(high);
     unlockNote.textContent = state.mastered[state.level]
       ? '★ Level mastered. Complete today’s mission to keep your streak growing.'
-      : 'Reach 60 CPM in all three training rounds to open the test, then reach 60 CPM on the test to unlock the next level.';
+      : 'Reach 60 CPM with at least 80% accuracy in training to open the test, then meet both goals on the test to unlock the next level.';
     towel.hidden = state.level === 0 || state.level === levels.length - 1;
     guidance.hidden = false;
     result.hidden = true;
@@ -510,7 +541,7 @@ void (async () => {
 
   function startPractice(reset = false) {
     closeTypingMetric(false);
-    if (reset) state.daily.levels[String(state.level)] = { correct: 0, tested: false, practiceCPM: 0 };
+    if (reset) state.daily.levels[String(state.level)] = { correct: 0, tested: false, practiceCPM: 0, practiceAttempts: 0 };
     state.mode = 'practice';
     state.position = 0;
     state.correct = 0;
@@ -522,9 +553,9 @@ void (async () => {
     guidance.hidden = false;
     result.hidden = true;
     const daily = dailyLevel();
-    const testReady = daily.correct >= trainingTotal() && daily.practiceCPM >= 60;
+    const testReady = practiceTestReady(daily);
     feedback.textContent = daily.correct >= trainingTotal()
-      ? testReady ? 'Today’s training is complete. Your level test is ready.' : 'Training complete. Restart today’s training to build toward 60 CPM.'
+      ? testReady ? 'Today’s training is complete. Your level test is ready.' : `Training complete. ${practiceGoalMessage(daily)}`
       : 'Three rounds make up today’s training.';
     if (daily.correct < trainingTotal()) choosePracticeTarget();
     renderPracticePrompt();
@@ -535,7 +566,7 @@ void (async () => {
 
   function startTest() {
     const daily = dailyLevel();
-    if (daily.correct < trainingTotal() || daily.practiceCPM < 60) return;
+    if (!practiceTestReady(daily)) return;
     closeTypingMetric(false);
     touchDay();
     state.mode = 'test';
@@ -561,6 +592,7 @@ void (async () => {
     const cpm = state.correct / seconds * 60;
     const accuracy = state.attempts ? Math.round(state.correct / state.attempts * 100) : 0;
     const rank = rankFor(cpm);
+    const passed = meetsTypingGoal(cpm, accuracy);
     if (typingMetric) {
       typingMetric.activeSeconds = seconds;
       typingMetric.cpm = cpm;
@@ -568,11 +600,11 @@ void (async () => {
       closeTypingMetric(true);
     }
     const previousBest = state.best[state.level];
-    if (!previousBest || cpm > previousBest.cpm) {
+    const previousPassed = previousBest && (state.mastered[state.level] || meetsTypingGoal(previousBest.cpm, previousBest.accuracy));
+    if (!previousBest || (passed && !previousPassed) || (passed === previousPassed && cpm > previousBest.cpm)) {
       state.best[state.level] = { cpm, accuracy, rank: rank.name, at: new Date().toISOString() };
     }
     dailyLevel().tested = true;
-    const passed = cpm >= 60;
     const canUnlock = passed && state.level === state.unlocked && state.level < levels.length - 1;
     if (passed) state.mastered[state.level] = true;
     if (canUnlock) state.unlocked++;
@@ -581,14 +613,17 @@ void (async () => {
     rankIcon.textContent = rank.icon;
     rankLabel.textContent = rank.name;
     score.textContent = `${Math.round(cpm)} CPM · ${accuracy}% accuracy`;
+    const missingGoals = [];
+    if (cpm < minimumCPM) missingGoals.push(`${Math.max(1, minimumCPM - Math.round(cpm))} more CPM`);
+    if (accuracy < minimumAccuracy) missingGoals.push(`${minimumAccuracy - accuracy} more accuracy points`);
     unlockResult.textContent = passed
-      ? canUnlock ? `Level ${state.level + 2} is unlocked!` : 'You reached the 60 CPM goal.'
-      : `${Math.max(1, 60 - Math.round(cpm))} more CPM will unlock the next level.`;
+      ? canUnlock ? `Level ${state.level + 2} is unlocked!` : 'You reached the 60 CPM and 80% accuracy goals.'
+      : `Keep practicing: ${missingGoals.join(' and ')} needed to pass.`;
     continueButton.hidden = !canUnlock;
     result.hidden = false;
     feedback.textContent = passed ? 'Trail cleared! Great typing. ⭐' : 'Great finish! Practice again, then retake the test.';
     testButton.disabled = false;
-    best.textContent = `Best: ${Math.round(state.best[state.level].cpm)} CPM · ${state.best[state.level].rank}`;
+    best.textContent = bestScoreText(state.best[state.level]);
     renderLevelNav();
     renderMission();
     capture.blur();
@@ -601,6 +636,7 @@ void (async () => {
       if (daily.correct >= trainingTotal()) return;
       state.attempts++;
       const correct = character.toLocaleLowerCase() === state.practiceTarget;
+      daily.practiceAttempts++;
       daily.practiceCPM = recordTypingCharacter('typing-practice', correct);
       if (correct) {
         touchDay();
@@ -608,7 +644,7 @@ void (async () => {
         daily.correct++;
         const completed = daily.correct >= trainingTotal();
         feedback.textContent = completed
-          ? daily.practiceCPM >= 60 ? 'Daily training complete! Your test is ready. ⭐' : `Training complete at ${Math.round(daily.practiceCPM)} CPM. Restart to build more speed.`
+          ? practiceTestReady(daily) ? 'Daily training complete! Your test is ready. ⭐' : `Training complete. ${practiceGoalMessage(daily)}`
           : 'Nice key!';
         state.practiceMistakes = 0;
         if (!completed) choosePracticeTarget();

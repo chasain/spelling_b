@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Spelling B home"><span>Spelling</span> B <span class="brand-bee" aria-hidden="true">🐝</span></a>
     <nav class="topnav" aria-label="Main navigation"><a href="/">Word Lists</a><a href="/high-frequency">High Frequency</a><a href="/phonics">Sound Patterns</a><a href="/typing">Typing</a><a href="/test">Test</a><a href="/progress">Progress</a><a class="sticker-book-link" href="/stickers">⭐ Sticker Book</a></nav>
   </header>
 
-  <main class="settings-shell">
+  <main id="main-content" class="settings-shell">
     <header class="settings-page-heading">
       <p class="eyebrow">Parent &amp; teacher controls</p>
       <h1>Settings</h1>
@@ -36,21 +37,31 @@
             <h2 id="word-lists-title">Your word lists</h2>
             <p>Give each list a title and enter one word per line.</p>
           </div>
-          <button id="add-list" class="secondary" type="button">+ Add list</button>
+          <div class="word-list-heading-actions">
+            <button id="import-list" class="secondary" type="button">Import list</button>
+            <button id="add-list" class="secondary" type="button">+ Add list</button>
+          </div>
         </div>
+        <input id="list-file" class="sr-only" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
+        <p id="list-import-status" class="sentence-status list-import-status" role="status" aria-live="polite"></p>
         <div id="lists" class="lists"></div>
         <div class="sentence-prompt-settings">
           <div class="sentence-prompt-heading">
             <div>
               <p class="eyebrow">Chrome AI</p>
-              <h3>Sentence-generation instructions</h3>
+              <h3>Personalize example sentences</h3>
             </div>
             <button id="reset-sentence-prompt" class="secondary" type="button">Reset prompt</button>
           </div>
-          <label for="sentence-prompt">Editable prompt
+          <label for="sentence-prompt">Instructions for examples
             <textarea id="sentence-prompt" rows="5" maxlength="2000" required></textarea>
           </label>
-          <p>Enter style, vocabulary, and preferred-length instructions only—do not paste the word list here. Spelling B supplies one spelling word at a time and adds the structured-output and child-safety request rules. Sentence length is not rejected.</p>
+          <div class="sentence-personalization-tip">
+            <strong>Make examples feel familiar</strong>
+            <p>This is a place to personalize lessons for your learner. Add their interests, favorite themes, or familiar activities so the examples are easier to connect with.</p>
+            <p>Try instructions such as <q>Wherever relevant, mention cartoon XYZ</q> or <q>Try to relate some of these words to dinosaurs</q>.</p>
+          </div>
+          <p>Enter instructions only—do not paste the word list or private information here. Spelling B supplies one spelling word at a time and adds structured-output and child-safety rules.</p>
         </div>
       </section>
 
@@ -141,6 +152,13 @@
           </fieldset>
         </div>
         <fieldset class="adaptive-review-card">
+          <legend>💡 Guided hints</legend>
+          <label class="adaptive-review-toggle">
+            <input id="guided-hints" type="checkbox" checked>
+            <span><strong>Offer help after a learner pauses</strong><small>During Guided practice, show a teaching hint after 10 seconds and a ghosted next letter after another 20 seconds. Letter counting and color guidance stay available either way.</small></span>
+          </label>
+        </fieldset>
+        <fieldset class="adaptive-review-card">
           <legend>🎯 Missed-word review</legend>
           <label class="adaptive-review-toggle">
             <input id="advanced-review-enabled" type="checkbox" checked>
@@ -194,6 +212,15 @@
             <span><strong>Split keyboard</strong><small>Separate the left-hand and right-hand key groups.</small></span>
           </label>
         </div>
+        <fieldset class="accessibility-settings">
+          <legend>Accessibility</legend>
+          <p>These supports follow the active learner profile and do not change lesson difficulty.</p>
+          <div class="typing-display-options">
+            <label class="typing-display-toggle"><input id="accessibility-large-text" type="checkbox"><span><strong>Larger text</strong><small>Increase reading text and controls throughout the app.</small></span></label>
+            <label class="typing-display-toggle"><input id="accessibility-high-contrast" type="checkbox"><span><strong>Higher contrast</strong><small>Use stronger borders and simpler page backgrounds.</small></span></label>
+            <label class="typing-display-toggle"><input id="accessibility-reduce-motion" type="checkbox"><span><strong>Reduce motion</strong><small>Turn off celebratory movement, flashes, and animated transitions.</small></span></label>
+          </div>
+        </fieldset>
         <label class="typing-gap-setting" for="typing-keyboard-gap">
           <span><strong>Keyboard gap</strong><small>Distance between the left and right sections.</small></span>
           <input id="typing-keyboard-gap" type="range" min="0" max="25" step="1" value="25">
@@ -254,7 +281,7 @@
             <summary><span aria-hidden="true">🏠</span><span><strong>Parent guide</strong><small>Set up useful practice and understand progress.</small></span></summary>
             <div class="persona-guide-body">
               <h3>Set up a list</h3>
-              <ol><li>Open the Word Lists tab.</li><li>Add a list, give it a clear title, and enter one word per line.</li><li>Optionally generate examples and review the sound-to-spelling mappings.</li><li>Save, return to Word Lists, and select it.</li></ol>
+              <ol><li>Open the Word Lists tab.</li><li>Add a list, give it a clear title, and enter one word per line.</li><li>Optionally generate and review example sentences.</li><li>Save, return to Word Lists, and select it.</li></ol>
               <h3>Tune practice</h3><p>Practice Plan controls beginner days, lesson repetitions, optional missed-word review, test size, and typing-practice length. Appearance &amp; Voice controls keyboard guidance and speech.</p>
               <h3>Review progress</h3><p>Use Progress to follow 0–100 sound-to-spelling mastery built through successful practice across ten words, or export a teacher CSV. Mistakes do not lower mastery. Children choose their next reward pack from the separate Sticker Book page.</p>
               <h3>Profiles and device changes</h3><p>Create one profile per learner under Profiles &amp; Data. Before changing devices, export the learner profile and keep the file private; importing it creates a separate learner and restores progress, metrics, typing levels, and stickers.</p>
@@ -361,7 +388,7 @@
       <div><p class="eyebrow">Optional Chrome AI</p><h2 id="ai-model-title">Download the language model?</h2></div>
       <button id="cancel-ai-model-x" class="dialog-close" type="button" aria-label="Cancel model download">×</button>
     </div>
-    <p>Chrome needs to download and install its on-device language model before Spelling B can generate examples and sound mappings. This can be a large download and may take several minutes.</p>
+    <p>Chrome needs to download and install its on-device language model before Spelling B can generate examples. This can be a large download and may take several minutes.</p>
     <div class="ai-requirements">
       <strong>Chrome system requirements</strong>
       <ul>
@@ -390,27 +417,26 @@
       <label>Words<textarea class="words-input" rows="7" required placeholder="apple&#10;friend&#10;school"></textarea></label>
       <div class="sentence-tools">
         <div>
-          <strong>Examples and sound mappings</strong>
-          <small>Generate both locally with Chrome AI, copy an examples-only prompt for an online model, or import a file.</small>
+          <strong>Example sentences</strong>
+          <small>Generate locally with Chrome AI, copy a prompt for an online model, import a file, or enter them yourself.</small>
         </div>
         <div class="sentence-actions">
           <button class="secondary generate-sentences" type="button">✨ Generate</button>
           <button class="secondary copy-sentence-prompt" type="button">Copy AI prompt</button>
-          <button class="secondary import-sentences" type="button">Import file</button>
-          <button class="secondary export-sentences" type="button">Export file</button>
+          <button class="secondary import-sentences" type="button">Import examples</button>
+          <button class="secondary export-sentences" type="button">Export list</button>
         </div>
-        <p class="mapping-provenance-note"><strong>Teacher reference:</strong> locally generated or imported mappings stay editable and travel with classroom exports. They do not feed student Progress metrics; Progress uses 98 reviewed patterns, a deterministic lookup covering 116,563 CMUdict headwords, and a separate set of 1,960 curated focus-list associations.</p>
         <input class="sentence-file sr-only" type="file" accept=".json,.csv,.tsv,application/json,text/csv,text/tab-separated-values">
         <p class="sentence-status" role="status" aria-live="polite"></p>
         <details class="external-model-workflow">
           <summary>Paste a response from an online model</summary>
-          <p>After using Copy AI prompt, paste the returned examples here. The copied prompt no longer asks online models for sound mappings, though Spelling B still accepts mappings from older or custom JSON.</p>
+          <p>After using Copy AI prompt, paste the returned examples here.</p>
           <textarea class="external-model-response" rows="7" placeholder='{"apple":{"sentence":"red apple"},"friend":{"sentence":"my kind friend"}}'></textarea>
           <button class="secondary load-model-response" type="button">Load pasted response</button>
         </details>
       </div>
       <details class="sentence-editor" hidden>
-        <summary>Review examples and sound mappings</summary>
+        <summary>Review example sentences</summary>
         <div class="sentence-rows"></div>
       </details>
     </details>
